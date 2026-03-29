@@ -30,7 +30,7 @@ class MetadataModelCatalogResource:
         Raises:
             ApiError: If the request fails
         """
-        path = "/v2/metadata-model-catalog"
+        path = "/metadata-model-catalog"
         params = {}
         if scope is not None:
             params["scope"] = scope
@@ -57,7 +57,7 @@ class MetadataModelCatalogResource:
         Raises:
             ApiError: If the request fails
         """
-        path = "/v2/metadata-model-catalog/{model_id}"
+        path = "/metadata-model-catalog/{model_id}"
         path = path.replace("{model_id}", str(model_id))
         response = self._http.request("GET", path)
         return MetadataModelCatalogEntry.model_validate(response)
@@ -82,7 +82,7 @@ class AsyncMetadataModelCatalogResource:
         Raises:
             ApiError: If the request fails
         """
-        path = "/v2/metadata-model-catalog"
+        path = "/metadata-model-catalog"
         params = {}
         if scope is not None:
             params["scope"] = scope
@@ -109,7 +109,7 @@ class AsyncMetadataModelCatalogResource:
         Raises:
             ApiError: If the request fails
         """
-        path = "/v2/metadata-model-catalog/{model_id}"
+        path = "/metadata-model-catalog/{model_id}"
         path = path.replace("{model_id}", str(model_id))
         response = await self._http.request("GET", path)
         return MetadataModelCatalogEntry.model_validate(response)

@@ -30,7 +30,7 @@ class TagDescriptionsResource:
         Raises:
             ApiError: If the request fails
         """
-        path = "/v2/datasources/{datasource_id}/tag-tables"
+        path = "/datasources/{datasource_id}/tag-tables"
         path = path.replace("{datasource_id}", str(datasource_id))
         return PaginatedIterator(
             self._http,
@@ -55,7 +55,7 @@ class TagDescriptionsResource:
         Raises:
             ApiError: If the request fails
         """
-        path = "/v2/datasources/{datasource_id}/tag-tables/{table_name}/columns"
+        path = "/datasources/{datasource_id}/tag-tables/{table_name}/columns"
         path = path.replace("{datasource_id}", str(datasource_id))
         path = path.replace("{table_name}", str(table_name))
         return PaginatedIterator(
@@ -82,7 +82,7 @@ class TagDescriptionsResource:
         Raises:
             ApiError: If the request fails
         """
-        path = "/v2/datasources/{datasource_id}/tag-tables/{table_name}"
+        path = "/datasources/{datasource_id}/tag-tables/{table_name}"
         path = path.replace("{datasource_id}", str(datasource_id))
         path = path.replace("{table_name}", str(table_name))
         response = self._http.request("PUT", path, json=body.model_dump(by_alias=True, exclude_unset=True) if body else None)
@@ -104,7 +104,7 @@ class TagDescriptionsResource:
         Raises:
             ApiError: If the request fails
         """
-        path = "/v2/datasources/{datasource_id}/tag-tables/{table_name}/columns/{column_name}"
+        path = "/datasources/{datasource_id}/tag-tables/{table_name}/columns/{column_name}"
         path = path.replace("{datasource_id}", str(datasource_id))
         path = path.replace("{table_name}", str(table_name))
         path = path.replace("{column_name}", str(column_name))
@@ -131,7 +131,7 @@ class AsyncTagDescriptionsResource:
         Raises:
             ApiError: If the request fails
         """
-        path = "/v2/datasources/{datasource_id}/tag-tables"
+        path = "/datasources/{datasource_id}/tag-tables"
         path = path.replace("{datasource_id}", str(datasource_id))
         return AsyncPaginatedIterator(
             self._http,
@@ -156,7 +156,7 @@ class AsyncTagDescriptionsResource:
         Raises:
             ApiError: If the request fails
         """
-        path = "/v2/datasources/{datasource_id}/tag-tables/{table_name}/columns"
+        path = "/datasources/{datasource_id}/tag-tables/{table_name}/columns"
         path = path.replace("{datasource_id}", str(datasource_id))
         path = path.replace("{table_name}", str(table_name))
         return AsyncPaginatedIterator(
@@ -183,7 +183,7 @@ class AsyncTagDescriptionsResource:
         Raises:
             ApiError: If the request fails
         """
-        path = "/v2/datasources/{datasource_id}/tag-tables/{table_name}"
+        path = "/datasources/{datasource_id}/tag-tables/{table_name}"
         path = path.replace("{datasource_id}", str(datasource_id))
         path = path.replace("{table_name}", str(table_name))
         response = await self._http.request("PUT", path, json=body.model_dump(by_alias=True, exclude_unset=True) if body else None)
@@ -205,7 +205,7 @@ class AsyncTagDescriptionsResource:
         Raises:
             ApiError: If the request fails
         """
-        path = "/v2/datasources/{datasource_id}/tag-tables/{table_name}/columns/{column_name}"
+        path = "/datasources/{datasource_id}/tag-tables/{table_name}/columns/{column_name}"
         path = path.replace("{datasource_id}", str(datasource_id))
         path = path.replace("{table_name}", str(table_name))
         path = path.replace("{column_name}", str(column_name))

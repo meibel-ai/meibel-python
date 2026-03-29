@@ -30,7 +30,7 @@ class DataElementsResource:
         Raises:
             ApiError: If the request fails
         """
-        path = "/v2/datasources/{datasource_id}/data-elements"
+        path = "/datasources/{datasource_id}/data-elements"
         path = path.replace("{datasource_id}", str(datasource_id))
         return PaginatedIterator(
             self._http,
@@ -55,7 +55,7 @@ class DataElementsResource:
         Raises:
             ApiError: If the request fails
         """
-        path = "/v2/datasources/{datasource_id}/data-elements"
+        path = "/datasources/{datasource_id}/data-elements"
         path = path.replace("{datasource_id}", str(datasource_id))
         response = self._http.request("POST", path, json=body.model_dump(by_alias=True, exclude_unset=True) if body else None)
         return DataElementResponse.model_validate(response)
@@ -74,13 +74,13 @@ class DataElementsResource:
         Raises:
             ApiError: If the request fails
         """
-        path = "/v2/datasources/{datasource_id}/data-elements/{data_element_id}"
+        path = "/datasources/{datasource_id}/data-elements/{data_element_id}"
         path = path.replace("{datasource_id}", str(datasource_id))
         path = path.replace("{data_element_id}", str(data_element_id))
         response = self._http.request("GET", path)
         return DataElementResponse.model_validate(response)
 
-    def update_data_element(self, datasource_id: str, data_element_id: str, body: "GatewayServiceV2ModelsDataElementsUpdateDataElementRequest") -> "DataElementResponse":
+    def update_data_element(self, datasource_id: str, data_element_id: str, body: "UpdateDataElementRequest") -> "DataElementResponse":
         """
         Update Data Element
         
@@ -95,7 +95,7 @@ class DataElementsResource:
         Raises:
             ApiError: If the request fails
         """
-        path = "/v2/datasources/{datasource_id}/data-elements/{data_element_id}"
+        path = "/datasources/{datasource_id}/data-elements/{data_element_id}"
         path = path.replace("{datasource_id}", str(datasource_id))
         path = path.replace("{data_element_id}", str(data_element_id))
         response = self._http.request("PUT", path, json=body.model_dump(by_alias=True, exclude_unset=True) if body else None)
@@ -115,7 +115,7 @@ class DataElementsResource:
         Raises:
             ApiError: If the request fails
         """
-        path = "/v2/datasources/{datasource_id}/data-elements/{data_element_id}"
+        path = "/datasources/{datasource_id}/data-elements/{data_element_id}"
         path = path.replace("{datasource_id}", str(datasource_id))
         path = path.replace("{data_element_id}", str(data_element_id))
         response = self._http.request("DELETE", path)
@@ -135,7 +135,7 @@ class DataElementsResource:
         Raises:
             ApiError: If the request fails
         """
-        path = "/v2/datasources/{datasource_id}/data-elements/search"
+        path = "/datasources/{datasource_id}/data-elements/search"
         path = path.replace("{datasource_id}", str(datasource_id))
         response = self._http.request("POST", path, json=body.model_dump(by_alias=True, exclude_unset=True) if body else None)
         return [DataElementResponse.model_validate(item) for item in response]
@@ -160,7 +160,7 @@ class AsyncDataElementsResource:
         Raises:
             ApiError: If the request fails
         """
-        path = "/v2/datasources/{datasource_id}/data-elements"
+        path = "/datasources/{datasource_id}/data-elements"
         path = path.replace("{datasource_id}", str(datasource_id))
         return AsyncPaginatedIterator(
             self._http,
@@ -185,7 +185,7 @@ class AsyncDataElementsResource:
         Raises:
             ApiError: If the request fails
         """
-        path = "/v2/datasources/{datasource_id}/data-elements"
+        path = "/datasources/{datasource_id}/data-elements"
         path = path.replace("{datasource_id}", str(datasource_id))
         response = await self._http.request("POST", path, json=body.model_dump(by_alias=True, exclude_unset=True) if body else None)
         return DataElementResponse.model_validate(response)
@@ -204,13 +204,13 @@ class AsyncDataElementsResource:
         Raises:
             ApiError: If the request fails
         """
-        path = "/v2/datasources/{datasource_id}/data-elements/{data_element_id}"
+        path = "/datasources/{datasource_id}/data-elements/{data_element_id}"
         path = path.replace("{datasource_id}", str(datasource_id))
         path = path.replace("{data_element_id}", str(data_element_id))
         response = await self._http.request("GET", path)
         return DataElementResponse.model_validate(response)
 
-    async def update_data_element(self, datasource_id: str, data_element_id: str, body: "GatewayServiceV2ModelsDataElementsUpdateDataElementRequest") -> "DataElementResponse":
+    async def update_data_element(self, datasource_id: str, data_element_id: str, body: "UpdateDataElementRequest") -> "DataElementResponse":
         """
         Update Data Element
         
@@ -225,7 +225,7 @@ class AsyncDataElementsResource:
         Raises:
             ApiError: If the request fails
         """
-        path = "/v2/datasources/{datasource_id}/data-elements/{data_element_id}"
+        path = "/datasources/{datasource_id}/data-elements/{data_element_id}"
         path = path.replace("{datasource_id}", str(datasource_id))
         path = path.replace("{data_element_id}", str(data_element_id))
         response = await self._http.request("PUT", path, json=body.model_dump(by_alias=True, exclude_unset=True) if body else None)
@@ -245,7 +245,7 @@ class AsyncDataElementsResource:
         Raises:
             ApiError: If the request fails
         """
-        path = "/v2/datasources/{datasource_id}/data-elements/{data_element_id}"
+        path = "/datasources/{datasource_id}/data-elements/{data_element_id}"
         path = path.replace("{datasource_id}", str(datasource_id))
         path = path.replace("{data_element_id}", str(data_element_id))
         response = await self._http.request("DELETE", path)
@@ -265,7 +265,7 @@ class AsyncDataElementsResource:
         Raises:
             ApiError: If the request fails
         """
-        path = "/v2/datasources/{datasource_id}/data-elements/search"
+        path = "/datasources/{datasource_id}/data-elements/search"
         path = path.replace("{datasource_id}", str(datasource_id))
         response = await self._http.request("POST", path, json=body.model_dump(by_alias=True, exclude_unset=True) if body else None)
         return [DataElementResponse.model_validate(item) for item in response]

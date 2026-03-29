@@ -34,7 +34,7 @@ class DocumentsResource:
         Raises:
             ApiError: If the request fails
         """
-        path = "/v2/documents"
+        path = "/documents"
         response = self._http.upload("POST", path, file=file, file_name=file_name)
         return ParseDocumentResponse.model_validate(response)
 
@@ -54,7 +54,7 @@ class DocumentsResource:
         Raises:
             ApiError: If the request fails
         """
-        path = "/v2/documents/process"
+        path = "/documents/process"
         response = self._http.upload("POST", path, file=file, file_name=file_name)
         return ProcessDocumentResponse.model_validate(response)
 
@@ -73,7 +73,7 @@ class DocumentsResource:
         Raises:
             ApiError: If the request fails
         """
-        path = "/v2/documents/{job_id}"
+        path = "/documents/{job_id}"
         path = path.replace("{job_id}", str(job_id))
         response = self._http.request("GET", path)
         return DocumentStatus.model_validate(response)
@@ -94,7 +94,7 @@ class DocumentsResource:
         Raises:
             ApiError: If the request fails
         """
-        path = "/v2/documents/{job_id}/result"
+        path = "/documents/{job_id}/result"
         path = path.replace("{job_id}", str(job_id))
         params = {}
         if format is not None:
@@ -117,7 +117,7 @@ class DocumentsResource:
         Raises:
             ApiError: If the request fails
         """
-        path = "/v2/documents/{job_id}/children"
+        path = "/documents/{job_id}/children"
         path = path.replace("{job_id}", str(job_id))
         return PaginatedIterator(
             self._http,
@@ -143,7 +143,7 @@ class DocumentsResource:
         Raises:
             ApiError: If the request fails
         """
-        path = "/v2/documents/{job_id}/trace"
+        path = "/documents/{job_id}/trace"
         path = path.replace("{job_id}", str(job_id))
         return self._http.stream("GET", path)
 
@@ -169,7 +169,7 @@ class AsyncDocumentsResource:
         Raises:
             ApiError: If the request fails
         """
-        path = "/v2/documents"
+        path = "/documents"
         response = await self._http.upload("POST", path, file=file, file_name=file_name)
         return ParseDocumentResponse.model_validate(response)
 
@@ -189,7 +189,7 @@ class AsyncDocumentsResource:
         Raises:
             ApiError: If the request fails
         """
-        path = "/v2/documents/process"
+        path = "/documents/process"
         response = await self._http.upload("POST", path, file=file, file_name=file_name)
         return ProcessDocumentResponse.model_validate(response)
 
@@ -208,7 +208,7 @@ class AsyncDocumentsResource:
         Raises:
             ApiError: If the request fails
         """
-        path = "/v2/documents/{job_id}"
+        path = "/documents/{job_id}"
         path = path.replace("{job_id}", str(job_id))
         response = await self._http.request("GET", path)
         return DocumentStatus.model_validate(response)
@@ -229,7 +229,7 @@ class AsyncDocumentsResource:
         Raises:
             ApiError: If the request fails
         """
-        path = "/v2/documents/{job_id}/result"
+        path = "/documents/{job_id}/result"
         path = path.replace("{job_id}", str(job_id))
         params = {}
         if format is not None:
@@ -252,7 +252,7 @@ class AsyncDocumentsResource:
         Raises:
             ApiError: If the request fails
         """
-        path = "/v2/documents/{job_id}/children"
+        path = "/documents/{job_id}/children"
         path = path.replace("{job_id}", str(job_id))
         return AsyncPaginatedIterator(
             self._http,
@@ -278,6 +278,6 @@ class AsyncDocumentsResource:
         Raises:
             ApiError: If the request fails
         """
-        path = "/v2/documents/{job_id}/trace"
+        path = "/documents/{job_id}/trace"
         path = path.replace("{job_id}", str(job_id))
         return self._http.stream("GET", path)

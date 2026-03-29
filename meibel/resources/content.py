@@ -34,7 +34,7 @@ class ContentResource:
         Raises:
             ApiError: If the request fails
         """
-        path = "/v2/datasources/{datasource_id}/content"
+        path = "/datasources/{datasource_id}/content"
         path = path.replace("{datasource_id}", str(datasource_id))
         params = {}
         if prefix is not None:
@@ -67,7 +67,7 @@ class ContentResource:
         Raises:
             ApiError: If the request fails
         """
-        path = "/v2/datasources/{datasource_id}/content"
+        path = "/datasources/{datasource_id}/content"
         path = path.replace("{datasource_id}", str(datasource_id))
         response = self._http.upload("POST", path, file=file, file_name=file_name)
         return response
@@ -85,7 +85,7 @@ class ContentResource:
         Raises:
             ApiError: If the request fails
         """
-        path = "/v2/uploads/{upload_id}/progress"
+        path = "/uploads/{upload_id}/progress"
         path = path.replace("{upload_id}", str(upload_id))
         response = self._http.request("GET", path)
         return response
@@ -104,7 +104,7 @@ class ContentResource:
         Raises:
             ApiError: If the request fails
         """
-        path = "/v2/datasources/{datasource_id}/content/{path}/metadata"
+        path = "/datasources/{datasource_id}/content/{path}/metadata"
         path = path.replace("{datasource_id}", str(datasource_id))
         path = path.replace("{path}", str(path))
         response = self._http.request("GET", path)
@@ -124,7 +124,7 @@ class ContentResource:
         Raises:
             ApiError: If the request fails
         """
-        path = "/v2/datasources/{datasource_id}/content/{path}/download"
+        path = "/datasources/{datasource_id}/content/{path}/download"
         path = path.replace("{datasource_id}", str(datasource_id))
         path = path.replace("{path}", str(path))
         response = self._http.request("GET", path)
@@ -143,7 +143,7 @@ class ContentResource:
         Raises:
             ApiError: If the request fails
         """
-        path = "/v2/datasources/{datasource_id}/trigger-ingest"
+        path = "/datasources/{datasource_id}/trigger-ingest"
         path = path.replace("{datasource_id}", str(datasource_id))
         response = self._http.request("POST", path)
         return response
@@ -162,7 +162,7 @@ class ContentResource:
         Raises:
             ApiError: If the request fails
         """
-        path = "/v2/datasources/{datasource_id}/content/{path}"
+        path = "/datasources/{datasource_id}/content/{path}"
         path = path.replace("{datasource_id}", str(datasource_id))
         path = path.replace("{path}", str(path))
         response = self._http.request("DELETE", path)
@@ -191,7 +191,7 @@ class AsyncContentResource:
         Raises:
             ApiError: If the request fails
         """
-        path = "/v2/datasources/{datasource_id}/content"
+        path = "/datasources/{datasource_id}/content"
         path = path.replace("{datasource_id}", str(datasource_id))
         params = {}
         if prefix is not None:
@@ -224,7 +224,7 @@ class AsyncContentResource:
         Raises:
             ApiError: If the request fails
         """
-        path = "/v2/datasources/{datasource_id}/content"
+        path = "/datasources/{datasource_id}/content"
         path = path.replace("{datasource_id}", str(datasource_id))
         response = await self._http.upload("POST", path, file=file, file_name=file_name)
         return response
@@ -242,7 +242,7 @@ class AsyncContentResource:
         Raises:
             ApiError: If the request fails
         """
-        path = "/v2/uploads/{upload_id}/progress"
+        path = "/uploads/{upload_id}/progress"
         path = path.replace("{upload_id}", str(upload_id))
         response = await self._http.request("GET", path)
         return response
@@ -261,7 +261,7 @@ class AsyncContentResource:
         Raises:
             ApiError: If the request fails
         """
-        path = "/v2/datasources/{datasource_id}/content/{path}/metadata"
+        path = "/datasources/{datasource_id}/content/{path}/metadata"
         path = path.replace("{datasource_id}", str(datasource_id))
         path = path.replace("{path}", str(path))
         response = await self._http.request("GET", path)
@@ -281,7 +281,7 @@ class AsyncContentResource:
         Raises:
             ApiError: If the request fails
         """
-        path = "/v2/datasources/{datasource_id}/content/{path}/download"
+        path = "/datasources/{datasource_id}/content/{path}/download"
         path = path.replace("{datasource_id}", str(datasource_id))
         path = path.replace("{path}", str(path))
         response = await self._http.request("GET", path)
@@ -300,7 +300,7 @@ class AsyncContentResource:
         Raises:
             ApiError: If the request fails
         """
-        path = "/v2/datasources/{datasource_id}/trigger-ingest"
+        path = "/datasources/{datasource_id}/trigger-ingest"
         path = path.replace("{datasource_id}", str(datasource_id))
         response = await self._http.request("POST", path)
         return response
@@ -319,7 +319,7 @@ class AsyncContentResource:
         Raises:
             ApiError: If the request fails
         """
-        path = "/v2/datasources/{datasource_id}/content/{path}"
+        path = "/datasources/{datasource_id}/content/{path}"
         path = path.replace("{datasource_id}", str(datasource_id))
         path = path.replace("{path}", str(path))
         response = await self._http.request("DELETE", path)

@@ -29,7 +29,7 @@ class MetadataConfigurationResource:
         Raises:
             ApiError: If the request fails
         """
-        path = "/v2/datasources/{datasource_id}/metadata-config"
+        path = "/datasources/{datasource_id}/metadata-config"
         path = path.replace("{datasource_id}", str(datasource_id))
         response = self._http.request("GET", path)
         return MetadataConfigResponse.model_validate(response)
@@ -48,7 +48,7 @@ class MetadataConfigurationResource:
         Raises:
             ApiError: If the request fails
         """
-        path = "/v2/datasources/{datasource_id}/metadata-config"
+        path = "/datasources/{datasource_id}/metadata-config"
         path = path.replace("{datasource_id}", str(datasource_id))
         response = self._http.request("PUT", path, json=body.model_dump(by_alias=True, exclude_unset=True) if body else None)
         return MetadataConfigResponse.model_validate(response)
@@ -66,7 +66,7 @@ class MetadataConfigurationResource:
         Raises:
             ApiError: If the request fails
         """
-        path = "/v2/datasources/{datasource_id}/reprocess-metadata"
+        path = "/datasources/{datasource_id}/reprocess-metadata"
         path = path.replace("{datasource_id}", str(datasource_id))
         response = self._http.request("POST", path)
         return response
@@ -84,7 +84,7 @@ class MetadataConfigurationResource:
         Raises:
             ApiError: If the request fails
         """
-        path = "/v2/datasources/{datasource_id}/reprocess-metadata/status"
+        path = "/datasources/{datasource_id}/reprocess-metadata/status"
         path = path.replace("{datasource_id}", str(datasource_id))
         response = self._http.request("GET", path)
         return response
@@ -109,7 +109,7 @@ class AsyncMetadataConfigurationResource:
         Raises:
             ApiError: If the request fails
         """
-        path = "/v2/datasources/{datasource_id}/metadata-config"
+        path = "/datasources/{datasource_id}/metadata-config"
         path = path.replace("{datasource_id}", str(datasource_id))
         response = await self._http.request("GET", path)
         return MetadataConfigResponse.model_validate(response)
@@ -128,7 +128,7 @@ class AsyncMetadataConfigurationResource:
         Raises:
             ApiError: If the request fails
         """
-        path = "/v2/datasources/{datasource_id}/metadata-config"
+        path = "/datasources/{datasource_id}/metadata-config"
         path = path.replace("{datasource_id}", str(datasource_id))
         response = await self._http.request("PUT", path, json=body.model_dump(by_alias=True, exclude_unset=True) if body else None)
         return MetadataConfigResponse.model_validate(response)
@@ -146,7 +146,7 @@ class AsyncMetadataConfigurationResource:
         Raises:
             ApiError: If the request fails
         """
-        path = "/v2/datasources/{datasource_id}/reprocess-metadata"
+        path = "/datasources/{datasource_id}/reprocess-metadata"
         path = path.replace("{datasource_id}", str(datasource_id))
         response = await self._http.request("POST", path)
         return response
@@ -164,7 +164,7 @@ class AsyncMetadataConfigurationResource:
         Raises:
             ApiError: If the request fails
         """
-        path = "/v2/datasources/{datasource_id}/reprocess-metadata/status"
+        path = "/datasources/{datasource_id}/reprocess-metadata/status"
         path = path.replace("{datasource_id}", str(datasource_id))
         response = await self._http.request("GET", path)
         return response

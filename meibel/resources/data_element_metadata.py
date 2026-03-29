@@ -30,7 +30,7 @@ class DataElementMetadataResource:
         Raises:
             ApiError: If the request fails
         """
-        path = "/v2/datasources/{datasource_id}/data-elements/{data_element_id}/metadata"
+        path = "/datasources/{datasource_id}/data-elements/{data_element_id}/metadata"
         path = path.replace("{datasource_id}", str(datasource_id))
         path = path.replace("{data_element_id}", str(data_element_id))
         response = self._http.request("GET", path)
@@ -51,7 +51,7 @@ class DataElementMetadataResource:
         Raises:
             ApiError: If the request fails
         """
-        path = "/v2/datasources/{datasource_id}/data-elements/{data_element_id}/metadata"
+        path = "/datasources/{datasource_id}/data-elements/{data_element_id}/metadata"
         path = path.replace("{datasource_id}", str(datasource_id))
         path = path.replace("{data_element_id}", str(data_element_id))
         response = self._http.request("PUT", path, json=body.model_dump(by_alias=True, exclude_unset=True) if body else None)
@@ -72,7 +72,7 @@ class DataElementMetadataResource:
         Raises:
             ApiError: If the request fails
         """
-        path = "/v2/datasources/{datasource_id}/data-elements/{data_element_id}/metadata/result/{request_id}"
+        path = "/datasources/{datasource_id}/data-elements/{data_element_id}/metadata/result/{request_id}"
         path = path.replace("{datasource_id}", str(datasource_id))
         path = path.replace("{data_element_id}", str(data_element_id))
         path = path.replace("{request_id}", str(request_id))
@@ -100,7 +100,7 @@ class AsyncDataElementMetadataResource:
         Raises:
             ApiError: If the request fails
         """
-        path = "/v2/datasources/{datasource_id}/data-elements/{data_element_id}/metadata"
+        path = "/datasources/{datasource_id}/data-elements/{data_element_id}/metadata"
         path = path.replace("{datasource_id}", str(datasource_id))
         path = path.replace("{data_element_id}", str(data_element_id))
         response = await self._http.request("GET", path)
@@ -121,7 +121,7 @@ class AsyncDataElementMetadataResource:
         Raises:
             ApiError: If the request fails
         """
-        path = "/v2/datasources/{datasource_id}/data-elements/{data_element_id}/metadata"
+        path = "/datasources/{datasource_id}/data-elements/{data_element_id}/metadata"
         path = path.replace("{datasource_id}", str(datasource_id))
         path = path.replace("{data_element_id}", str(data_element_id))
         response = await self._http.request("PUT", path, json=body.model_dump(by_alias=True, exclude_unset=True) if body else None)
@@ -142,7 +142,7 @@ class AsyncDataElementMetadataResource:
         Raises:
             ApiError: If the request fails
         """
-        path = "/v2/datasources/{datasource_id}/data-elements/{data_element_id}/metadata/result/{request_id}"
+        path = "/datasources/{datasource_id}/data-elements/{data_element_id}/metadata/result/{request_id}"
         path = path.replace("{datasource_id}", str(datasource_id))
         path = path.replace("{data_element_id}", str(data_element_id))
         path = path.replace("{request_id}", str(request_id))
