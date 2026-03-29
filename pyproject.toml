@@ -21,16 +21,16 @@ classifiers = [
     "Operating System :: OS Independent",
     "Typing :: Typed",
 ]
+dependencies = [
+    "httpx>=0.25.0",
+    "pydantic>=2.0.0",
+]
 
 [project.urls]
 Homepage = "https://docs.meibel.ai"
 Repository = "https://github.com/meibel-ai/meibel-python"
 Documentation = "https://docs.meibel.ai/sdk/python"
 "Bug Tracker" = "https://github.com/meibel-ai/meibel-python/issues"
-dependencies = [
-    "httpx>=0.25.0",
-    "pydantic>=2.0.0",
-]
 
 [project.optional-dependencies]
 dev = [
