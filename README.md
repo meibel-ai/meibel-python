@@ -5,7 +5,7 @@ The official Python SDK for the [Meibel API](https://docs.meibel.ai). Provides d
 ## Installation
 
 ```bash
-pip install meibel==0.1.0b1
+pip install --pre meibel
 ```
 
 ## Quick Start
