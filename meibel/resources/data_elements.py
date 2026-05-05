@@ -8,6 +8,7 @@ from typing import Optional, List, Dict, Any, Union, Iterator, AsyncIterator
 from .._http import HttpClient, AsyncHttpClient
 from ..models import *
 from ..exceptions import raise_for_status
+from .._pagination import PaginatedIterator, AsyncPaginatedIterator
 
 
 class DataElementsResource:
@@ -15,65 +16,6 @@ class DataElementsResource:
 
     def __init__(self, http: HttpClient):
         self._http = http
-
-    def get_data_element(self, datasource_id: str, data_element_id: str) -> "DataElement":
-        """
-        Get Data Element
-        
-        Args:
-            datasource_id: The datasource_id parameter
-            data_element_id: The data_element_id parameter
-        
-        Returns:
-            Successful Response
-        
-        Raises:
-            ApiError: If the request fails
-        """
-        path = "/datasource/{datasource_id}/data_element/{data_element_id}"
-        path = path.replace("{datasource_id}", str(datasource_id))
-        path = path.replace("{data_element_id}", str(data_element_id))
-        response = self._http.request("GET", path)
-        return DataElement.model_validate(response)
-
-    def update_data_element(self, datasource_id: str, data_element_id: str, body: "DatasourceServiceClientModelsUpdateDataElementRequestUpdateDataElementRequest") -> "UpdateDataElementResponse":
-        """
-        Update Data Element
-        
-        Args:
-            datasource_id: The datasource_id parameter
-            data_element_id: The data_element_id parameter
-            body: Request body
-        
-        Returns:
-            Successful Response
-        
-        Raises:
-            ApiError: If the request fails
-        """
-        path = "/datasource/{datasource_id}/data_element/{data_element_id}"
-        path = path.replace("{datasource_id}", str(datasource_id))
-        path = path.replace("{data_element_id}", str(data_element_id))
-        response = self._http.request("PUT", path, json=body.model_dump(by_alias=True, exclude_unset=True) if body else None)
-        return UpdateDataElementResponse.model_validate(response)
-
-    def list_data_elements(self, datasource_id: str) -> List["DataElementResponse"]:
-        """
-        List Data Elements
-        
-        Args:
-            datasource_id: The datasource_id parameter
-        
-        Returns:
-            Successful Response
-        
-        Raises:
-            ApiError: If the request fails
-        """
-        path = "/v2/datasources/{datasource_id}/data-elements"
-        path = path.replace("{datasource_id}", str(datasource_id))
-        response = self._http.request("GET", path)
-        return [DataElementResponse.model_validate(item) for item in response]
 
     def get_data_element(self, datasource_id: str, data_element_id: str) -> "DataElementResponse":
         """
@@ -89,13 +31,13 @@ class DataElementsResource:
         Raises:
             ApiError: If the request fails
         """
-        path = "/v2/datasources/{datasource_id}/data-elements/{data_element_id}"
+        path = "/datasources/{datasource_id}/data-elements/{data_element_id}"
         path = path.replace("{datasource_id}", str(datasource_id))
         path = path.replace("{data_element_id}", str(data_element_id))
         response = self._http.request("GET", path)
         return DataElementResponse.model_validate(response)
 
-    def update_data_element(self, datasource_id: str, data_element_id: str, body: "GatewayServiceV2ModelsDataElementsUpdateDataElementRequest") -> "DataElementResponse":
+    def update_data_element(self, datasource_id: str, data_element_id: str, body: "UpdateDataElementRequest") -> "DataElementResponse":
         """
         Update Data Element
         
@@ -110,18 +52,52 @@ class DataElementsResource:
         Raises:
             ApiError: If the request fails
         """
-        path = "/v2/datasources/{datasource_id}/data-elements/{data_element_id}"
+        path = "/datasources/{datasource_id}/data-elements/{data_element_id}"
         path = path.replace("{datasource_id}", str(datasource_id))
         path = path.replace("{data_element_id}", str(data_element_id))
         response = self._http.request("PUT", path, json=body.model_dump(by_alias=True, exclude_unset=True) if body else None)
         return DataElementResponse.model_validate(response)
 
-    def search_data_elements(self, datasource_id: str, body: "DataElementSearchRequest") -> List["DataElementResponse"]:
+    def list_data_elements(self, datasource_id: str, cursor: Optional[Union[str, None]] = None, limit: Optional[int] = None) -> PaginatedIterator["DataElementResponse"]:
+        """
+        List Data Elements
+        
+        Args:
+            datasource_id: The datasource_id parameter
+            cursor: Cursor for pagination
+            limit: Maximum items to return
+        
+        Returns:
+            Successful Response
+        
+        Raises:
+            ApiError: If the request fails
+        """
+        path = "/datasources/{datasource_id}/data-elements"
+        path = path.replace("{datasource_id}", str(datasource_id))
+        params = {}
+        if cursor is not None:
+            params["cursor"] = cursor
+        if limit is not None:
+            params["limit"] = limit
+        return PaginatedIterator(
+            self._http,
+            "GET",
+            path,
+            items_field="items",
+            cursor_param="cursor",
+            next_field="next_cursor",
+            params=params,
+        )
+
+    def search_data_elements(self, datasource_id: str, body: "DataElementSearchRequest", cursor: Optional[Union[str, None]] = None, limit: Optional[int] = None) -> "DataElementListResponse":
         """
         Search Data Elements
         
         Args:
             datasource_id: The datasource_id parameter
+            cursor: Cursor for pagination
+            limit: Maximum items to return
             body: Request body
         
         Returns:
@@ -130,10 +106,15 @@ class DataElementsResource:
         Raises:
             ApiError: If the request fails
         """
-        path = "/v2/datasources/{datasource_id}/data-elements/search"
+        path = "/datasources/{datasource_id}/data-elements/search"
         path = path.replace("{datasource_id}", str(datasource_id))
-        response = self._http.request("POST", path, json=body.model_dump(by_alias=True, exclude_unset=True) if body else None)
-        return [DataElementResponse.model_validate(item) for item in response]
+        params = {}
+        if cursor is not None:
+            params["cursor"] = cursor
+        if limit is not None:
+            params["limit"] = limit
+        response = self._http.request("POST", path, params=params, json=body.model_dump(by_alias=True, exclude_unset=True) if body else None)
+        return DataElementListResponse.model_validate(response)
 
 
 class AsyncDataElementsResource:
@@ -141,65 +122,6 @@ class AsyncDataElementsResource:
 
     def __init__(self, http: AsyncHttpClient):
         self._http = http
-
-    async def get_data_element(self, datasource_id: str, data_element_id: str) -> "DataElement":
-        """
-        Get Data Element
-        
-        Args:
-            datasource_id: The datasource_id parameter
-            data_element_id: The data_element_id parameter
-        
-        Returns:
-            Successful Response
-        
-        Raises:
-            ApiError: If the request fails
-        """
-        path = "/datasource/{datasource_id}/data_element/{data_element_id}"
-        path = path.replace("{datasource_id}", str(datasource_id))
-        path = path.replace("{data_element_id}", str(data_element_id))
-        response = await self._http.request("GET", path)
-        return DataElement.model_validate(response)
-
-    async def update_data_element(self, datasource_id: str, data_element_id: str, body: "DatasourceServiceClientModelsUpdateDataElementRequestUpdateDataElementRequest") -> "UpdateDataElementResponse":
-        """
-        Update Data Element
-        
-        Args:
-            datasource_id: The datasource_id parameter
-            data_element_id: The data_element_id parameter
-            body: Request body
-        
-        Returns:
-            Successful Response
-        
-        Raises:
-            ApiError: If the request fails
-        """
-        path = "/datasource/{datasource_id}/data_element/{data_element_id}"
-        path = path.replace("{datasource_id}", str(datasource_id))
-        path = path.replace("{data_element_id}", str(data_element_id))
-        response = await self._http.request("PUT", path, json=body.model_dump(by_alias=True, exclude_unset=True) if body else None)
-        return UpdateDataElementResponse.model_validate(response)
-
-    async def list_data_elements(self, datasource_id: str) -> List["DataElementResponse"]:
-        """
-        List Data Elements
-        
-        Args:
-            datasource_id: The datasource_id parameter
-        
-        Returns:
-            Successful Response
-        
-        Raises:
-            ApiError: If the request fails
-        """
-        path = "/v2/datasources/{datasource_id}/data-elements"
-        path = path.replace("{datasource_id}", str(datasource_id))
-        response = await self._http.request("GET", path)
-        return [DataElementResponse.model_validate(item) for item in response]
 
     async def get_data_element(self, datasource_id: str, data_element_id: str) -> "DataElementResponse":
         """
@@ -215,13 +137,13 @@ class AsyncDataElementsResource:
         Raises:
             ApiError: If the request fails
         """
-        path = "/v2/datasources/{datasource_id}/data-elements/{data_element_id}"
+        path = "/datasources/{datasource_id}/data-elements/{data_element_id}"
         path = path.replace("{datasource_id}", str(datasource_id))
         path = path.replace("{data_element_id}", str(data_element_id))
         response = await self._http.request("GET", path)
         return DataElementResponse.model_validate(response)
 
-    async def update_data_element(self, datasource_id: str, data_element_id: str, body: "GatewayServiceV2ModelsDataElementsUpdateDataElementRequest") -> "DataElementResponse":
+    async def update_data_element(self, datasource_id: str, data_element_id: str, body: "UpdateDataElementRequest") -> "DataElementResponse":
         """
         Update Data Element
         
@@ -236,18 +158,52 @@ class AsyncDataElementsResource:
         Raises:
             ApiError: If the request fails
         """
-        path = "/v2/datasources/{datasource_id}/data-elements/{data_element_id}"
+        path = "/datasources/{datasource_id}/data-elements/{data_element_id}"
         path = path.replace("{datasource_id}", str(datasource_id))
         path = path.replace("{data_element_id}", str(data_element_id))
         response = await self._http.request("PUT", path, json=body.model_dump(by_alias=True, exclude_unset=True) if body else None)
         return DataElementResponse.model_validate(response)
 
-    async def search_data_elements(self, datasource_id: str, body: "DataElementSearchRequest") -> List["DataElementResponse"]:
+    async def list_data_elements(self, datasource_id: str, cursor: Optional[Union[str, None]] = None, limit: Optional[int] = None) -> AsyncPaginatedIterator["DataElementResponse"]:
+        """
+        List Data Elements
+        
+        Args:
+            datasource_id: The datasource_id parameter
+            cursor: Cursor for pagination
+            limit: Maximum items to return
+        
+        Returns:
+            Successful Response
+        
+        Raises:
+            ApiError: If the request fails
+        """
+        path = "/datasources/{datasource_id}/data-elements"
+        path = path.replace("{datasource_id}", str(datasource_id))
+        params = {}
+        if cursor is not None:
+            params["cursor"] = cursor
+        if limit is not None:
+            params["limit"] = limit
+        return AsyncPaginatedIterator(
+            self._http,
+            "GET",
+            path,
+            items_field="items",
+            cursor_param="cursor",
+            next_field="next_cursor",
+            params=params,
+        )
+
+    async def search_data_elements(self, datasource_id: str, body: "DataElementSearchRequest", cursor: Optional[Union[str, None]] = None, limit: Optional[int] = None) -> "DataElementListResponse":
         """
         Search Data Elements
         
         Args:
             datasource_id: The datasource_id parameter
+            cursor: Cursor for pagination
+            limit: Maximum items to return
             body: Request body
         
         Returns:
@@ -256,7 +212,12 @@ class AsyncDataElementsResource:
         Raises:
             ApiError: If the request fails
         """
-        path = "/v2/datasources/{datasource_id}/data-elements/search"
+        path = "/datasources/{datasource_id}/data-elements/search"
         path = path.replace("{datasource_id}", str(datasource_id))
-        response = await self._http.request("POST", path, json=body.model_dump(by_alias=True, exclude_unset=True) if body else None)
-        return [DataElementResponse.model_validate(item) for item in response]
+        params = {}
+        if cursor is not None:
+            params["cursor"] = cursor
+        if limit is not None:
+            params["limit"] = limit
+        response = await self._http.request("POST", path, params=params, json=body.model_dump(by_alias=True, exclude_unset=True) if body else None)
+        return DataElementListResponse.model_validate(response)

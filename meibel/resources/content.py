@@ -8,6 +8,8 @@ from typing import Optional, List, Dict, Any, Union, Iterator, AsyncIterator
 from .._http import HttpClient, AsyncHttpClient
 from ..models import *
 from ..exceptions import raise_for_status
+from .._pagination import PaginatedIterator, AsyncPaginatedIterator
+from .._streaming import SSEIterator, AsyncSSEIterator
 from typing import BinaryIO
 
 
@@ -17,11 +19,43 @@ class ContentResource:
     def __init__(self, http: HttpClient):
         self._http = http
 
-    def stream_upload_progress(self, upload_id: str) -> None:
+    def upload_content(self, file: BinaryIO, file_name: str) -> "UploadContentResponse":
         """
-        Stream upload progress events
+        Upload Content (async)
         
-        Subscribe to real-time upload progress updates via Server-Sent Events
+        Args:
+            body: Request body
+        
+        Returns:
+            Successful Response
+        
+        Raises:
+            ApiError: If the request fails
+        """
+        path = "/datasources/uploads"
+        response = self._http.upload("POST", path, file=file, file_name=file_name)
+        return UploadContentResponse.model_validate(response)
+
+    def upload_and_list_content(self, file: BinaryIO, file_name: str) -> "FileUploadSyncResponse":
+        """
+        Upload Content (sync)
+        
+        Args:
+            body: Request body
+        
+        Returns:
+            Successful Response
+        
+        Raises:
+            ApiError: If the request fails
+        """
+        path = "/datasources/uploads/process"
+        response = self._http.upload("POST", path, file=file, file_name=file_name)
+        return FileUploadSyncResponse.model_validate(response)
+
+    def stream_upload_progress(self, upload_id: str) -> Iterator[Union["", "", "", ""]]:
+        """
+        Stream Upload Progress
         
         Args:
             upload_id: The upload_id parameter
@@ -32,32 +66,11 @@ class ContentResource:
         Raises:
             ApiError: If the request fails
         """
-        path = "/uploads/{upload_id}/progress"
+        path = "/datasources/uploads/{upload_id}/progress"
         path = path.replace("{upload_id}", str(upload_id))
-        response = self._http.request("GET", path)
-        return response
+        return self._http.stream("GET", path)
 
-    def trigger_ingest(self, datasource_id: str) -> str:
-        """
-        Trigger ingest
-        
-        Trigger ingestion for a datasource
-        
-        Args:
-            datasource_id: The datasource_id parameter
-        
-        Returns:
-            Successful Response
-        
-        Raises:
-            ApiError: If the request fails
-        """
-        path = "/datasource/{datasource_id}/trigger-ingest"
-        path = path.replace("{datasource_id}", str(datasource_id))
-        response = self._http.request("GET", path)
-        return response
-
-    def list_content(self, datasource_id: str, prefix: Optional[Union[str, None]] = None, continuation_token: Optional[Union[str, None]] = None, limit: Optional[int] = None) -> str:
+    def list_content(self, datasource_id: str, prefix: Optional[Union[str, None]] = None, continuation_token: Optional[Union[str, None]] = None, limit: Optional[int] = None) -> PaginatedIterator["ContentItem"]:
         """
         List Content
         
@@ -73,7 +86,7 @@ class ContentResource:
         Raises:
             ApiError: If the request fails
         """
-        path = "/v2/datasources/{datasource_id}/content"
+        path = "/datasources/{datasource_id}/content"
         path = path.replace("{datasource_id}", str(datasource_id))
         params = {}
         if prefix is not None:
@@ -82,45 +95,15 @@ class ContentResource:
             params["continuation_token"] = continuation_token
         if limit is not None:
             params["limit"] = limit
-        response = self._http.request("GET", path, params=params)
-        return response
-
-    def upload_content(self, datasource_id: str, file: BinaryIO, file_name: str) -> str:
-        """
-        Upload Content
-        
-        Args:
-            datasource_id: The datasource_id parameter
-            body: Request body
-        
-        Returns:
-            Successful Response
-        
-        Raises:
-            ApiError: If the request fails
-        """
-        path = "/v2/datasources/{datasource_id}/content"
-        path = path.replace("{datasource_id}", str(datasource_id))
-        response = self._http.upload("POST", path, file=file, file_name=file_name)
-        return response
-
-    def stream_upload_progress(self, upload_id: str) -> None:
-        """
-        Stream Upload Progress
-        
-        Args:
-            upload_id: The upload_id parameter
-        
-        Returns:
-            None
-        
-        Raises:
-            ApiError: If the request fails
-        """
-        path = "/v2/uploads/{upload_id}/progress"
-        path = path.replace("{upload_id}", str(upload_id))
-        response = self._http.request("GET", path)
-        return response
+        return PaginatedIterator(
+            self._http,
+            "GET",
+            path,
+            items_field="items",
+            cursor_param="continuation_token",
+            next_field="next_cursor",
+            params=params,
+        )
 
     def trigger_ingest(self, datasource_id: str) -> str:
         """
@@ -135,10 +118,28 @@ class ContentResource:
         Raises:
             ApiError: If the request fails
         """
-        path = "/v2/datasources/{datasource_id}/trigger-ingest"
+        path = "/datasources/{datasource_id}/trigger-ingest"
         path = path.replace("{datasource_id}", str(datasource_id))
         response = self._http.request("POST", path)
         return response
+
+    def get_ingest_status(self, datasource_id: str) -> "IngestStatusResponse":
+        """
+        Get Ingest Status
+        
+        Args:
+            datasource_id: The datasource_id parameter
+        
+        Returns:
+            Successful Response
+        
+        Raises:
+            ApiError: If the request fails
+        """
+        path = "/datasources/{datasource_id}/ingest-status"
+        path = path.replace("{datasource_id}", str(datasource_id))
+        response = self._http.request("GET", path)
+        return IngestStatusResponse.model_validate(response)
 
 
 class AsyncContentResource:
@@ -147,11 +148,43 @@ class AsyncContentResource:
     def __init__(self, http: AsyncHttpClient):
         self._http = http
 
-    async def stream_upload_progress(self, upload_id: str) -> None:
+    async def upload_content(self, file: BinaryIO, file_name: str) -> "UploadContentResponse":
         """
-        Stream upload progress events
+        Upload Content (async)
         
-        Subscribe to real-time upload progress updates via Server-Sent Events
+        Args:
+            body: Request body
+        
+        Returns:
+            Successful Response
+        
+        Raises:
+            ApiError: If the request fails
+        """
+        path = "/datasources/uploads"
+        response = await self._http.upload("POST", path, file=file, file_name=file_name)
+        return UploadContentResponse.model_validate(response)
+
+    async def upload_and_list_content(self, file: BinaryIO, file_name: str) -> "FileUploadSyncResponse":
+        """
+        Upload Content (sync)
+        
+        Args:
+            body: Request body
+        
+        Returns:
+            Successful Response
+        
+        Raises:
+            ApiError: If the request fails
+        """
+        path = "/datasources/uploads/process"
+        response = await self._http.upload("POST", path, file=file, file_name=file_name)
+        return FileUploadSyncResponse.model_validate(response)
+
+    async def stream_upload_progress(self, upload_id: str) -> AsyncIterator[Union["", "", "", ""]]:
+        """
+        Stream Upload Progress
         
         Args:
             upload_id: The upload_id parameter
@@ -162,32 +195,11 @@ class AsyncContentResource:
         Raises:
             ApiError: If the request fails
         """
-        path = "/uploads/{upload_id}/progress"
+        path = "/datasources/uploads/{upload_id}/progress"
         path = path.replace("{upload_id}", str(upload_id))
-        response = await self._http.request("GET", path)
-        return response
+        return self._http.stream("GET", path)
 
-    async def trigger_ingest(self, datasource_id: str) -> str:
-        """
-        Trigger ingest
-        
-        Trigger ingestion for a datasource
-        
-        Args:
-            datasource_id: The datasource_id parameter
-        
-        Returns:
-            Successful Response
-        
-        Raises:
-            ApiError: If the request fails
-        """
-        path = "/datasource/{datasource_id}/trigger-ingest"
-        path = path.replace("{datasource_id}", str(datasource_id))
-        response = await self._http.request("GET", path)
-        return response
-
-    async def list_content(self, datasource_id: str, prefix: Optional[Union[str, None]] = None, continuation_token: Optional[Union[str, None]] = None, limit: Optional[int] = None) -> str:
+    async def list_content(self, datasource_id: str, prefix: Optional[Union[str, None]] = None, continuation_token: Optional[Union[str, None]] = None, limit: Optional[int] = None) -> AsyncPaginatedIterator["ContentItem"]:
         """
         List Content
         
@@ -203,7 +215,7 @@ class AsyncContentResource:
         Raises:
             ApiError: If the request fails
         """
-        path = "/v2/datasources/{datasource_id}/content"
+        path = "/datasources/{datasource_id}/content"
         path = path.replace("{datasource_id}", str(datasource_id))
         params = {}
         if prefix is not None:
@@ -212,45 +224,15 @@ class AsyncContentResource:
             params["continuation_token"] = continuation_token
         if limit is not None:
             params["limit"] = limit
-        response = await self._http.request("GET", path, params=params)
-        return response
-
-    async def upload_content(self, datasource_id: str, file: BinaryIO, file_name: str) -> str:
-        """
-        Upload Content
-        
-        Args:
-            datasource_id: The datasource_id parameter
-            body: Request body
-        
-        Returns:
-            Successful Response
-        
-        Raises:
-            ApiError: If the request fails
-        """
-        path = "/v2/datasources/{datasource_id}/content"
-        path = path.replace("{datasource_id}", str(datasource_id))
-        response = await self._http.upload("POST", path, file=file, file_name=file_name)
-        return response
-
-    async def stream_upload_progress(self, upload_id: str) -> None:
-        """
-        Stream Upload Progress
-        
-        Args:
-            upload_id: The upload_id parameter
-        
-        Returns:
-            None
-        
-        Raises:
-            ApiError: If the request fails
-        """
-        path = "/v2/uploads/{upload_id}/progress"
-        path = path.replace("{upload_id}", str(upload_id))
-        response = await self._http.request("GET", path)
-        return response
+        return AsyncPaginatedIterator(
+            self._http,
+            "GET",
+            path,
+            items_field="items",
+            cursor_param="continuation_token",
+            next_field="next_cursor",
+            params=params,
+        )
 
     async def trigger_ingest(self, datasource_id: str) -> str:
         """
@@ -265,7 +247,25 @@ class AsyncContentResource:
         Raises:
             ApiError: If the request fails
         """
-        path = "/v2/datasources/{datasource_id}/trigger-ingest"
+        path = "/datasources/{datasource_id}/trigger-ingest"
         path = path.replace("{datasource_id}", str(datasource_id))
         response = await self._http.request("POST", path)
         return response
+
+    async def get_ingest_status(self, datasource_id: str) -> "IngestStatusResponse":
+        """
+        Get Ingest Status
+        
+        Args:
+            datasource_id: The datasource_id parameter
+        
+        Returns:
+            Successful Response
+        
+        Raises:
+            ApiError: If the request fails
+        """
+        path = "/datasources/{datasource_id}/ingest-status"
+        path = path.replace("{datasource_id}", str(datasource_id))
+        response = await self._http.request("GET", path)
+        return IngestStatusResponse.model_validate(response)

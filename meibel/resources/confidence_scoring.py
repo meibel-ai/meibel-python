@@ -20,8 +20,6 @@ class ConfidenceScoringResource:
         """
         Get Scoring Job
         
-        Get a scoring job by ID. Returns 403 if the job does not belong to the caller's customer.
-        
         Args:
             job_id: The job_id parameter
         
@@ -32,53 +30,6 @@ class ConfidenceScoringResource:
             ApiError: If the request fails
         """
         path = "/confidence-scoring/job/{job_id}"
-        path = path.replace("{job_id}", str(job_id))
-        response = self._http.request("GET", path)
-        return response
-
-    def get_scoring_jobs_summary(self, primary: str, secondary: Optional[Union[str, None]] = None) -> "ScoreSummary":
-        """
-        Get Scoring Jobs Summary
-        
-        Get aggregated scoring summary for the caller's customer.
-        
-        primary: Required filter in format 'field:value' (e.g., 'agent_execution_id:exec_123').
-        secondary: Optional secondary filter in format 'field:value' (e.g., 'agent_name:my_agent').
-        Results are always scoped to the caller's customer_id.
-        
-        Args:
-            primary: The primary parameter
-            secondary: The secondary parameter
-        
-        Returns:
-            Successful Response
-        
-        Raises:
-            ApiError: If the request fails
-        """
-        path = "/confidence-scoring/summary"
-        params = {}
-        if primary is not None:
-            params["primary"] = primary
-        if secondary is not None:
-            params["secondary"] = secondary
-        response = self._http.request("GET", path, params=params)
-        return ScoreSummary.model_validate(response)
-
-    def get_scoring_job(self, job_id: str) -> str:
-        """
-        Get Scoring Job
-        
-        Args:
-            job_id: The job_id parameter
-        
-        Returns:
-            Successful Response
-        
-        Raises:
-            ApiError: If the request fails
-        """
-        path = "/v2/confidence-scoring/job/{job_id}"
         path = path.replace("{job_id}", str(job_id))
         response = self._http.request("GET", path)
         return response
@@ -104,7 +55,7 @@ class ConfidenceScoringResource:
         Raises:
             ApiError: If the request fails
         """
-        path = "/v2/confidence-scoring/jobs"
+        path = "/confidence-scoring/jobs"
         params = {}
         if agent_name is not None:
             params["agent_name"] = agent_name
@@ -141,7 +92,7 @@ class ConfidenceScoringResource:
         Raises:
             ApiError: If the request fails
         """
-        path = "/v2/confidence-scoring/summary"
+        path = "/confidence-scoring/summary"
         params = {}
         if primary is not None:
             params["primary"] = primary
@@ -161,8 +112,6 @@ class AsyncConfidenceScoringResource:
         """
         Get Scoring Job
         
-        Get a scoring job by ID. Returns 403 if the job does not belong to the caller's customer.
-        
         Args:
             job_id: The job_id parameter
         
@@ -173,53 +122,6 @@ class AsyncConfidenceScoringResource:
             ApiError: If the request fails
         """
         path = "/confidence-scoring/job/{job_id}"
-        path = path.replace("{job_id}", str(job_id))
-        response = await self._http.request("GET", path)
-        return response
-
-    async def get_scoring_jobs_summary(self, primary: str, secondary: Optional[Union[str, None]] = None) -> "ScoreSummary":
-        """
-        Get Scoring Jobs Summary
-        
-        Get aggregated scoring summary for the caller's customer.
-        
-        primary: Required filter in format 'field:value' (e.g., 'agent_execution_id:exec_123').
-        secondary: Optional secondary filter in format 'field:value' (e.g., 'agent_name:my_agent').
-        Results are always scoped to the caller's customer_id.
-        
-        Args:
-            primary: The primary parameter
-            secondary: The secondary parameter
-        
-        Returns:
-            Successful Response
-        
-        Raises:
-            ApiError: If the request fails
-        """
-        path = "/confidence-scoring/summary"
-        params = {}
-        if primary is not None:
-            params["primary"] = primary
-        if secondary is not None:
-            params["secondary"] = secondary
-        response = await self._http.request("GET", path, params=params)
-        return ScoreSummary.model_validate(response)
-
-    async def get_scoring_job(self, job_id: str) -> str:
-        """
-        Get Scoring Job
-        
-        Args:
-            job_id: The job_id parameter
-        
-        Returns:
-            Successful Response
-        
-        Raises:
-            ApiError: If the request fails
-        """
-        path = "/v2/confidence-scoring/job/{job_id}"
         path = path.replace("{job_id}", str(job_id))
         response = await self._http.request("GET", path)
         return response
@@ -245,7 +147,7 @@ class AsyncConfidenceScoringResource:
         Raises:
             ApiError: If the request fails
         """
-        path = "/v2/confidence-scoring/jobs"
+        path = "/confidence-scoring/jobs"
         params = {}
         if agent_name is not None:
             params["agent_name"] = agent_name
@@ -282,7 +184,7 @@ class AsyncConfidenceScoringResource:
         Raises:
             ApiError: If the request fails
         """
-        path = "/v2/confidence-scoring/summary"
+        path = "/confidence-scoring/summary"
         params = {}
         if primary is not None:
             params["primary"] = primary

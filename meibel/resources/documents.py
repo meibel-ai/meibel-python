@@ -33,7 +33,7 @@ class DocumentsResource:
         Raises:
             ApiError: If the request fails
         """
-        path = "/v2/documents"
+        path = "/documents"
         response = self._http.upload("POST", path, file=file, file_name=file_name)
         return ParseDocumentResponse.model_validate(response)
 
@@ -44,6 +44,7 @@ class DocumentsResource:
         Upload a document and block until parsing is complete. Returns the full parsed result.
         
         Args:
+            format: Result format: markdown, annotated, docling, json
             body: Request body
         
         Returns:
@@ -52,7 +53,7 @@ class DocumentsResource:
         Raises:
             ApiError: If the request fails
         """
-        path = "/v2/documents/process"
+        path = "/documents/process"
         response = self._http.upload("POST", path, file=file, file_name=file_name)
         return ProcessDocumentResponse.model_validate(response)
 
@@ -71,12 +72,12 @@ class DocumentsResource:
         Raises:
             ApiError: If the request fails
         """
-        path = "/v2/documents/{job_id}"
+        path = "/documents/{job_id}"
         path = path.replace("{job_id}", str(job_id))
         response = self._http.request("GET", path)
         return DocumentStatus.model_validate(response)
 
-    def get_document_result(self, job_id: str) -> str:
+    def get_document_result(self, job_id: str, format: Optional[str] = None) -> str:
         """
         Get parsed document result
         
@@ -84,6 +85,7 @@ class DocumentsResource:
         
         Args:
             job_id: The job_id parameter
+            format: Result format: markdown, annotated, docling, json
         
         Returns:
             Successful Response
@@ -91,9 +93,12 @@ class DocumentsResource:
         Raises:
             ApiError: If the request fails
         """
-        path = "/v2/documents/{job_id}/result"
+        path = "/documents/{job_id}/result"
         path = path.replace("{job_id}", str(job_id))
-        response = self._http.request("GET", path)
+        params = {}
+        if format is not None:
+            params["format"] = format
+        response = self._http.request("GET", path, params=params)
         return response
 
     def list_document_children(self, job_id: str) -> List["DocumentChild"]:
@@ -111,7 +116,7 @@ class DocumentsResource:
         Raises:
             ApiError: If the request fails
         """
-        path = "/v2/documents/{job_id}/children"
+        path = "/documents/{job_id}/children"
         path = path.replace("{job_id}", str(job_id))
         response = self._http.request("GET", path)
         return [DocumentChild.model_validate(item) for item in response]
@@ -131,7 +136,7 @@ class DocumentsResource:
         Raises:
             ApiError: If the request fails
         """
-        path = "/v2/documents/{job_id}/trace"
+        path = "/documents/{job_id}/trace"
         path = path.replace("{job_id}", str(job_id))
         return self._http.stream("GET", path)
 
@@ -157,7 +162,7 @@ class AsyncDocumentsResource:
         Raises:
             ApiError: If the request fails
         """
-        path = "/v2/documents"
+        path = "/documents"
         response = await self._http.upload("POST", path, file=file, file_name=file_name)
         return ParseDocumentResponse.model_validate(response)
 
@@ -168,6 +173,7 @@ class AsyncDocumentsResource:
         Upload a document and block until parsing is complete. Returns the full parsed result.
         
         Args:
+            format: Result format: markdown, annotated, docling, json
             body: Request body
         
         Returns:
@@ -176,7 +182,7 @@ class AsyncDocumentsResource:
         Raises:
             ApiError: If the request fails
         """
-        path = "/v2/documents/process"
+        path = "/documents/process"
         response = await self._http.upload("POST", path, file=file, file_name=file_name)
         return ProcessDocumentResponse.model_validate(response)
 
@@ -195,12 +201,12 @@ class AsyncDocumentsResource:
         Raises:
             ApiError: If the request fails
         """
-        path = "/v2/documents/{job_id}"
+        path = "/documents/{job_id}"
         path = path.replace("{job_id}", str(job_id))
         response = await self._http.request("GET", path)
         return DocumentStatus.model_validate(response)
 
-    async def get_document_result(self, job_id: str) -> str:
+    async def get_document_result(self, job_id: str, format: Optional[str] = None) -> str:
         """
         Get parsed document result
         
@@ -208,6 +214,7 @@ class AsyncDocumentsResource:
         
         Args:
             job_id: The job_id parameter
+            format: Result format: markdown, annotated, docling, json
         
         Returns:
             Successful Response
@@ -215,9 +222,12 @@ class AsyncDocumentsResource:
         Raises:
             ApiError: If the request fails
         """
-        path = "/v2/documents/{job_id}/result"
+        path = "/documents/{job_id}/result"
         path = path.replace("{job_id}", str(job_id))
-        response = await self._http.request("GET", path)
+        params = {}
+        if format is not None:
+            params["format"] = format
+        response = await self._http.request("GET", path, params=params)
         return response
 
     async def list_document_children(self, job_id: str) -> List["DocumentChild"]:
@@ -235,7 +245,7 @@ class AsyncDocumentsResource:
         Raises:
             ApiError: If the request fails
         """
-        path = "/v2/documents/{job_id}/children"
+        path = "/documents/{job_id}/children"
         path = path.replace("{job_id}", str(job_id))
         response = await self._http.request("GET", path)
         return [DocumentChild.model_validate(item) for item in response]
@@ -255,6 +265,6 @@ class AsyncDocumentsResource:
         Raises:
             ApiError: If the request fails
         """
-        path = "/v2/documents/{job_id}/trace"
+        path = "/documents/{job_id}/trace"
         path = path.replace("{job_id}", str(job_id))
         return self._http.stream("GET", path)

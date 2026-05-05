@@ -16,61 +16,6 @@ class DatasourcesResource:
     def __init__(self, http: HttpClient):
         self._http = http
 
-    def get_datasource(self, datasource_id: str) -> "Datasource":
-        """
-        Get Datasource
-        
-        Args:
-            datasource_id: The datasource_id parameter
-        
-        Returns:
-            Successful Response
-        
-        Raises:
-            ApiError: If the request fails
-        """
-        path = "/datasource/{datasource_id}"
-        path = path.replace("{datasource_id}", str(datasource_id))
-        response = self._http.request("GET", path)
-        return Datasource.model_validate(response)
-
-    def update_datasource(self, datasource_id: str, body: "DatasourceServiceClientModelsUpdateDatasourceRequestUpdateDatasourceRequest") -> "UpdateDatasourceResponse":
-        """
-        Update Datasource
-        
-        Args:
-            datasource_id: The datasource_id parameter
-            body: Request body
-        
-        Returns:
-            Successful Response
-        
-        Raises:
-            ApiError: If the request fails
-        """
-        path = "/datasource/{datasource_id}"
-        path = path.replace("{datasource_id}", str(datasource_id))
-        response = self._http.request("PUT", path, json=body.model_dump(by_alias=True, exclude_unset=True) if body else None)
-        return UpdateDatasourceResponse.model_validate(response)
-
-    def delete_datasource(self, datasource_id: str) -> "DeleteDatasourceResponse":
-        """
-        Delete Datasource
-        
-        Args:
-            datasource_id: The datasource_id parameter
-        
-        Returns:
-            Successful Response
-        
-        Raises:
-            ApiError: If the request fails
-        """
-        path = "/datasource/{datasource_id}"
-        path = path.replace("{datasource_id}", str(datasource_id))
-        response = self._http.request("DELETE", path)
-        return DeleteDatasourceResponse.model_validate(response)
-
     def list_datasources(self) -> "DatasourceListResponse":
         """
         List Datasources
@@ -81,7 +26,7 @@ class DatasourcesResource:
         Raises:
             ApiError: If the request fails
         """
-        path = "/v2/datasources"
+        path = "/datasources"
         response = self._http.request("GET", path)
         return DatasourceListResponse.model_validate(response)
 
@@ -98,16 +43,17 @@ class DatasourcesResource:
         Raises:
             ApiError: If the request fails
         """
-        path = "/v2/datasources"
+        path = "/datasources"
         response = self._http.request("POST", path, json=body.model_dump(by_alias=True, exclude_unset=True) if body else None)
         return DatasourceResponse.model_validate(response)
 
-    def get_datasource(self, datasource_id: str) -> "DatasourceResponse":
+    def get_datasource(self, datasource_id: str, include_tables: Optional[bool] = None) -> "DatasourceResponse":
         """
         Get Datasource
         
         Args:
             datasource_id: The datasource_id parameter
+            include_tables: Include table and column details (structured datasources only)
         
         Returns:
             Successful Response
@@ -115,12 +61,15 @@ class DatasourcesResource:
         Raises:
             ApiError: If the request fails
         """
-        path = "/v2/datasources/{datasource_id}"
+        path = "/datasources/{datasource_id}"
         path = path.replace("{datasource_id}", str(datasource_id))
-        response = self._http.request("GET", path)
+        params = {}
+        if include_tables is not None:
+            params["include_tables"] = include_tables
+        response = self._http.request("GET", path, params=params)
         return DatasourceResponse.model_validate(response)
 
-    def update_datasource(self, datasource_id: str, body: "GatewayServiceV2ModelsDatasourcesUpdateDatasourceRequest") -> "DatasourceResponse":
+    def update_datasource(self, datasource_id: str, body: "UpdateDatasourceRequest") -> "DatasourceResponse":
         """
         Update Datasource
         
@@ -134,7 +83,7 @@ class DatasourcesResource:
         Raises:
             ApiError: If the request fails
         """
-        path = "/v2/datasources/{datasource_id}"
+        path = "/datasources/{datasource_id}"
         path = path.replace("{datasource_id}", str(datasource_id))
         response = self._http.request("PUT", path, json=body.model_dump(by_alias=True, exclude_unset=True) if body else None)
         return DatasourceResponse.model_validate(response)
@@ -152,7 +101,7 @@ class DatasourcesResource:
         Raises:
             ApiError: If the request fails
         """
-        path = "/v2/datasources/{datasource_id}"
+        path = "/datasources/{datasource_id}"
         path = path.replace("{datasource_id}", str(datasource_id))
         response = self._http.request("DELETE", path)
         return response
@@ -164,61 +113,6 @@ class AsyncDatasourcesResource:
     def __init__(self, http: AsyncHttpClient):
         self._http = http
 
-    async def get_datasource(self, datasource_id: str) -> "Datasource":
-        """
-        Get Datasource
-        
-        Args:
-            datasource_id: The datasource_id parameter
-        
-        Returns:
-            Successful Response
-        
-        Raises:
-            ApiError: If the request fails
-        """
-        path = "/datasource/{datasource_id}"
-        path = path.replace("{datasource_id}", str(datasource_id))
-        response = await self._http.request("GET", path)
-        return Datasource.model_validate(response)
-
-    async def update_datasource(self, datasource_id: str, body: "DatasourceServiceClientModelsUpdateDatasourceRequestUpdateDatasourceRequest") -> "UpdateDatasourceResponse":
-        """
-        Update Datasource
-        
-        Args:
-            datasource_id: The datasource_id parameter
-            body: Request body
-        
-        Returns:
-            Successful Response
-        
-        Raises:
-            ApiError: If the request fails
-        """
-        path = "/datasource/{datasource_id}"
-        path = path.replace("{datasource_id}", str(datasource_id))
-        response = await self._http.request("PUT", path, json=body.model_dump(by_alias=True, exclude_unset=True) if body else None)
-        return UpdateDatasourceResponse.model_validate(response)
-
-    async def delete_datasource(self, datasource_id: str) -> "DeleteDatasourceResponse":
-        """
-        Delete Datasource
-        
-        Args:
-            datasource_id: The datasource_id parameter
-        
-        Returns:
-            Successful Response
-        
-        Raises:
-            ApiError: If the request fails
-        """
-        path = "/datasource/{datasource_id}"
-        path = path.replace("{datasource_id}", str(datasource_id))
-        response = await self._http.request("DELETE", path)
-        return DeleteDatasourceResponse.model_validate(response)
-
     async def list_datasources(self) -> "DatasourceListResponse":
         """
         List Datasources
@@ -229,7 +123,7 @@ class AsyncDatasourcesResource:
         Raises:
             ApiError: If the request fails
         """
-        path = "/v2/datasources"
+        path = "/datasources"
         response = await self._http.request("GET", path)
         return DatasourceListResponse.model_validate(response)
 
@@ -246,16 +140,17 @@ class AsyncDatasourcesResource:
         Raises:
             ApiError: If the request fails
         """
-        path = "/v2/datasources"
+        path = "/datasources"
         response = await self._http.request("POST", path, json=body.model_dump(by_alias=True, exclude_unset=True) if body else None)
         return DatasourceResponse.model_validate(response)
 
-    async def get_datasource(self, datasource_id: str) -> "DatasourceResponse":
+    async def get_datasource(self, datasource_id: str, include_tables: Optional[bool] = None) -> "DatasourceResponse":
         """
         Get Datasource
         
         Args:
             datasource_id: The datasource_id parameter
+            include_tables: Include table and column details (structured datasources only)
         
         Returns:
             Successful Response
@@ -263,12 +158,15 @@ class AsyncDatasourcesResource:
         Raises:
             ApiError: If the request fails
         """
-        path = "/v2/datasources/{datasource_id}"
+        path = "/datasources/{datasource_id}"
         path = path.replace("{datasource_id}", str(datasource_id))
-        response = await self._http.request("GET", path)
+        params = {}
+        if include_tables is not None:
+            params["include_tables"] = include_tables
+        response = await self._http.request("GET", path, params=params)
         return DatasourceResponse.model_validate(response)
 
-    async def update_datasource(self, datasource_id: str, body: "GatewayServiceV2ModelsDatasourcesUpdateDatasourceRequest") -> "DatasourceResponse":
+    async def update_datasource(self, datasource_id: str, body: "UpdateDatasourceRequest") -> "DatasourceResponse":
         """
         Update Datasource
         
@@ -282,7 +180,7 @@ class AsyncDatasourcesResource:
         Raises:
             ApiError: If the request fails
         """
-        path = "/v2/datasources/{datasource_id}"
+        path = "/datasources/{datasource_id}"
         path = path.replace("{datasource_id}", str(datasource_id))
         response = await self._http.request("PUT", path, json=body.model_dump(by_alias=True, exclude_unset=True) if body else None)
         return DatasourceResponse.model_validate(response)
@@ -300,7 +198,7 @@ class AsyncDatasourcesResource:
         Raises:
             ApiError: If the request fails
         """
-        path = "/v2/datasources/{datasource_id}"
+        path = "/datasources/{datasource_id}"
         path = path.replace("{datasource_id}", str(datasource_id))
         response = await self._http.request("DELETE", path)
         return response

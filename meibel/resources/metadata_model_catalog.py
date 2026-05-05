@@ -8,7 +8,6 @@ from typing import Optional, List, Dict, Any, Union, Iterator, AsyncIterator
 from .._http import HttpClient, AsyncHttpClient
 from ..models import *
 from ..exceptions import raise_for_status
-from .._pagination import PaginatedIterator, AsyncPaginatedIterator
 
 
 class MetadataModelCatalogResource:
@@ -17,7 +16,7 @@ class MetadataModelCatalogResource:
     def __init__(self, http: HttpClient):
         self._http = http
 
-    def list_metadata_model_catalog(self, scope: Optional[Union[str, None]] = None) -> PaginatedIterator["ListMetadataModelCatalogResponse"]:
+    def list_metadata_model_catalog(self, scope: Optional[Union[str, None]] = None) -> "ListMetadataModelCatalogResponse":
         """
         List Metadata Model Catalog
         
@@ -30,19 +29,12 @@ class MetadataModelCatalogResource:
         Raises:
             ApiError: If the request fails
         """
-        path = "/metadata_model_catalog"
+        path = "/metadata-model-catalog"
         params = {}
         if scope is not None:
             params["scope"] = scope
-        return PaginatedIterator(
-            self._http,
-            "GET",
-            path,
-            items_field="items",
-            cursor_param="page",
-            next_field="next_cursor",
-            params=params,
-        )
+        response = self._http.request("GET", path, params=params)
+        return ListMetadataModelCatalogResponse.model_validate(response)
 
     def get_metadata_model_catalog_entry(self, model_id: str) -> "MetadataModelCatalogEntry":
         """
@@ -57,52 +49,7 @@ class MetadataModelCatalogResource:
         Raises:
             ApiError: If the request fails
         """
-        path = "/metadata_model_catalog/{model_id}"
-        path = path.replace("{model_id}", str(model_id))
-        response = self._http.request("GET", path)
-        return MetadataModelCatalogEntry.model_validate(response)
-
-    def list_metadata_model_catalog(self, scope: Optional[Union[str, None]] = None) -> PaginatedIterator["ListMetadataModelCatalogResponse"]:
-        """
-        List Metadata Model Catalog
-        
-        Args:
-            scope: The scope parameter
-        
-        Returns:
-            Successful Response
-        
-        Raises:
-            ApiError: If the request fails
-        """
-        path = "/v2/metadata-model-catalog"
-        params = {}
-        if scope is not None:
-            params["scope"] = scope
-        return PaginatedIterator(
-            self._http,
-            "GET",
-            path,
-            items_field="items",
-            cursor_param="page",
-            next_field="next_cursor",
-            params=params,
-        )
-
-    def get_metadata_model_catalog_entry(self, model_id: str) -> "MetadataModelCatalogEntry":
-        """
-        Get Metadata Model Catalog Entry
-        
-        Args:
-            model_id: The model_id parameter
-        
-        Returns:
-            Successful Response
-        
-        Raises:
-            ApiError: If the request fails
-        """
-        path = "/v2/metadata-model-catalog/{model_id}"
+        path = "/metadata-model-catalog/{model_id}"
         path = path.replace("{model_id}", str(model_id))
         response = self._http.request("GET", path)
         return MetadataModelCatalogEntry.model_validate(response)
@@ -114,7 +61,7 @@ class AsyncMetadataModelCatalogResource:
     def __init__(self, http: AsyncHttpClient):
         self._http = http
 
-    async def list_metadata_model_catalog(self, scope: Optional[Union[str, None]] = None) -> AsyncPaginatedIterator["ListMetadataModelCatalogResponse"]:
+    async def list_metadata_model_catalog(self, scope: Optional[Union[str, None]] = None) -> "ListMetadataModelCatalogResponse":
         """
         List Metadata Model Catalog
         
@@ -127,19 +74,12 @@ class AsyncMetadataModelCatalogResource:
         Raises:
             ApiError: If the request fails
         """
-        path = "/metadata_model_catalog"
+        path = "/metadata-model-catalog"
         params = {}
         if scope is not None:
             params["scope"] = scope
-        return AsyncPaginatedIterator(
-            self._http,
-            "GET",
-            path,
-            items_field="items",
-            cursor_param="page",
-            next_field="next_cursor",
-            params=params,
-        )
+        response = await self._http.request("GET", path, params=params)
+        return ListMetadataModelCatalogResponse.model_validate(response)
 
     async def get_metadata_model_catalog_entry(self, model_id: str) -> "MetadataModelCatalogEntry":
         """
@@ -154,52 +94,7 @@ class AsyncMetadataModelCatalogResource:
         Raises:
             ApiError: If the request fails
         """
-        path = "/metadata_model_catalog/{model_id}"
-        path = path.replace("{model_id}", str(model_id))
-        response = await self._http.request("GET", path)
-        return MetadataModelCatalogEntry.model_validate(response)
-
-    async def list_metadata_model_catalog(self, scope: Optional[Union[str, None]] = None) -> AsyncPaginatedIterator["ListMetadataModelCatalogResponse"]:
-        """
-        List Metadata Model Catalog
-        
-        Args:
-            scope: The scope parameter
-        
-        Returns:
-            Successful Response
-        
-        Raises:
-            ApiError: If the request fails
-        """
-        path = "/v2/metadata-model-catalog"
-        params = {}
-        if scope is not None:
-            params["scope"] = scope
-        return AsyncPaginatedIterator(
-            self._http,
-            "GET",
-            path,
-            items_field="items",
-            cursor_param="page",
-            next_field="next_cursor",
-            params=params,
-        )
-
-    async def get_metadata_model_catalog_entry(self, model_id: str) -> "MetadataModelCatalogEntry":
-        """
-        Get Metadata Model Catalog Entry
-        
-        Args:
-            model_id: The model_id parameter
-        
-        Returns:
-            Successful Response
-        
-        Raises:
-            ApiError: If the request fails
-        """
-        path = "/v2/metadata-model-catalog/{model_id}"
+        path = "/metadata-model-catalog/{model_id}"
         path = path.replace("{model_id}", str(model_id))
         response = await self._http.request("GET", path)
         return MetadataModelCatalogEntry.model_validate(response)
