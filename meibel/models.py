@@ -11,43 +11,189 @@ from uuid import UUID
 from pydantic import BaseModel, Field
 
 
-class AgentDetailResponse(BaseModel):
+class Activity(BaseModel):
+    """Activity"""
+    id: Optional[Union[str, None]] = Field(default=None)
+    blueprint_instance_id: str = ...
+    activity_type: str = ...
+    status: Optional[Union["ActivityStatus", None]] = Field(default=None)
+    start_time: Optional[Union[datetime, None]] = Field(default=None)
+    end_time: Optional[Union[datetime, None]] = Field(default=None)
+    input_data: Optional[Union[str, None]] = Field(default=None)
+    output_data: Optional[Union[str, None]] = Field(default=None)
+    error: Optional[Union[str, None]] = Field(default=None)
+    group_id: Optional[Union[str, None]] = Field(default=None)
+    task_metadata: Optional[Union[str, None]] = Field(default=None)
+
+
+class ActivityStatus(BaseModel):
+    """ActivityStatus"""
+    pass
+
+
+class AddActivityRequest(BaseModel):
+    """AddActivityRequest"""
+    activity_type: str = ...
+    input_data: Optional[Union[str, None]] = Field(default=None)
+    output_data: Optional[Union[str, None]] = Field(default=None)
+    group_id: Optional[Union[str, None]] = Field(default=None)
+    task_metadata: Optional[Union[str, None]] = Field(default=None)
+    status: Optional[Union[str, None]] = Field(default=None)
+
+
+class AddActivityResponse(BaseModel):
+    """AddActivityResponse"""
     id: str = ...
+
+
+class AddBlueprintInstanceRequest(BaseModel):
+    """AddBlueprintInstanceRequest"""
+    blueprint_id: Optional[Union[str, None]] = Field(default=None)
+    workflow_type: Optional[Union[str, None]] = Field(default=None)
+    task_queue: Optional[Union[str, None]] = Field(default=None)
+    instance_metadata: Optional[Union[str, None]] = Field(default=None)
+    parent_id: Optional[Union[str, None]] = Field(default=None)
+
+
+class AddBlueprintInstanceResponse(BaseModel):
+    """AddBlueprintInstanceResponse"""
+    id: str = ...
+
+
+class AddBlueprintRequest(BaseModel):
+    """AddBlueprintRequest"""
     name: str = ...
-    display_name: str = ...
-    catalog_urn: str = ...
-    version: str = ...
-    parent_version: Optional[Union[str, None]] = Field(default=None)
-    type: str = ...
+    execution_mode: Optional[Union[str, None]] = Field(default=None)
+    version: Optional[Union[str, None]] = Field(default=None)
     description: Optional[Union[str, None]] = Field(default=None)
-    llm_model: str = ...
-    fallback_models: List[str] = ...
-    datasources: List[str] = ...
-    instructions: str = ...
-    tools: List[str] = ...
-    artifacts: List[str] = ...
-    confidence_configs: List[str] = ...
-    temperature: Union[float, int] = ...
-    max_tokens: Optional[Union[int, None]] = Field(default=None)
-    tags: List[str] = ...
-    icon: Optional[Union[str, None]] = Field(default=None)
-    created_by: Optional[Union[str, None]] = Field(default=None)
-    created_at: Optional[Union[datetime, None]] = Field(default=None)
-    last_execution_status: Optional[Union[str, None]] = Field(default=None)
-    last_execution_time: Optional[Union[datetime, None]] = Field(default=None)
+    dsl_definition: "DslDefinition" = ...
+    yaml_spec_content: Optional[Union[str, None]] = Field(default=None)
+    json_spec_content: Optional[Union[str, None]] = Field(default=None)
+    workflow_type: Optional[Union[str, None]] = Field(default=None)
+    workflow_task_queue: Optional[Union[str, None]] = Field(default=None)
+    init_input: Optional[Union[str, None]] = Field(default=None)
 
 
-class AgentExecutionDetailsResponse(BaseModel):
-    """AgentExecutionDetailsResponse"""
-    agent_id: Union[str, None] = ...
-    agent_name: Union[str, None] = ...
-    version: Union[str, None] = ...
-    status: str = ...
-    messages: List["MessageEntry"] = ...
-    tool_activity: List["ToolActivityEntry"] = ...
-    token_usage: List[Union[str, None]] = ...
-    file_parsing: List["FileParseEntry"] = ...
-    result: List["ArtifactEntry"] = ...
+class AddBlueprintResponse(BaseModel):
+    """AddBlueprintResponse"""
+    id: str = ...
+
+
+class AddBlueprintTaskRequest(BaseModel):
+    """AddBlueprintTaskRequest"""
+    name: str = ...
+    type: Optional[Union[str, None]] = Field(default=None)
+    description: Optional[Union[str, None]] = Field(default=None)
+    input_schema: str = ...
+    output_schema: str = ...
+    config_schema: Optional[Union[str, None]] = Field(default=None)
+    tool_schema: Optional[Union[str, None]] = Field(default=None)
+
+
+class AddChunkingStrategyRequest(BaseModel):
+    """AddChunkingStrategyRequest"""
+    code_splitter: Optional[Union["CodeChunking", None]] = Field(default=None)
+    html_node_parser: Optional[Union["HtmlChunking", None]] = Field(default=None)
+    json_node_parser: Optional[Union["JsonNodeChunking", None]] = Field(default=None)
+    markdown_node_parser: Optional[Union["MarkdownNodeChunking", None]] = Field(default=None)
+    semantic_splitter_node_parser: Optional[Union["SemanticChunking", None]] = Field(default=None)
+    sentence_splitter: Optional[Union["SentenceChunking", None]] = Field(default=None)
+    token_text_splitter: Optional[Union["TokenTextChunking", None]] = Field(default=None)
+
+
+class AddChunkingStrategyResponse(BaseModel):
+    """AddChunkingStrategyResponse"""
+    message: str = ...
+
+
+class AddDataElementRequest(BaseModel):
+    """AddDataElementRequest"""
+    description: Union[str, None] = ...
+    name: str = ...
+    path: str = ...
+    media_type: str = ...
+    discovery_record: Union["DataElementDiscoveryRecord", None] = ...
+    parent_data_element_id: Optional[Union[str, None]] = Field(default=None)
+
+
+class AddDataElementResponse(BaseModel):
+    """AddDataElementResponse"""
+    id: str = ...
+
+
+class AddDatasourceResponse(BaseModel):
+    """AddDatasourceResponse"""
+    id: str = ...
+
+
+class AddEventResponse(BaseModel):
+    """AddEventResponse"""
+    id: str = ...
+
+
+class AddGatewayDatasourceRequest(BaseModel):
+    name: str = ...
+    description: str = ...
+    recurrence: str = ...
+    object_storage_config: Optional[Union["ObjectStorageConfig", None]] = Field(default=None)
+    web_config: Optional[Union["DatasourceWebConfig", None]] = Field(default=None)
+    connector_config: Optional[Union["DatasourceConnectorConfig", None]] = Field(default=None)
+
+
+class AddRagConfigRequest(BaseModel):
+    """AddRagConfigRequest"""
+    description: Optional[Union[str, None]] = Field(default=None)
+    collection_id: str = ...
+    extractor_model: Optional[Union["ExtractorModel", None]] = Field(default=None)
+    embedding_model: Optional[Union["EmbeddingModel", None]] = Field(default=None)
+    sparse_embedding_model: Optional[Union["SparseEmbeddingModel", None]] = Field(default=None)
+    collect_metadata: Optional[Union[bool, None]] = Field(default=None)
+    metadata_options: Optional[Union["MetadataOptions", None]] = Field(default=None)
+    metadata_model: Optional[Union["MetadataModelConfig", None]] = Field(default=None)
+
+
+class AddRagConfigResponse(BaseModel):
+    """AddRagConfigResponse"""
+    message: str = ...
+
+
+class AddTagColumnRequest(BaseModel):
+    """AddTagColumnRequest"""
+    description: Optional[Union[str, None]] = Field(default=None)
+    dtype: Optional[Union[str, None]] = Field(default=None)
+    is_key: Optional[Union[bool, None]] = Field(default=None)
+    is_indexed: Optional[Union[bool, None]] = Field(default=None)
+    engineered_features: Optional[Union[List[str], None]] = Field(default=None)
+
+
+class AddTagColumnResponse(BaseModel):
+    """AddTagColumnResponse"""
+    message: str = ...
+
+
+class AddTagConfigRequest(BaseModel):
+    """AddTagConfigRequest"""
+    description: Optional[Union[str, None]] = Field(default=None)
+    logical_group_regex: Optional[Union[str, None]] = Field(default=None)
+    working_bucket: str = ...
+    working_platform: Optional[Union[str, None]] = Field(default=None)
+    db_path: Optional[Union[str, None]] = Field(default=None)
+    database_config: Optional[Union["DatabaseConfigInput", None]] = Field(default=None)
+
+
+class AddTagConfigResponse(BaseModel):
+    """AddTagConfigResponse"""
+    message: str = ...
+
+
+class AddTagTableRequest(BaseModel):
+    """AddTagTableRequest"""
+    description: Optional[Union[str, None]] = Field(default=None)
+
+
+class AddTagTableResponse(BaseModel):
+    """AddTagTableResponse"""
+    message: str = ...
 
 
 class AgentIdentityContext(BaseModel):
@@ -65,52 +211,16 @@ class AgentIdentityContext(BaseModel):
     tool_execution_id: Optional[Union[str, None]] = Field(default=None)
 
 
-class AgentListResponse(BaseModel):
-    data: List["AgentSummary"] = ...
-    total: int = ...
+class AirbyteConfig(BaseModel):
+    """AirbyteConfig"""
+    source_id: str = ...
+    destination_id: str = ...
+    connection_id: Optional[Union[str, None]] = Field(default=None)
 
 
-class AgentSummary(BaseModel):
-    id: str = ...
-    name: Optional[Union[str, None]] = Field(default=None)
-    display_name: str = ...
-    llm_model: str = ...
-    tool_count: int = ...
-    datasource_count: int = ...
-    last_execution_status: Optional[Union[str, None]] = Field(default=None)
-    last_execution_time: Optional[Union[datetime, None]] = Field(default=None)
-
-
-class AgentToolDefinition(BaseModel):
-    """AgentToolDefinition"""
-    name: str = Field(description="Instance name - what the LLM sees and calls")
-    type: str = Field(description="Tool type: rag_search, database_query, etc.")
-    description: Optional[Union[str, None]] = Field(description="Description shown to LLM", default=None)
-    config: Optional[Union[str, None]] = Field(description="Tool config passed to activity via tool_context (datasource_id, base_prompt, etc.)", default=None)
-    parameters_schema: Optional[Union[str, None]] = Field(description="Optional override for the tool's parameters schema", default=None)
-    use_for: Optional[Union[List[str], None]] = Field(description="When to use this tool (injected into system prompt)", default=None)
-    avoid_for: Optional[Union[List[str], None]] = Field(description="When NOT to use this tool (injected into system prompt)", default=None)
-    require_approval: Optional[Union[bool, None]] = Field(description="If true, workflow pauses for human approval before executing this tool", default=None)
-    approval_message: Optional[Union[str, None]] = Field(description="Message to display when requesting approval (supports {{variable}} templates)", default=None)
-
-
-class AgentVersionListResponse(BaseModel):
-    data: List["AgentVersionSummary"] = ...
-    total: int = ...
-
-
-class AgentVersionSummary(BaseModel):
-    id: str = ...
-    display_name: str = ...
-    version: str = ...
-    parent_version: Optional[Union[str, None]] = Field(default=None)
-    description: Optional[Union[str, None]] = Field(default=None)
-    llm_model: str = ...
-    created_at: Optional[Union[datetime, None]] = Field(default=None)
-    created_by: Optional[Union[str, None]] = Field(default=None)
-    is_published: bool = ...
-    published_at: Optional[Union[datetime, None]] = Field(default=None)
-    commit_message: Optional[Union[str, None]] = Field(default=None)
+class AllowedDataElementFilterKeys(BaseModel):
+    """AllowedDataElementFilterKeys"""
+    pass
 
 
 class Artifact(BaseModel):
@@ -124,49 +234,58 @@ class Artifact(BaseModel):
     created_at: Optional[Union[str, None]] = Field(default=None)
 
 
-class ArtifactEntry(BaseModel):
-    """ArtifactEntry"""
+class BasicWebAuth(BaseModel):
+    """BasicWebAuth"""
+    username: str = ...
+    password: str = ...
+
+
+class Blueprint(BaseModel):
+    """Blueprint"""
+    id: Optional[Union[str, None]] = Field(default=None)
     name: str = ...
-    content: Optional[Union[str, None]] = Field(default=None)
-    file_type: Union[str, None] = ...
-
-
-class ArtifactSchemaListResponse(BaseModel):
-    data: List["ArtifactSchemaSummary"] = ...
-    total: int = ...
-
-
-class ArtifactSchemaResponse(BaseModel):
-    id: str = ...
-    name: str = ...
-    display_name: str = ...
-    version: str = ...
-    parent_version: Optional[Union[str, None]] = Field(default=None)
-    type: str = ...
-    description: str = ...
-    required: bool = ...
-    schema_def: str = ...
-    max_size_bytes: Optional[Union[int, None]] = Field(default=None)
-    storage_strategy: str = ...
+    execution_mode: Optional[Union["BlueprintExecutionMode", None]] = Field(default=None)
+    chat_signal: Optional[Union[str, None]] = Field(default=None)
+    version: Optional[Union[str, None]] = Field(default=None)
+    description: Optional[Union[str, None]] = Field(default=None)
+    dsl_definition: "DslDefinition" = ...
+    yaml_spec_content: Optional[Union[str, None]] = Field(default=None)
+    json_spec_content: Optional[Union[str, None]] = Field(default=None)
     created_by: Optional[Union[str, None]] = Field(default=None)
+    updated_by: Optional[Union[str, None]] = Field(default=None)
     created_at: Optional[Union[datetime, None]] = Field(default=None)
+    updated_at: Optional[Union[datetime, None]] = Field(default=None)
+    customer_id: str = ...
+    project_id: str = ...
+    workflow_type: Optional[Union[str, None]] = Field(default=None)
+    workflow_task_queue: Optional[Union[str, None]] = Field(default=None)
+    init_input: Optional[Union[str, None]] = Field(default=None)
 
 
-class ArtifactSchemaSummary(BaseModel):
-    id: str = ...
-    name: str = ...
-    description: str = ...
-    type: str = ...
-    fields_summary: List["FieldSummary"] = ...
-
-
-class ArtifactStorageStrategy(BaseModel):
-    """Supported storage strategies."""
+class BlueprintExecutionMode(BaseModel):
+    """BlueprintExecutionMode"""
     pass
 
 
-class ArtifactType(BaseModel):
-    """Supported artifact types."""
+class BlueprintInstance(BaseModel):
+    """BlueprintInstance"""
+    id: Optional[Union[str, None]] = Field(default=None)
+    blueprint_id: Optional[Union[str, None]] = Field(default=None)
+    workflow_type: Optional[Union[str, None]] = Field(default=None)
+    task_queue: Optional[Union[str, None]] = Field(default=None)
+    workflow_run_id: Optional[Union[str, None]] = Field(default=None)
+    status: Optional[Union["BlueprintInstanceStatus", None]] = Field(default=None)
+    start_time: Optional[Union[datetime, None]] = Field(default=None)
+    end_time: Optional[Union[datetime, None]] = Field(default=None)
+    instance_metadata: Optional[Union[str, None]] = Field(default=None)
+    parent_id: Optional[Union[str, None]] = Field(default=None)
+    children: Optional[Union[List["BlueprintInstance"], None]] = Field(default=None)
+    activities: Optional[Union[List["Activity"], None]] = Field(default=None)
+    events: Optional[Union[List["Event"], None]] = Field(default=None)
+
+
+class BlueprintInstanceStatus(BaseModel):
+    """BlueprintInstanceStatus"""
     pass
 
 
@@ -182,15 +301,15 @@ class CallToAction(BaseModel):
     """An action the user can take."""
     label: str = ...
     action: str = ...
-    action_data: Optional[Union[str, None]] = Field(description="Optional override for the tool's parameters schema", default=None)
+    action_data: Optional[Union[str, None]] = Field(default=None)
 
 
 class ChatMessageRequest(BaseModel):
     """Request body for chat message endpoints."""
     user_message: str = Field(description="The user's chat message")
-    timeout_seconds: Optional[Union[int, None]] = Field(description="Maximum time to wait for response (seconds)", default=None)
-    include_thinking: Optional[Union[bool, None]] = Field(description="Whether to include thinking content in response", default=None)
-    include_tool_activity: Optional[Union[bool, None]] = Field(description="Whether to include tool call/result activity", default=None)
+    timeout_seconds: Optional[Union[int, None]] = Field(default=None)
+    include_thinking: Optional[Union[bool, None]] = Field(default=None)
+    include_tool_activity: Optional[Union[bool, None]] = Field(default=None)
 
 
 class ChatMessageResponse(BaseModel):
@@ -198,9 +317,9 @@ class ChatMessageResponse(BaseModel):
     signal_id: str = Field(description="Unique ID for this message exchange")
     response: "ChatResponse" = Field(description="The structured response")
     assistant_response: str = Field(description="The assistant response in text-format")
-    tool_activity: Optional[Union[List["ToolActivity"], None]] = Field(description="Tool calls made during response generation", default=None)
-    thinking: Optional[Union[str, None]] = Field(description="LLM thinking/reasoning content", default=None)
-    token_usage: Optional[Union[Dict[str, int], None]] = Field(description="Token usage statistics", default=None)
+    tool_activity: Optional[Union[List["ToolActivity"], None]] = Field(default=None)
+    thinking: Optional[Union[str, None]] = Field(default=None)
+    token_usage: Optional[Union[Dict[str, int], None]] = Field(default=None)
 
 
 class ChatResponse(BaseModel):
@@ -212,13 +331,30 @@ class ChatResponse(BaseModel):
     artifacts: Optional[Union[List["Artifact"], None]] = Field(default=None)
 
 
+class ClickhouseConfig(BaseModel):
+    """ClickhouseConfig"""
+    database_type: Optional[Union["DatabaseType", None]] = Field(default=None)
+    database_name: str = ...
+
+
 class CloudStorageConnector(BaseModel):
     """Connect to a cloud storage bucket."""
     provider: Literal["s3", "gcs"] = Field(description="Cloud storage provider")
     bucket: str = Field(description="Bucket name")
     prefix: Optional[Union[str, None]] = Field(description="Key prefix to scope the datasource", default=None)
     role_arn: Optional[Union[str, None]] = Field(description="AWS IAM role ARN (S3 only)", default=None)
-    region: Optional[Union[str, None]] = Field(description="AWS region (S3 only)", default=None)
+
+
+class CodeChunking(BaseModel):
+    """CodeChunking"""
+    chunk_lines: Optional[Union[int, None]] = Field(default=None)
+    chunk_lines_overlap: Optional[Union[int, None]] = Field(default=None)
+    max_chars: Optional[Union[int, None]] = Field(default=None)
+
+
+class CompleteBlueprintInstanceRequest(BaseModel):
+    """CompleteBlueprintInstanceRequest"""
+    result: Optional[Union[str, None]] = Field(default=None)
 
 
 class ConfidenceScoringConfig(BaseModel):
@@ -237,100 +373,113 @@ class Config(BaseModel):
     any_of_schemas: Optional[List[str]] = Field(default=None)
 
 
-class ConnectorConfig(BaseModel):
+class ConnectorConfigInput(BaseModel):
     """Datasource connection configuration. Exactly one connector type must be set."""
-    type: Literal["database", "cloud_storage", "web_crawl"] = Field(description="Connector type — set the matching config object: 'database' → database, 'cloud_storage' → cloud_storage, 'web_crawl' → web_crawl")
+    type: Literal["database", "cloud_storage", "web_crawl"] = ...
     database: Optional[Union["DatabaseConnector", None]] = Field(default=None)
     cloud_storage: Optional[Union["CloudStorageConnector", None]] = Field(default=None)
     web_crawl: Optional[Union["WebCrawlConnector", None]] = Field(default=None)
 
 
-class CreateAgentArtifactRequest(BaseModel):
-    """Request model for creating a new agent artifact."""
-    display_name: str = Field(description="Human-readable name of the artifact (letters, numbers, and spaces only). Converted to kebab-case internally.")
-    type: "ArtifactType" = Field(description="Artifact type (json, markdown, csv, yaml, text, html, pdf)")
-    description: Optional[Union[str, None]] = Field(description="Description of the artifact", default=None)
-    required: Optional[Union[bool, None]] = Field(description="Whether agent must produce this artifact", default=None)
-    schema_def: str = Field(description="Schema definition")
-    max_size_bytes: Optional[Union[int, None]] = Field(description="Maximum artifact size in bytes", default=None)
-    storage_strategy: Optional[Union["ArtifactStorageStrategy", None]] = Field(description="Storage strategy (inline, gcs, auto)", default=None)
-    additional_properties: Optional[str] = Field(default=None)
+class ConnectorConfigOutput(BaseModel):
+    """Datasource connection configuration. Exactly one connector type must be set."""
+    type: Literal["database", "cloud_storage", "web_crawl"] = ...
+    database: Optional[Union["DatabaseConnector", None]] = Field(default=None)
+    cloud_storage: Optional[Union["CloudStorageConnector", None]] = Field(default=None)
+    web_crawl: Optional[Union["WebCrawlConnector", None]] = Field(default=None)
 
 
-class CreateAgentDefinitionRequest(BaseModel):
-    """Request model for creating a new agent definition."""
-    display_name: str = Field(description="Human-readable name of the agent (letters, numbers, and spaces only). Converted to kebab-case internally.")
-    instructions: str = Field(description="System prompt/instructions for the agent")
-    type: Optional[Union[str, None]] = Field(description="Agent type", default=None)
-    description: Optional[Union[str, None]] = Field(description="Description of the agent", default=None)
-    llm_model: Optional[Union[str, None]] = Field(description="LLM model to use", default=None)
-    fallback_models: Optional[Union[List[str], None]] = Field(description="List of fallback models", default=None)
-    datasources: Optional[Union[List[str], None]] = Field(description="Datasource IDs the agent has access to", default=None)
-    tools: Optional[Union[List["AgentToolDefinition"], None]] = Field(description="Tools configuration", default=None)
-    artifacts: Optional[Union[List[str], None]] = Field(description="Catalog URNs of artifacts the agent produces", default=None)
-    confidence_configs: Optional[Union[List[str], None]] = Field(description="Confidence scoring module names to apply during execution", default=None)
-    temperature: Optional[Union[float, int, None]] = Field(description="LLM temperature", default=None)
-    max_tokens: Optional[Union[int, None]] = Field(description="Maximum tokens in response", default=None)
-    tags: Optional[Union[List[str], None]] = Field(description="Tags for categorization", default=None)
-    icon: Optional[Union[str, None]] = Field(description="UI icon identifier", default=None)
-    additional_properties: Optional[str] = Field(default=None)
-
-
-class CreateAgentPromptRequest(BaseModel):
-    """Request model for creating a new agent prompt."""
-    display_name: str = Field(description="Human-readable name of the prompt (letters, numbers, and spaces only). Converted to kebab-case internally.")
-    prompt: str = Field(description="Prompt text")
-
-
-class CreateAgentResponse(BaseModel):
-    id: str = ...
+class ContentItem(BaseModel):
+    """ContentItem"""
     name: str = ...
-    display_name: str = ...
-    version: str = ...
+    path: str = ...
+    type: "ContentType" = ...
+    size: Optional[Union[int, None]] = Field(default=None)
+    media_type: Optional[Union[str, None]] = Field(default=None)
+    last_modified: Optional[Union[str, None]] = Field(default=None)
+    etag: Optional[Union[str, None]] = Field(default=None)
 
 
-class CreateArtifactSchemaResponse(BaseModel):
-    id: str = ...
-    name: str = ...
-    display_name: str = ...
-    version: str = ...
+class ContentType(BaseModel):
+    """ContentType"""
+    pass
+
+
+class CreateDataElementRequest(BaseModel):
+    name: str = Field(description="Data element name")
+    media_type: Optional[Union[str, None]] = Field(description="MIME type of the data element", default=None)
+    metadata: Optional[Union[str, None]] = Field(description="Arbitrary metadata", default=None)
 
 
 class CreateDatasourceRequest(BaseModel):
     name: str = Field(description="Human-readable datasource name")
     description: Optional[str] = Field(description="What this datasource contains", default=None)
-    connector: "ConnectorConfig" = Field(description="Connection configuration")
-    metadata_config: Optional[Union["MetadataConfigRequest", None]] = Field(description="Optional metadata extraction config to apply after creation", default=None)
+    connector: "ConnectorConfigInput" = Field(description="Connection configuration")
 
 
-class CreatePromptResponse(BaseModel):
-    id: str = ...
+class CustomEventRequest(BaseModel):
+    """CustomEventRequest"""
+    activity_id: Optional[Union[str, None]] = Field(default=None)
+    event_name: str = Field(description="Name of the custom event being logged.")
+    details: Optional[Union[str, None]] = Field(default=None)
+    group_id: Optional[Union[str, None]] = Field(default=None)
+    is_signal: Optional[Union[bool, None]] = Field(default=None)
+    is_internal: Optional[Union[bool, None]] = Field(default=None)
+    originating_signal_id: Optional[Union[str, None]] = Field(default=None)
+
+
+class DataElement(BaseModel):
+    """DataElement"""
+    id: Union[str, None] = ...
+    datasource_id: str = ...
     name: str = ...
-    display_name: str = ...
-    version: str = ...
+    path: str = ...
+    media_type: str = ...
+    discovery_record: Union["DataElementDiscoveryRecord", None] = ...
+    description: Union[str, None] = ...
+    parent_data_element_id: Optional[Union[str, None]] = Field(default=None)
+    created_at: str = ...
+    updated_at: str = ...
 
 
-class CreateSessionRequest(BaseModel):
-    prompt: Optional[Union[str, None]] = Field(default=None)
-    initial_context: Optional[Union[str, None]] = Field(default=None)
-    max_iterations_per_user_message: Optional[Union[int, None]] = Field(default=None)
+class DataElementCondition(BaseModel):
+    """DataElementCondition"""
+    pass
 
 
-class CreateSessionResponse(BaseModel):
-    session_id: str = ...
+class DataElementDiscoveryRecord(BaseModel):
+    """DataElementDiscoveryRecord"""
+    discovery_time: str = ...
+    last_modified_time: str = ...
+    size: Union[float, int] = ...
+    element_hash: str = ...
+    file_id: Optional[Union[str, None]] = Field(default=None)
+    file_created_at: Optional[Union[str, None]] = Field(default=None)
+    file_modified_at: Optional[Union[str, None]] = Field(default=None)
+    extra: Optional[Union[str, None]] = Field(description="Connector-specific extra metadata", default=None)
 
 
-class DataElementListResponse(BaseModel):
-    items: List["DataElementResponse"] = ...
-    next_cursor: Optional[Union[str, None]] = Field(default=None)
-    has_next: Optional[bool] = Field(default=None)
+class DataElementFilter(BaseModel):
+    """DataElementFilter"""
+    key: "AllowedDataElementFilterKeys" = ...
+    condition: Optional[Union["DataElementCondition", None]] = Field(default=None)
+    value: Union[str, None] = ...
+
+
+class DataElementFilterRequest(BaseModel):
+    """DataElementFilterRequest"""
+    filters: Optional[Union[List["DataElementFilter"], None]] = Field(default=None)
+
+
+class DataElementMetadata(BaseModel):
+    """Metadata key-value pairs on a data element."""
+    metadata: str = Field(description="Arbitrary key-value metadata")
 
 
 class DataElementResponse(BaseModel):
     id: str = ...
     datasource_id: str = ...
     name: str = ...
-    description: Optional[Union[str, None]] = Field(default=None)
     media_type: Optional[Union[str, None]] = Field(default=None)
     metadata: Optional[Union[str, None]] = Field(default=None)
     created_at: Optional[Union[str, None]] = Field(default=None)
@@ -342,12 +491,59 @@ class DataElementSearchRequest(BaseModel):
     media_type_filters: Optional[Union[List[str], None]] = Field(description="Filter by MIME types", default=None)
 
 
+class DatabaseConfigInput(BaseModel):
+    """DatabaseConfig"""
+    anyof_schema_1_validator: Optional[Union["DuckDbConfig", None]] = Field(default=None)
+    anyof_schema_2_validator: Optional[Union["ClickhouseConfig", None]] = Field(default=None)
+    anyof_schema_3_validator: Optional[Union["PostgreSqlConfig", None]] = Field(default=None)
+    actual_instance: Optional[str] = Field(default=None)
+    any_of_schemas: Optional[List[str]] = Field(default=None)
+
+
+class DatabaseConfigOutput(BaseModel):
+    """DatabaseConfig"""
+    anyof_schema_1_validator: Optional[Union["DuckDbConfig", None]] = Field(default=None)
+    anyof_schema_2_validator: Optional[Union["ClickhouseConfig", None]] = Field(default=None)
+    anyof_schema_3_validator: Optional[Union["PostgreSqlConfig", None]] = Field(default=None)
+    actual_instance: Optional[str] = Field(default=None)
+    any_of_schemas: Optional[List[str]] = Field(default=None)
+
+
 class DatabaseConnector(BaseModel):
     """Connect to a relational database."""
     host: str = Field(description="Database host address")
     port: int = Field(description="Database port")
     database: str = Field(description="Database name")
     schema_name: Optional[Union[str, None]] = Field(description="Schema name (defaults to public)", default=None)
+
+
+class DatabaseType(BaseModel):
+    """DatabaseType"""
+    pass
+
+
+class Datasource(BaseModel):
+    """Datasource"""
+    id: Union[str, None] = ...
+    customer_id: str = ...
+    project_id: str = ...
+    name: str = ...
+    description: str = ...
+    recurrence: Union[str, None] = ...
+    created_by: str = ...
+    created_at: str = ...
+    updated_by: str = ...
+    updated_at: str = ...
+    object_storage_config: Union["ObjectStorageConfig", None] = ...
+    web_config: Union["DatasourceWebConfig", None] = ...
+    connector_config: Union["DatasourceConnectorConfig", None] = ...
+
+
+class DatasourceConnectorConfig(BaseModel):
+    """DatasourceConnectorConfig"""
+    connector_id: str = ...
+    airbyte_config: Optional[Union["AirbyteConfig", None]] = Field(default=None)
+    source_config: Optional[Union[str, None]] = Field(default=None)
 
 
 class DatasourceListResponse(BaseModel):
@@ -358,16 +554,46 @@ class DatasourceResponse(BaseModel):
     id: str = ...
     name: str = ...
     description: str = ...
-    connector: "ConnectorConfig" = ...
+    connector: "ConnectorConfigOutput" = ...
     created_at: str = ...
     updated_at: str = ...
-    last_sync_at: Optional[Union[str, None]] = Field(default=None)
-    last_sync_status: Optional[Union[str, None]] = Field(default=None)
-    total_ingested_files: Optional[Union[int, None]] = Field(default=None)
-    metadata_config: Optional[Union["MetadataConfigResponse", None]] = Field(default=None)
-    files: Optional[Union["FilesSummaryResponse", None]] = Field(default=None)
-    ingest_counts: Optional[Union["IngestCountsResponse", None]] = Field(default=None)
-    tables: Optional[Union[List["TableSummaryResponse"], None]] = Field(default=None)
+
+
+class DatasourceWebConfig(BaseModel):
+    """DatasourceWebConfig"""
+    base_url: str = Field(alias="baseURL")
+    javascript_render: bool = Field(alias="javascriptRender")
+    wait_for_selector: Union[str, None] = Field(alias="waitForSelector")
+    domains: Union[List["DatasourceServiceClientModelsWebDomainWebDomain"], None] = ...
+    authentication: Union["BasicWebAuth", None] = ...
+
+    model_config = {"populate_by_name": True}
+
+
+class DeleteChunkingStrategyResponse(BaseModel):
+    """DeleteChunkingStrategyResponse"""
+    message: str = ...
+
+
+class DeleteContentResponse(BaseModel):
+    """DeleteContentResponse"""
+    success: bool = ...
+    deleted_paths: List[str] = ...
+
+
+class DeleteDataElementResponse(BaseModel):
+    """DeleteDataElementResponse"""
+    id: str = ...
+
+
+class DeleteDatasourceResponse(BaseModel):
+    """DeleteDatasourceResponse"""
+    id: str = ...
+
+
+class DeleteTagTableResponse(BaseModel):
+    """DeleteTagTableResponse"""
+    message: str = ...
 
 
 class DocumentChild(BaseModel):
@@ -402,90 +628,136 @@ class DocumentStatus(BaseModel):
     error: Optional[Union[str, None]] = Field(default=None)
 
 
-class DownloadJobRequest(BaseModel):
-    content: Optional[Union[str, None]] = Field(description="Content to include: files, parsed_content, or files_and_parsed_content", default=None)
-    data_element_ids: Optional[Union[List[str], None]] = Field(description="Specific data element IDs to include", default=None)
+class DslDefinition(BaseModel):
+    """DslDefinition"""
+    pass
 
 
-class DownloadJobResponse(BaseModel):
-    job_id: str = ...
-    status: str = Field(description="Current job status")
-    status_url: str = Field(description="Stream progress events from this SSE URL")
+class DuckDbConfig(BaseModel):
+    """DuckDBConfig"""
+    database_type: Optional[Union["DatabaseType", None]] = Field(default=None)
+    database_filepath: Optional[Union[str, None]] = Field(default=None)
+    database_name: Optional[Union[str, None]] = Field(default=None)
+    database_schema: Optional[Union[str, None]] = Field(default=None)
 
 
-class FieldSummary(BaseModel):
+class EmbeddingModel(BaseModel):
+    """EmbeddingModel"""
     name: str = ...
-    type: str = ...
+    endpoint: str = ...
+    dimensions: int = ...
 
 
-class FileParseCompleteInfo(BaseModel):
-    """FileParseCompleteInfo"""
+class Event(BaseModel):
+    """Event"""
+    id: Optional[Union[str, None]] = Field(default=None)
+    activity_id: Optional[Union[str, None]] = Field(default=None)
+    blueprint_instance_id: str = ...
+    event_type: Optional[Union["EventType", None]] = Field(default=None)
+    timestamp: Optional[Union[datetime, None]] = Field(default=None)
+    details: Optional[Union[str, None]] = Field(default=None)
+    group_id: Optional[Union[str, None]] = Field(default=None)
+    is_signal: Optional[Union[bool, None]] = Field(default=None)
+    is_internal: Optional[Union[bool, None]] = Field(default=None)
+    originating_signal_id: Optional[Union[str, None]] = Field(default=None)
+
+
+class EventType(BaseModel):
+    """EventType"""
+    pass
+
+
+class ExecuteBlueprintRequest(BaseModel):
+    """ExecuteBlueprintRequest"""
+    init_input: Optional[Union[str, None]] = Field(default=None)
+    enable_streaming: Optional[Union[bool, None]] = Field(default=None)
+
+
+class ExtractorModel(BaseModel):
+    """ExtractorModel"""
+    name: str = ...
+    endpoint: str = ...
+
+
+class FailBlueprintInstanceRequest(BaseModel):
+    """FailBlueprintInstanceRequest"""
+    error: Optional[Union[str, None]] = Field(description="Error message for failure", default=None)
+    error_details: Optional[Union[str, None]] = Field(default=None)
+
+
+class GetActivitiesResponse(BaseModel):
+    """GetActivitiesResponse"""
+    data: List["Activity"] = ...
+
+
+class GetAllDatasourceIdsResponse(BaseModel):
+    """GetAllDatasourceIdsResponse"""
+    datasource_ids: List[str] = ...
+
+
+class GetBlueprintInstancesResponse(BaseModel):
+    """GetBlueprintInstancesResponse"""
+    data: List["BlueprintInstance"] = ...
+
+
+class GetBlueprintsResponse(BaseModel):
+    """GetBlueprintsResponse"""
+    data: List["Blueprint"] = ...
+
+
+class GetContentResponse(BaseModel):
+    """GetContentResponse"""
+    name: str = ...
+    path: str = ...
+    type: "ContentType" = ...
+    size: Optional[Union[int, None]] = Field(default=None)
+    media_type: Optional[Union[str, None]] = Field(default=None)
+    last_modified: Optional[Union[str, None]] = Field(default=None)
+    etag: Optional[Union[str, None]] = Field(default=None)
+    metadata: Optional[Union[str, None]] = Field(default=None)
+
+
+class GetDataElementMetadataResponse(BaseModel):
+    """GetDataElementMetadataResponse"""
+    data_element_id: str = ...
+    metadata: Union[str, None] = ...
+
+
+class GetDataElementMetadataResultResponse(BaseModel):
+    """GetDataElementMetadataResultResponse"""
+    request_id: str = ...
     status: Union[str, None] = ...
+    metadata: Union[str, None] = ...
     error: Optional[Union[str, None]] = Field(default=None)
-    bbox_count: Union[int, None] = ...
-    page_count: Union[int, None] = ...
-    content_type: Union[str, None] = ...
-    timestamp: Union[str, None] = ...
 
 
-class FileParseEntry(BaseModel):
-    """FileParseEntry"""
-    file_id: str = ...
-    filename: Union[str, None] = ...
-    parse_start: Union["FileParseStartInfo", None] = ...
-    parse_complete: Union["FileParseCompleteInfo", None] = ...
+class GetEventsResponse(BaseModel):
+    """GetEventsResponse"""
+    data: List["Event"] = ...
 
 
-class FileParseStartInfo(BaseModel):
-    """FileParseStartInfo"""
-    attempt: Union[int, None] = ...
-    timestamp: Union[str, None] = ...
+class GetReprocessStatusResponse(BaseModel):
+    """GetReprocessStatusResponse"""
+    total: Union[int, None] = ...
+    completed: Union[int, None] = ...
+    failed: Union[int, None] = ...
 
 
-class FileUploadSyncResponse(BaseModel):
-    datasource_id: str = ...
-    items: List["ContentItem"] = ...
-    continuation_token: Optional[Union[str, None]] = Field(default=None)
-    ingest_url: Optional[Union[str, None]] = Field(default=None)
-
-
-class FilesSummaryResponse(BaseModel):
-    total: int = ...
-    deleted: Optional[Union[int, None]] = Field(default=None)
+class HtmlChunking(BaseModel):
+    """HTMLChunking"""
+    include_metadata: bool = ...
+    include_prev_next_rel: bool = ...
+    tags: Optional[Union[List[str], None]] = Field(default=None)
 
 
 class HttpValidationError(BaseModel):
     detail: Optional[List["ValidationError"]] = Field(default=None)
 
 
-class IngestCountsResponse(BaseModel):
-    rag: Optional[Union["IngestMethodCountsResponse", None]] = Field(default=None)
-    tag: Optional[Union["IngestMethodCountsResponse", None]] = Field(default=None)
-    ref_graph: Optional[Union["IngestMethodCountsResponse", None]] = Field(default=None)
-
-
-class IngestMethodCountsResponse(BaseModel):
-    total: int = ...
-    new: Optional[Union[int, None]] = Field(default=None)
-    updated: Optional[Union[int, None]] = Field(default=None)
-
-
-class IngestMethodSummary(BaseModel):
-    method: str = ...
-    total_files: Optional[int] = Field(default=None)
-    processed_files: Optional[int] = Field(default=None)
-    adds: Optional[int] = Field(default=None)
-    updates: Optional[int] = Field(default=None)
-    errors: Optional[int] = Field(default=None)
-    warnings: Optional[int] = Field(default=None)
-
-
-class IngestStatusResponse(BaseModel):
-    datasource_id: str = ...
-    status: str = ...
-    started_at: Optional[Union[str, None]] = Field(default=None)
-    completed_at: Optional[Union[str, None]] = Field(default=None)
-    methods: Optional[List["IngestMethodSummary"]] = Field(default=None)
+class JsonNodeChunking(BaseModel):
+    """JSONNodeChunking"""
+    include_metadata: bool = ...
+    include_prev_next_rel: bool = ...
 
 
 class JudgeConfig(BaseModel):
@@ -495,9 +767,22 @@ class JudgeConfig(BaseModel):
     temperature_step: Optional[Union[float, int, None]] = Field(default=None)
 
 
+class ListContentResponse(BaseModel):
+    """ListContentResponse"""
+    items: List["ContentItem"] = ...
+    continuation_token: Optional[Union[str, None]] = Field(default=None)
+
+
 class ListMetadataModelCatalogResponse(BaseModel):
     """ListMetadataModelCatalogResponse"""
     models: List["MetadataModelCatalogEntry"] = ...
+
+
+class MarkdownNodeChunking(BaseModel):
+    """MarkdownNodeChunking"""
+    include_metadata: bool = ...
+    include_prev_next_rel: bool = ...
+    header_path_separator: str = ...
 
 
 class MeibelDocumentResult(BaseModel):
@@ -508,19 +793,11 @@ class MeibelDocumentResult(BaseModel):
     metadata: Optional[Union[str, None]] = Field(default=None)
 
 
-class MessageEntry(BaseModel):
-    """MessageEntry"""
-    role: str = ...
-    message: str = ...
-    signal_id: Union[str, None] = ...
-    timestamp: datetime = ...
-
-
 class MetadataConfigRequest(BaseModel):
     """Configure automatic metadata extraction from documents on ingest."""
-    type: Literal["catalog", "custom"] = Field(description="Use 'catalog' to select a pre-built extraction model (set model_id); use 'custom' to define your own fields (set fields)")
-    model_id: Optional[Union[str, None]] = Field(description="Pre-built model ID from the metadata model catalog — required when type is 'catalog'", default=None)
-    fields: Optional[Union[List["MetadataField"], None]] = Field(description="Custom field definitions to extract — required when type is 'custom'", default=None)
+    type: Literal["catalog", "custom"] = ...
+    model_id: Optional[Union[str, None]] = Field(description="Required when type='catalog'", default=None)
+    fields: Optional[Union[List["MetadataField"], None]] = Field(description="Required when type='custom'", default=None)
 
 
 class MetadataConfigResponse(BaseModel):
@@ -531,9 +808,15 @@ class MetadataConfigResponse(BaseModel):
 
 class MetadataField(BaseModel):
     name: str = Field(description="Field name (snake_case)")
-    type: Literal["string", "integer", "float", "boolean", "datetime", "uuid", "geo", "list[string]"] = Field(description="Data type of the field")
+    type: Literal["string", "number", "boolean", "list[string]"] = ...
     description: str = Field(description="What this field captures")
-    index: Optional[bool] = Field(description="Whether this field is indexed for filtering", default=None)
+
+
+class MetadataFieldDefinition(BaseModel):
+    """MetadataFieldDefinition"""
+    name: str = ...
+    type: str = ...
+    description: str = ...
 
 
 class MetadataModelCatalogEntry(BaseModel):
@@ -551,12 +834,27 @@ class MetadataModelCatalogEntry(BaseModel):
     updated_at: Optional[Union[datetime, None]] = Field(default=None)
 
 
+class MetadataModelConfig(BaseModel):
+    """MetadataModelConfig"""
+    type: str = ...
+    model_id: Optional[Union[str, None]] = Field(default=None)
+    fields: Optional[Union[List["MetadataFieldDefinition"], None]] = Field(default=None)
+
+
 class MetadataModelField(BaseModel):
     """MetadataModelField"""
     name: str = ...
     type: str = ...
     description: str = ...
-    index: Optional[Union[bool, None]] = Field(default=None)
+
+
+class MetadataOptions(BaseModel):
+    """MetadataOptions"""
+    create_title: Optional[Union[bool, None]] = Field(default=None)
+    extract_questions_answers: Optional[Union[bool, None]] = Field(default=None)
+    extract_summary: Optional[Union[bool, None]] = Field(default=None)
+    has_consumer_content: Optional[Union[bool, None]] = Field(default=None)
+    get_bibliographical_information: Optional[Union[bool, None]] = Field(default=None)
 
 
 class NBootstraps(BaseModel):
@@ -586,10 +884,51 @@ class OcrConfig(BaseModel):
     ocr_confidence_scores: Optional[Union[List[Union[float, int]], None]] = Field(default=None)
 
 
+class ObjectStorageConfig(BaseModel):
+    """ObjectStorageConfig"""
+    bucket: str = ...
+    prefix: Union[str, None] = ...
+    filters: Optional[Union["ObjectStorageFilters", None]] = Field(default=None)
+    gcs_config: Optional[Union[str, None]] = Field(default=None)
+    s3_config: Optional[Union["S3Config", None]] = Field(default=None)
+
+
+class ObjectStorageFilters(BaseModel):
+    """ObjectStorageFilters"""
+    included_prefixes: Optional[Union[List[str], None]] = Field(default=None)
+    included_file_types: Optional[Union[List[str], None]] = Field(default=None)
+    recursive_prefixes: Optional[Union[bool, None]] = Field(default=None)
+    modified_date_start: Optional[Union[str, None]] = Field(default=None)
+    modified_date_end: Optional[Union[str, None]] = Field(default=None)
+    min_file_size: Optional[Union[int, None]] = Field(default=None)
+    max_file_size: Optional[Union[int, None]] = Field(default=None)
+
+
 class ParseDocumentResponse(BaseModel):
     """Returned from POST /documents (async)."""
     job_id: str = ...
     status: str = Field(description="Job status, e.g. 'queued'")
+
+
+class PatchRagConfigMetadataRequest(BaseModel):
+    """PatchRagConfigMetadataRequest"""
+    metadata_model: "MetadataModelConfig" = ...
+
+
+class PatchRagConfigMetadataResponse(BaseModel):
+    """PatchRagConfigMetadataResponse"""
+    message: str = ...
+
+
+class Platform(BaseModel):
+    """Platform"""
+    pass
+
+
+class PostgreSqlConfig(BaseModel):
+    """PostgreSQLConfig"""
+    database_type: Optional[Union["DatabaseType", None]] = Field(default=None)
+    database_name: str = ...
 
 
 class ProcessDocumentResponse(BaseModel):
@@ -599,44 +938,58 @@ class ProcessDocumentResponse(BaseModel):
     result: Union["MeibelDocumentResult", str] = Field(description="MeibelDocumentResult for meibel format, str for markdown")
 
 
-class PromptListResponse(BaseModel):
-    data: List["PromptSummary"] = ...
+class PutDataElementMetadataRequest(BaseModel):
+    """PutDataElementMetadataRequest"""
+    metadata: str = ...
 
 
-class PromptResponse(BaseModel):
-    id: str = ...
-    name: str = ...
-    display_name: str = ...
-    version: str = ...
-    parent_version: Optional[Union[str, None]] = Field(default=None)
-    prompt: str = ...
-    description: Optional[Union[str, None]] = Field(default=None)
+class PutDataElementMetadataResponse(BaseModel):
+    """PutDataElementMetadataResponse"""
+    workflow_id: str = ...
+    request_id: str = ...
+
+
+class RagChunkingStrategy(BaseModel):
+    """RagChunkingStrategy"""
+    datasource_id: str = ...
+    code_splitter: Optional[Union["CodeChunking", None]] = Field(default=None)
+    html_node_parser: Optional[Union["HtmlChunking", None]] = Field(default=None)
+    json_node_parser: Optional[Union["JsonNodeChunking", None]] = Field(default=None)
+    markdown_node_parser: Optional[Union["MarkdownNodeChunking", None]] = Field(default=None)
+    semantic_splitter_node_parser: Optional[Union["SemanticChunking", None]] = Field(default=None)
+    sentence_splitter: Optional[Union["SentenceChunking", None]] = Field(default=None)
+    token_text_splitter: Optional[Union["TokenTextChunking", None]] = Field(default=None)
+
+
+class RagConfig(BaseModel):
+    """RagConfig"""
+    datasource_id: str = ...
+    description: str = ...
+    collection_id: str = ...
+    extractor_model: Optional[Union["ExtractorModel", None]] = Field(default=None)
+    embedding_model: Optional[Union["EmbeddingModel", None]] = Field(default=None)
+    sparse_embedding_model: Optional[Union["SparseEmbeddingModel", None]] = Field(default=None)
+    collect_metadata: Optional[Union[bool, None]] = Field(default=None)
+    metadata_options: Optional[Union["MetadataOptions", None]] = Field(default=None)
+    metadata_model: Optional[Union["MetadataModelConfig", None]] = Field(default=None)
     created_by: Optional[Union[str, None]] = Field(default=None)
-    created_at: Optional[Union[datetime, None]] = Field(default=None)
+    updated_by: Optional[Union[str, None]] = Field(default=None)
 
 
-class PromptSummary(BaseModel):
-    id: str = ...
-    display_name: str = ...
-    version: str = ...
-    preview: str = ...
+class ReprocessDatasourceRequest(BaseModel):
+    """ReprocessDatasourceRequest"""
+    metadata_model: Optional[Union["MetadataModelConfig", None]] = Field(default=None)
 
 
-class PublishAgentDefinitionRequest(BaseModel):
-    """Request model for publishing the current draft of an agent."""
-    commit_message: str = Field(description="User-provided description of what changed in this version")
+class ReprocessDatasourceResponse(BaseModel):
+    """ReprocessDatasourceResponse"""
+    workflow_id: str = ...
 
 
-class PublishAgentDefinitionResponse(BaseModel):
-    """Response model for a publish event."""
-    id: str = Field(description="Registry entry ID")
-    agent_definition_urn: str = Field(description="Catalog URN of the published AgentDefinition version")
-    agent_name: str = Field(description="Agent name")
-    version: str = Field(description="Published version slug")
-    display_name: str = Field(description="Display name of the published version")
-    commit_message: str = Field(description="User-provided description of what changed in this version")
-    published_at: datetime = Field(description="Timestamp of the publish event")
-    published_by: Optional[Union[str, None]] = Field(description="User who published", default=None)
+class S3Config(BaseModel):
+    """S3Config"""
+    role_arn: str = ...
+    region: str = ...
 
 
 class ScoreSummary(BaseModel):
@@ -669,39 +1022,21 @@ class ScoringStatus(BaseModel):
     pass
 
 
-class SessionListResponse(BaseModel):
-    data: List["SessionSummary"] = ...
-    total: int = ...
+class SemanticChunking(BaseModel):
+    """SemanticChunking"""
+    buffer_size: Optional[Union[int, None]] = Field(default=None)
+    include_metadata: bool = ...
+    include_prev_next_rel: bool = ...
+    breakpoint_percentile_threshold: Optional[Union[int, None]] = Field(default=None)
 
 
-class SessionMessageItem(BaseModel):
-    type: str = ...
-    timestamp: Optional[Union[str, None]] = Field(default=None)
-    message: Optional[Union[str, None]] = Field(default=None)
-    signal_id: Optional[Union[str, None]] = Field(default=None)
-    tool_id: Optional[Union[str, None]] = Field(default=None)
-    tool_name: Optional[Union[str, None]] = Field(default=None)
-    arguments: Optional[Union[str, None]] = Field(default=None)
-    result: Optional[Union[str, None]] = Field(default=None)
-
-
-class SessionMessagesResponse(BaseModel):
-    agent_id: Optional[Union[str, None]] = Field(default=None)
-    agent_name: Optional[Union[str, None]] = Field(default=None)
-    version: Optional[Union[str, None]] = Field(default=None)
-    messages: List["SessionMessageItem"] = ...
-
-
-class SessionSummary(BaseModel):
-    session_id: str = ...
-    status: str = ...
-    start_time: datetime = ...
-    end_time: Optional[Union[datetime, None]] = Field(default=None)
-    agent_name: Optional[Union[str, None]] = Field(default=None)
-    agent_version: Optional[Union[str, None]] = Field(default=None)
-    messages_count: Optional[int] = Field(default=None)
-    token_usage: Optional[Union[str, None]] = Field(default=None)
-    result: Optional[List[str]] = Field(default=None)
+class SentenceChunking(BaseModel):
+    """SentenceChunking"""
+    chunk_size: Optional[Union[int, None]] = Field(default=None)
+    chunk_overlap: Optional[Union[int, None]] = Field(default=None)
+    separator: Optional[Union[str, None]] = Field(default=None)
+    paragraph_separator: Optional[Union[str, None]] = Field(default=None)
+    secondary_chunking_regex: Optional[Union[str, None]] = Field(default=None)
 
 
 class Source(BaseModel):
@@ -711,6 +1046,19 @@ class Source(BaseModel):
     snippet: Optional[Union[str, None]] = Field(default=None)
     data_element_id: Optional[Union[str, None]] = Field(default=None)
     relevance_score: Optional[Union[float, int, None]] = Field(default=None)
+
+
+class SparseEmbeddingModel(BaseModel):
+    """SparseEmbeddingModel"""
+    name: str = ...
+    endpoint: str = ...
+
+
+class StartBlueprintInstanceRequest(BaseModel):
+    """StartBlueprintInstanceRequest"""
+    workflow_args: Optional[Union[List[str], None]] = Field(default=None)
+    workflow_kwargs: Optional[Union[str, None]] = Field(default=None)
+    enable_streaming: Optional[Union[bool, None]] = Field(description="Enable streaming responses to Redis for chat workflows. When True, chat responses are streamed to Redis streams that can be consumed via the /chat/stream endpoint.", default=None)
 
 
 class Table(BaseModel):
@@ -729,38 +1077,46 @@ class TableCell(BaseModel):
     bbox: Optional[Union["BoundingBox", None]] = Field(default=None)
 
 
-class TableDescriptionUpdate(BaseModel):
-    table_name: str = ...
-    description: Optional[Union[str, None]] = Field(default=None)
-    columns: Optional[Union[List["TagColumnUpdateItem"], None]] = Field(default=None)
-
-
-class TableSummaryResponse(BaseModel):
-    name: str = ...
-    description: Optional[Union[str, None]] = Field(default=None)
-    column_count: int = ...
-
-
 class TagColumn(BaseModel):
     column_name: str = ...
-    type: Optional[Union[str, None]] = Field(default=None)
     description: Optional[Union[str, None]] = Field(default=None)
 
 
-class TagColumnUpdateItem(BaseModel):
-    column_name: str = ...
-    description: str = ...
+class TagColumnInfo(BaseModel):
+    """TagColumnInfo"""
+    datasource_id: str = ...
+    table_name: str = ...
+    name: str = ...
+    description: Union[str, None] = ...
+    dtype: Union[str, None] = ...
+    is_key: Union[bool, None] = ...
+    is_indexed: Union[bool, None] = ...
+    engineered_features: Union[List[str], None] = ...
+
+
+class TagConfig(BaseModel):
+    """TagConfig"""
+    datasource_id: str = ...
+    description: Union[str, None] = ...
+    logical_group_regex: Union[str, None] = ...
+    working_bucket: str = ...
+    working_platform: Optional[Union["Platform", None]] = Field(default=None)
+    db_path: Union[str, None] = ...
+    database_config: Optional[Union["DatabaseConfigOutput", None]] = Field(default=None)
+    created_by: Optional[Union[str, None]] = Field(default=None)
+    updated_by: Optional[Union[str, None]] = Field(default=None)
 
 
 class TagTable(BaseModel):
     table_name: str = ...
     description: Optional[Union[str, None]] = Field(default=None)
-    columns: Optional[Union[List["TagColumn"], None]] = Field(default=None)
 
 
-class TagTableUpdateItem(BaseModel):
-    table_name: str = ...
-    description: str = ...
+class TagTableInfo(BaseModel):
+    """TagTableInfo"""
+    datasource_id: str = ...
+    name: str = ...
+    description: Union[str, None] = ...
 
 
 class TokenConfig(BaseModel):
@@ -772,88 +1128,140 @@ class TokenConfig(BaseModel):
     n_influencers: Optional[Union[int, None]] = Field(default=None)
 
 
+class TokenTextChunking(BaseModel):
+    """TokenTextChunking"""
+    chunk_size: Optional[Union[int, None]] = Field(default=None)
+    chunk_overlap: Optional[Union[int, None]] = Field(default=None)
+    separator: Optional[Union[str, None]] = Field(default=None)
+    backup_separators: Optional[Union[List[str], None]] = Field(default=None)
+    keep_whitespaces: Optional[Union[bool, None]] = Field(default=None)
+
+
 class ToolActivity(BaseModel):
     """Record of a tool call and its result."""
     tool_id: str = ...
     tool_name: str = ...
     arguments: str = ...
-    result: Optional[Union[str, None]] = Field(description="Optional override for the tool's parameters schema", default=None)
+    result: Optional[Union[str, None]] = Field(default=None)
     timestamp: str = ...
 
 
-class ToolActivityEntry(BaseModel):
-    """ToolActivityEntry"""
-    tool_id: str = ...
-    tool_call: Union["ToolCallInfo", None] = ...
-    tool_result: Union["ToolResultInfo", None] = ...
+class UpdateBlueprintRequest(BaseModel):
+    """UpdateBlueprintRequest"""
+    name: Optional[Union[str, None]] = Field(default=None)
+    execution_mode: Optional[Union[str, None]] = Field(default=None)
+    version: Optional[Union[str, None]] = Field(default=None)
+    description: Optional[Union[str, None]] = Field(default=None)
+    dsl_definition: Optional[Union["DslDefinition", None]] = Field(default=None)
+    yaml_spec_content: Optional[Union[str, None]] = Field(default=None)
+    json_spec_content: Optional[Union[str, None]] = Field(default=None)
+    init_input: Optional[Union[str, None]] = Field(default=None)
 
 
-class ToolCallInfo(BaseModel):
-    """ToolCallInfo"""
-    tool_name: Union[str, None] = ...
-    arguments: Union[str, None] = Field(description="Optional override for the tool's parameters schema")
-    sequence: Union[str, None] = ...
-    timestamp: Union[str, None] = ...
+class UpdateBlueprintTaskRequest(BaseModel):
+    """UpdateBlueprintTaskRequest"""
+    name: Optional[Union[str, None]] = Field(default=None)
+    description: Optional[Union[str, None]] = Field(default=None)
+    input_schema: Optional[Union[str, None]] = Field(default=None)
+    output_schema: Optional[Union[str, None]] = Field(default=None)
+    config_schema: Optional[Union[str, None]] = Field(default=None)
+    tool_schema: Optional[Union[str, None]] = Field(default=None)
 
 
-class ToolResultInfo(BaseModel):
-    """ToolResultInfo"""
-    tool_name: Union[str, None] = ...
-    result: Optional[Union[str, None]] = Field(default=None)
-    sequence: Union[str, None] = ...
-    timestamp: Union[str, None] = ...
+class UpdateChunkingStrategyRequest(BaseModel):
+    """UpdateChunkingStrategyRequest"""
+    code_splitter: Optional[Union["CodeChunking", None]] = Field(default=None)
+    html_node_parser: Optional[Union["HtmlChunking", None]] = Field(default=None)
+    json_node_parser: Optional[Union["JsonNodeChunking", None]] = Field(default=None)
+    markdown_node_parser: Optional[Union["MarkdownNodeChunking", None]] = Field(default=None)
+    semantic_splitter_node_parser: Optional[Union["SemanticChunking", None]] = Field(default=None)
+    sentence_splitter: Optional[Union["SentenceChunking", None]] = Field(default=None)
+    token_text_splitter: Optional[Union["TokenTextChunking", None]] = Field(default=None)
 
 
-class UpdateAgentArtifactRequest(BaseModel):
-    """Request model for updating an agent artifact. Name is intentionally excluded as it serves as the stable identifier for a version chain and cannot be changed."""
-    display_name: Optional[Union[str, None]] = Field(description="Human-readable name of the artifact", default=None)
-    type: Optional[Union["ArtifactType", None]] = Field(description="Artifact type", default=None)
-    description: Optional[Union[str, None]] = Field(description="Description of the artifact", default=None)
-    required: Optional[Union[bool, None]] = Field(description="Whether agent must produce this artifact", default=None)
-    schema_def: Optional[Union[str, None]] = Field(description="Optional override for the tool's parameters schema", default=None)
-    max_size_bytes: Optional[Union[int, None]] = Field(description="Maximum artifact size in bytes", default=None)
-    storage_strategy: Optional[Union["ArtifactStorageStrategy", None]] = Field(description="Storage strategy", default=None)
+class UpdateChunkingStrategyResponse(BaseModel):
+    """UpdateChunkingStrategyResponse"""
+    message: str = ...
 
 
-class UpdateAgentDefinitionRequest(BaseModel):
-    """Request model for updating an agent definition. Name is intentionally excluded as it serves as the stable identifier for a version chain and cannot be changed."""
-    display_name: Optional[Union[str, None]] = Field(description="Human-readable name of the agent", default=None)
-    instructions: Optional[Union[str, None]] = Field(description="System prompt/instructions", default=None)
-    type: Optional[Union[str, None]] = Field(description="Agent type", default=None)
-    description: Optional[Union[str, None]] = Field(description="Description of the agent", default=None)
-    llm_model: Optional[Union[str, None]] = Field(description="LLM model to use", default=None)
-    fallback_models: Optional[Union[List[str], None]] = Field(description="List of fallback models", default=None)
-    datasources: Optional[Union[List[str], None]] = Field(description="Datasource IDs the agent has access to", default=None)
-    tools: Optional[Union[List["AgentToolDefinition"], None]] = Field(description="Tools configuration", default=None)
-    artifacts: Optional[Union[List[str], None]] = Field(description="Catalog URNs of artifacts the agent produces", default=None)
-    confidence_configs: Optional[Union[List[str], None]] = Field(description="Confidence scoring module names to apply during execution", default=None)
-    temperature: Optional[Union[float, int, None]] = Field(description="LLM temperature", default=None)
-    max_tokens: Optional[Union[int, None]] = Field(description="Maximum tokens in response", default=None)
-    tags: Optional[Union[List[str], None]] = Field(description="Tags for categorization", default=None)
-    icon: Optional[Union[str, None]] = Field(description="UI icon identifier", default=None)
-
-
-class UpdateAgentDefinitionResponse(BaseModel):
-    """Response model for updating an agent definition."""
-    id: str = Field(description="New agent definition ID")
-    catalog_urn: str = Field(description="Catalog URN for the new version")
-    version: str = Field(description="New version number")
-
-
-class UpdateAgentPromptRequest(BaseModel):
-    """Request model for updating an agent prompt. Name is intentionally excluded as it serves as the stable identifier for a version chain and cannot be changed."""
-    display_name: Optional[Union[str, None]] = Field(description="Human-readable name of the prompt", default=None)
-    prompt: Optional[Union[str, None]] = Field(description="Prompt text", default=None)
-
-
-class UpdateArtifactSchemaResponse(BaseModel):
+class UpdateDataElementResponse(BaseModel):
+    """UpdateDataElementResponse"""
     id: str = ...
-    version: str = ...
 
 
-class UpdatePromptResponse(BaseModel):
+class UpdateDatasourceResponse(BaseModel):
+    """UpdateDatasourceResponse"""
     id: str = ...
-    version: str = ...
+
+
+class UpdateRagConfigRequest(BaseModel):
+    """UpdateRagConfigRequest"""
+    description: Optional[Union[str, None]] = Field(default=None)
+    collection_id: Optional[Union[str, None]] = Field(default=None)
+    extractor_model: Optional[Union["ExtractorModel", None]] = Field(default=None)
+    embedding_model: Optional[Union["EmbeddingModel", None]] = Field(default=None)
+    sparse_embedding_model: Optional[Union["SparseEmbeddingModel", None]] = Field(default=None)
+    collect_metadata: Optional[Union[bool, None]] = Field(default=None)
+    metadata_options: Optional[Union["MetadataOptions", None]] = Field(default=None)
+    metadata_model: Optional[Union["MetadataModelConfig", None]] = Field(default=None)
+
+
+class UpdateRagConfigResponse(BaseModel):
+    """UpdateRagConfigResponse"""
+    message: str = ...
+
+
+class UpdateTagColumnRequest(BaseModel):
+    """UpdateTagColumnRequest"""
+    description: Optional[Union[str, None]] = Field(default=None)
+    dtype: Optional[Union[str, None]] = Field(default=None)
+    is_key: Optional[Union[bool, None]] = Field(default=None)
+    is_indexed: Optional[Union[bool, None]] = Field(default=None)
+    engineered_features: Optional[Union[List[str], None]] = Field(default=None)
+
+
+class UpdateTagColumnResponse(BaseModel):
+    """UpdateTagColumnResponse"""
+    message: str = ...
+
+
+class UpdateTagConfigRequest(BaseModel):
+    """UpdateTagConfigRequest"""
+    description: Optional[Union[str, None]] = Field(default=None)
+    logical_group_regex: Optional[Union[str, None]] = Field(default=None)
+    working_bucket: Optional[Union[str, None]] = Field(default=None)
+    working_platform: Optional[Union[str, None]] = Field(default=None)
+    db_path: Optional[Union[str, None]] = Field(default=None)
+    database_config: Optional[Union["DatabaseConfigInput", None]] = Field(default=None)
+
+
+class UpdateTagConfigResponse(BaseModel):
+    """UpdateTagConfigResponse"""
+    message: str = ...
+
+
+class UpdateTagDescriptionRequest(BaseModel):
+    description: str = Field(description="Description for AI context")
+
+
+class UpdateTagTableRequest(BaseModel):
+    """UpdateTagTableRequest"""
+    description: Optional[Union[str, None]] = Field(default=None)
+
+
+class UpdateTagTableResponse(BaseModel):
+    """UpdateTagTableResponse"""
+    message: str = ...
+
+
+class UploadContentResponse(BaseModel):
+    """UploadContentResponse"""
+    success: bool = ...
+    message: str = ...
+    upload_id: str = ...
+    sse_url: str = ...
+    estimated_files: int = ...
+    estimated_size: int = ...
 
 
 class ValidationError(BaseModel):
@@ -866,7 +1274,61 @@ class WebCrawlConnector(BaseModel):
     """Connect to a website for crawling."""
     base_url: str = Field(description="Starting URL for the crawl")
     javascript_render: Optional[bool] = Field(description="Enable JavaScript rendering", default=None)
-    domains: Optional[Union[List["WebDomain"], None]] = Field(default=None)
+    domains: Optional[Union[List["GatewayServiceV2ModelsDatasourcesWebDomain"], None]] = Field(default=None)
+
+
+class DatasourceServiceClientModelsUpdateDataElementRequestUpdateDataElementRequest(BaseModel):
+    """UpdateDataElementRequest"""
+    description: Optional[Union[str, None]] = Field(default=None)
+    name: Optional[Union[str, None]] = Field(default=None)
+    path: Optional[Union[str, None]] = Field(default=None)
+    media_type: Optional[Union[str, None]] = Field(default=None)
+    discovery_record: Optional[Union["DataElementDiscoveryRecord", None]] = Field(default=None)
+    parent_data_element_id: Optional[Union[str, None]] = Field(default=None)
+
+
+class DatasourceServiceClientModelsUpdateDatasourceRequestUpdateDatasourceRequest(BaseModel):
+    """UpdateDatasourceRequest"""
+    name: Optional[Union[str, None]] = Field(default=None)
+    description: Optional[Union[str, None]] = Field(default=None)
+    recurrence: Optional[Union[str, None]] = Field(default=None)
+    object_storage_config: Optional[Union["ObjectStorageConfig", None]] = Field(default=None)
+    web_config: Optional[Union["DatasourceWebConfig", None]] = Field(default=None)
+    connector_config: Optional[Union["DatasourceConnectorConfig", None]] = Field(default=None)
+
+
+class DatasourceServiceClientModelsWebDomainWebDomain(BaseModel):
+    """WebDomain"""
+    domain: str = ...
+    limit_pattern: str = Field(alias="limitPattern")
+    exclude_pattern: str = Field(alias="excludePattern")
+    ingestible: bool = ...
+    expandable: bool = ...
+
+    model_config = {"populate_by_name": True}
+
+
+class GatewayServiceV2ModelsDataElementsUpdateDataElementRequest(BaseModel):
+    name: Optional[Union[str, None]] = Field(default=None)
+    metadata: Optional[Union[str, None]] = Field(default=None)
+
+
+class GatewayServiceV2ModelsDatasourcesUpdateDatasourceRequest(BaseModel):
+    name: Optional[Union[str, None]] = Field(default=None)
+    description: Optional[Union[str, None]] = Field(default=None)
+    connector: Optional[Union["ConnectorConfigInput", None]] = Field(default=None)
+
+
+class GatewayServiceV2ModelsDatasourcesWebDomain(BaseModel):
+    domain: str = ...
+    include_pattern: str = Field(description="URL pattern to include")
+    exclude_pattern: Optional[str] = Field(description="URL pattern to exclude", default=None)
+
+
+class SseEvent(BaseModel):
+    """Generic Server-Sent Event"""
+    event: str = Field(description="Event type (e.g., connected, progress, stream_complete, error, keepalive)")
+    data: Optional[str] = Field(description="Event data payload", default=None)
 
 
 class ConnectedEvent(BaseModel):
@@ -905,165 +1367,180 @@ class CompletionEvent(BaseModel):
     data: str = ...
 
 
-class ContentItem(BaseModel):
-    name: str = ...
-    path: str = ...
-    type: Optional[Union[str, None]] = Field(default=None)
-    size: Optional[Union[int, None]] = Field(default=None)
-    media_type: Optional[Union[str, None]] = Field(default=None)
-    last_modified: Optional[Union[str, None]] = Field(default=None)
-    etag: Optional[Union[str, None]] = Field(default=None)
-
-
-class ListContentResponse(BaseModel):
-    items: List["ContentItem"] = ...
-    continuation_token: Optional[Union[str, None]] = Field(default=None)
-
-
-class UploadContentResponse(BaseModel):
-    success: bool = ...
-    message: str = ...
-    datasource_id: str = ...
-    upload_id: str = ...
-    sse_url: str = ...
-    estimated_files: Optional[Union[int, None]] = Field(default=None)
-    estimated_size: Optional[Union[int, None]] = Field(default=None)
-    ingest_url: Optional[Union[str, None]] = Field(default=None)
-
-
-class UpdateDataElementRequest(BaseModel):
-    name: Optional[Union[str, None]] = Field(description="Updated name", default=None)
-    description: Optional[Union[str, None]] = Field(description="Updated description", default=None)
-    metadata: Optional[Union[str, None]] = Field(description="Metadata key-value pairs — replaces all existing metadata", default=None)
-
-
-class UpdateDatasourceRequest(BaseModel):
-    name: Optional[Union[str, None]] = Field(description="Updated datasource name", default=None)
-    description: Optional[Union[str, None]] = Field(description="Updated description", default=None)
-    connector: Optional[Union["ConnectorConfig", None]] = Field(description="Updated connection configuration", default=None)
-    metadata_config: Optional[Union["MetadataConfigRequest", None]] = Field(description="Metadata extraction config — if changed, re-extraction triggers automatically", default=None)
-    tables: Optional[Union[List["TableDescriptionUpdate"], None]] = Field(description="Table and column descriptions to update (structured datasources only)", default=None)
-
-
-class WebDomain(BaseModel):
-    domain: str = Field(description="Domain to crawl (e.g. example.com)")
-    include_pattern: str = Field(description="Regex URL pattern to include")
-    exclude_pattern: Optional[str] = Field(description="Regex URL pattern to exclude", default=None)
-
-
 # Update forward references
-AgentDetailResponse.model_rebuild()
-AgentExecutionDetailsResponse.model_rebuild()
+Activity.model_rebuild()
+ActivityStatus.model_rebuild()
+AddActivityRequest.model_rebuild()
+AddActivityResponse.model_rebuild()
+AddBlueprintInstanceRequest.model_rebuild()
+AddBlueprintInstanceResponse.model_rebuild()
+AddBlueprintRequest.model_rebuild()
+AddBlueprintResponse.model_rebuild()
+AddBlueprintTaskRequest.model_rebuild()
+AddChunkingStrategyRequest.model_rebuild()
+AddChunkingStrategyResponse.model_rebuild()
+AddDataElementRequest.model_rebuild()
+AddDataElementResponse.model_rebuild()
+AddDatasourceResponse.model_rebuild()
+AddEventResponse.model_rebuild()
+AddGatewayDatasourceRequest.model_rebuild()
+AddRagConfigRequest.model_rebuild()
+AddRagConfigResponse.model_rebuild()
+AddTagColumnRequest.model_rebuild()
+AddTagColumnResponse.model_rebuild()
+AddTagConfigRequest.model_rebuild()
+AddTagConfigResponse.model_rebuild()
+AddTagTableRequest.model_rebuild()
+AddTagTableResponse.model_rebuild()
 AgentIdentityContext.model_rebuild()
-AgentListResponse.model_rebuild()
-AgentSummary.model_rebuild()
-AgentToolDefinition.model_rebuild()
-AgentVersionListResponse.model_rebuild()
-AgentVersionSummary.model_rebuild()
+AirbyteConfig.model_rebuild()
+AllowedDataElementFilterKeys.model_rebuild()
 Artifact.model_rebuild()
-ArtifactEntry.model_rebuild()
-ArtifactSchemaListResponse.model_rebuild()
-ArtifactSchemaResponse.model_rebuild()
-ArtifactSchemaSummary.model_rebuild()
-ArtifactStorageStrategy.model_rebuild()
-ArtifactType.model_rebuild()
+BasicWebAuth.model_rebuild()
+Blueprint.model_rebuild()
+BlueprintExecutionMode.model_rebuild()
+BlueprintInstance.model_rebuild()
+BlueprintInstanceStatus.model_rebuild()
 BoundingBox.model_rebuild()
 CallToAction.model_rebuild()
 ChatMessageRequest.model_rebuild()
 ChatMessageResponse.model_rebuild()
 ChatResponse.model_rebuild()
+ClickhouseConfig.model_rebuild()
 CloudStorageConnector.model_rebuild()
+CodeChunking.model_rebuild()
+CompleteBlueprintInstanceRequest.model_rebuild()
 ConfidenceScoringConfig.model_rebuild()
 Config.model_rebuild()
-ConnectorConfig.model_rebuild()
-CreateAgentArtifactRequest.model_rebuild()
-CreateAgentDefinitionRequest.model_rebuild()
-CreateAgentPromptRequest.model_rebuild()
-CreateAgentResponse.model_rebuild()
-CreateArtifactSchemaResponse.model_rebuild()
+ConnectorConfigInput.model_rebuild()
+ConnectorConfigOutput.model_rebuild()
+ContentItem.model_rebuild()
+ContentType.model_rebuild()
+CreateDataElementRequest.model_rebuild()
 CreateDatasourceRequest.model_rebuild()
-CreatePromptResponse.model_rebuild()
-CreateSessionRequest.model_rebuild()
-CreateSessionResponse.model_rebuild()
-DataElementListResponse.model_rebuild()
+CustomEventRequest.model_rebuild()
+DataElement.model_rebuild()
+DataElementCondition.model_rebuild()
+DataElementDiscoveryRecord.model_rebuild()
+DataElementFilter.model_rebuild()
+DataElementFilterRequest.model_rebuild()
+DataElementMetadata.model_rebuild()
 DataElementResponse.model_rebuild()
 DataElementSearchRequest.model_rebuild()
+DatabaseConfigInput.model_rebuild()
+DatabaseConfigOutput.model_rebuild()
 DatabaseConnector.model_rebuild()
+DatabaseType.model_rebuild()
+Datasource.model_rebuild()
+DatasourceConnectorConfig.model_rebuild()
 DatasourceListResponse.model_rebuild()
 DatasourceResponse.model_rebuild()
+DatasourceWebConfig.model_rebuild()
+DeleteChunkingStrategyResponse.model_rebuild()
+DeleteContentResponse.model_rebuild()
+DeleteDataElementResponse.model_rebuild()
+DeleteDatasourceResponse.model_rebuild()
+DeleteTagTableResponse.model_rebuild()
 DocumentChild.model_rebuild()
 DocumentElement.model_rebuild()
 DocumentStatus.model_rebuild()
-DownloadJobRequest.model_rebuild()
-DownloadJobResponse.model_rebuild()
-FieldSummary.model_rebuild()
-FileParseCompleteInfo.model_rebuild()
-FileParseEntry.model_rebuild()
-FileParseStartInfo.model_rebuild()
-FileUploadSyncResponse.model_rebuild()
-FilesSummaryResponse.model_rebuild()
+DslDefinition.model_rebuild()
+DuckDbConfig.model_rebuild()
+EmbeddingModel.model_rebuild()
+Event.model_rebuild()
+EventType.model_rebuild()
+ExecuteBlueprintRequest.model_rebuild()
+ExtractorModel.model_rebuild()
+FailBlueprintInstanceRequest.model_rebuild()
+GetActivitiesResponse.model_rebuild()
+GetAllDatasourceIdsResponse.model_rebuild()
+GetBlueprintInstancesResponse.model_rebuild()
+GetBlueprintsResponse.model_rebuild()
+GetContentResponse.model_rebuild()
+GetDataElementMetadataResponse.model_rebuild()
+GetDataElementMetadataResultResponse.model_rebuild()
+GetEventsResponse.model_rebuild()
+GetReprocessStatusResponse.model_rebuild()
+HtmlChunking.model_rebuild()
 HttpValidationError.model_rebuild()
-IngestCountsResponse.model_rebuild()
-IngestMethodCountsResponse.model_rebuild()
-IngestMethodSummary.model_rebuild()
-IngestStatusResponse.model_rebuild()
+JsonNodeChunking.model_rebuild()
 JudgeConfig.model_rebuild()
+ListContentResponse.model_rebuild()
 ListMetadataModelCatalogResponse.model_rebuild()
+MarkdownNodeChunking.model_rebuild()
 MeibelDocumentResult.model_rebuild()
-MessageEntry.model_rebuild()
 MetadataConfigRequest.model_rebuild()
 MetadataConfigResponse.model_rebuild()
 MetadataField.model_rebuild()
+MetadataFieldDefinition.model_rebuild()
 MetadataModelCatalogEntry.model_rebuild()
+MetadataModelConfig.model_rebuild()
 MetadataModelField.model_rebuild()
+MetadataOptions.model_rebuild()
 NBootstraps.model_rebuild()
 OcConfig.model_rebuild()
 OcrConfig.model_rebuild()
+ObjectStorageConfig.model_rebuild()
+ObjectStorageFilters.model_rebuild()
 ParseDocumentResponse.model_rebuild()
+PatchRagConfigMetadataRequest.model_rebuild()
+PatchRagConfigMetadataResponse.model_rebuild()
+Platform.model_rebuild()
+PostgreSqlConfig.model_rebuild()
 ProcessDocumentResponse.model_rebuild()
-PromptListResponse.model_rebuild()
-PromptResponse.model_rebuild()
-PromptSummary.model_rebuild()
-PublishAgentDefinitionRequest.model_rebuild()
-PublishAgentDefinitionResponse.model_rebuild()
+PutDataElementMetadataRequest.model_rebuild()
+PutDataElementMetadataResponse.model_rebuild()
+RagChunkingStrategy.model_rebuild()
+RagConfig.model_rebuild()
+ReprocessDatasourceRequest.model_rebuild()
+ReprocessDatasourceResponse.model_rebuild()
+S3Config.model_rebuild()
 ScoreSummary.model_rebuild()
 ScoringJobRecord.model_rebuild()
 ScoringStatus.model_rebuild()
-SessionListResponse.model_rebuild()
-SessionMessageItem.model_rebuild()
-SessionMessagesResponse.model_rebuild()
-SessionSummary.model_rebuild()
+SemanticChunking.model_rebuild()
+SentenceChunking.model_rebuild()
 Source.model_rebuild()
+SparseEmbeddingModel.model_rebuild()
+StartBlueprintInstanceRequest.model_rebuild()
 Table.model_rebuild()
 TableCell.model_rebuild()
-TableDescriptionUpdate.model_rebuild()
-TableSummaryResponse.model_rebuild()
 TagColumn.model_rebuild()
-TagColumnUpdateItem.model_rebuild()
+TagColumnInfo.model_rebuild()
+TagConfig.model_rebuild()
 TagTable.model_rebuild()
-TagTableUpdateItem.model_rebuild()
+TagTableInfo.model_rebuild()
 TokenConfig.model_rebuild()
+TokenTextChunking.model_rebuild()
 ToolActivity.model_rebuild()
-ToolActivityEntry.model_rebuild()
-ToolCallInfo.model_rebuild()
-ToolResultInfo.model_rebuild()
-UpdateAgentArtifactRequest.model_rebuild()
-UpdateAgentDefinitionRequest.model_rebuild()
-UpdateAgentDefinitionResponse.model_rebuild()
-UpdateAgentPromptRequest.model_rebuild()
-UpdateArtifactSchemaResponse.model_rebuild()
-UpdatePromptResponse.model_rebuild()
+UpdateBlueprintRequest.model_rebuild()
+UpdateBlueprintTaskRequest.model_rebuild()
+UpdateChunkingStrategyRequest.model_rebuild()
+UpdateChunkingStrategyResponse.model_rebuild()
+UpdateDataElementResponse.model_rebuild()
+UpdateDatasourceResponse.model_rebuild()
+UpdateRagConfigRequest.model_rebuild()
+UpdateRagConfigResponse.model_rebuild()
+UpdateTagColumnRequest.model_rebuild()
+UpdateTagColumnResponse.model_rebuild()
+UpdateTagConfigRequest.model_rebuild()
+UpdateTagConfigResponse.model_rebuild()
+UpdateTagDescriptionRequest.model_rebuild()
+UpdateTagTableRequest.model_rebuild()
+UpdateTagTableResponse.model_rebuild()
+UploadContentResponse.model_rebuild()
 ValidationError.model_rebuild()
 WebCrawlConnector.model_rebuild()
+DatasourceServiceClientModelsUpdateDataElementRequestUpdateDataElementRequest.model_rebuild()
+DatasourceServiceClientModelsUpdateDatasourceRequestUpdateDatasourceRequest.model_rebuild()
+DatasourceServiceClientModelsWebDomainWebDomain.model_rebuild()
+GatewayServiceV2ModelsDataElementsUpdateDataElementRequest.model_rebuild()
+GatewayServiceV2ModelsDatasourcesUpdateDatasourceRequest.model_rebuild()
+GatewayServiceV2ModelsDatasourcesWebDomain.model_rebuild()
+SseEvent.model_rebuild()
 ConnectedEvent.model_rebuild()
 StatusEvent.model_rebuild()
 ToolCallEvent.model_rebuild()
 ToolResultEvent.model_rebuild()
 PartialResponseEvent.model_rebuild()
 CompletionEvent.model_rebuild()
-ContentItem.model_rebuild()
-ListContentResponse.model_rebuild()
-UploadContentResponse.model_rebuild()
-UpdateDataElementRequest.model_rebuild()
-UpdateDatasourceRequest.model_rebuild()
-WebDomain.model_rebuild()

@@ -8,7 +8,6 @@ from typing import Optional, List, Dict, Any, Union, Iterator, AsyncIterator
 from .._http import HttpClient, AsyncHttpClient
 from ..models import *
 from ..exceptions import raise_for_status
-from .._streaming import SSEIterator, AsyncSSEIterator
 
 
 class SessionsResource:
@@ -17,48 +16,12 @@ class SessionsResource:
     def __init__(self, http: HttpClient):
         self._http = http
 
-    def get_session(self, session_id: str) -> "AgentExecutionDetailsResponse":
-        """
-        Get Session
-        
-        Args:
-            session_id: The session_id parameter
-        
-        Returns:
-            Successful Response
-        
-        Raises:
-            ApiError: If the request fails
-        """
-        path = "/sessions/{session_id}"
-        path = path.replace("{session_id}", str(session_id))
-        response = self._http.request("GET", path)
-        return AgentExecutionDetailsResponse.model_validate(response)
-
-    def get_session_messages(self, session_id: str) -> "SessionMessagesResponse":
-        """
-        Get Session Messages
-        
-        Args:
-            session_id: The session_id parameter
-        
-        Returns:
-            Successful Response
-        
-        Raises:
-            ApiError: If the request fails
-        """
-        path = "/sessions/{session_id}/messages"
-        path = path.replace("{session_id}", str(session_id))
-        response = self._http.request("GET", path)
-        return SessionMessagesResponse.model_validate(response)
-
-    def send_chat_message(self, session_id: str, body: "ChatMessageRequest") -> "ChatMessageResponse":
+    def send_chat_message(self, blueprint_instance_id: str, body: "ChatMessageRequest") -> "ChatMessageResponse":
         """
         Send Chat Message
         
         Args:
-            session_id: The session_id parameter
+            blueprint_instance_id: The blueprint_instance_id parameter
             body: Request body
         
         Returns:
@@ -67,17 +30,19 @@ class SessionsResource:
         Raises:
             ApiError: If the request fails
         """
-        path = "/sessions/{session_id}/chat"
-        path = path.replace("{session_id}", str(session_id))
+        path = "/{blueprint_instance_id}/chat"
+        path = path.replace("{blueprint_instance_id}", str(blueprint_instance_id))
         response = self._http.request("POST", path, json=body.model_dump(by_alias=True, exclude_unset=True) if body else None)
         return ChatMessageResponse.model_validate(response)
 
-    def send_chat_message_stream(self, session_id: str, body: "ChatMessageRequest") -> Iterator[Union["", "", "", "", "", "", ""]]:
+    def send_chat_message_stream(self, blueprint_instance_id: str, body: "ChatMessageRequest") -> None:
         """
         Send a chat message and stream the response via SSE
         
+        Send a chat message to a running chat agent workflow and stream the response as Server-Sent Events.
+        
         Args:
-            session_id: The session_id parameter
+            blueprint_instance_id: The blueprint_instance_id parameter
             body: Request body
         
         Returns:
@@ -86,9 +51,10 @@ class SessionsResource:
         Raises:
             ApiError: If the request fails
         """
-        path = "/sessions/{session_id}/chat/stream"
-        path = path.replace("{session_id}", str(session_id))
-        return self._http.stream("POST", path, json=body.model_dump(by_alias=True, exclude_unset=True) if body else None)
+        path = "/{blueprint_instance_id}/chat/stream"
+        path = path.replace("{blueprint_instance_id}", str(blueprint_instance_id))
+        response = self._http.request("POST", path, json=body.model_dump(by_alias=True, exclude_unset=True) if body else None)
+        return response
 
 
 class AsyncSessionsResource:
@@ -97,48 +63,12 @@ class AsyncSessionsResource:
     def __init__(self, http: AsyncHttpClient):
         self._http = http
 
-    async def get_session(self, session_id: str) -> "AgentExecutionDetailsResponse":
-        """
-        Get Session
-        
-        Args:
-            session_id: The session_id parameter
-        
-        Returns:
-            Successful Response
-        
-        Raises:
-            ApiError: If the request fails
-        """
-        path = "/sessions/{session_id}"
-        path = path.replace("{session_id}", str(session_id))
-        response = await self._http.request("GET", path)
-        return AgentExecutionDetailsResponse.model_validate(response)
-
-    async def get_session_messages(self, session_id: str) -> "SessionMessagesResponse":
-        """
-        Get Session Messages
-        
-        Args:
-            session_id: The session_id parameter
-        
-        Returns:
-            Successful Response
-        
-        Raises:
-            ApiError: If the request fails
-        """
-        path = "/sessions/{session_id}/messages"
-        path = path.replace("{session_id}", str(session_id))
-        response = await self._http.request("GET", path)
-        return SessionMessagesResponse.model_validate(response)
-
-    async def send_chat_message(self, session_id: str, body: "ChatMessageRequest") -> "ChatMessageResponse":
+    async def send_chat_message(self, blueprint_instance_id: str, body: "ChatMessageRequest") -> "ChatMessageResponse":
         """
         Send Chat Message
         
         Args:
-            session_id: The session_id parameter
+            blueprint_instance_id: The blueprint_instance_id parameter
             body: Request body
         
         Returns:
@@ -147,17 +77,19 @@ class AsyncSessionsResource:
         Raises:
             ApiError: If the request fails
         """
-        path = "/sessions/{session_id}/chat"
-        path = path.replace("{session_id}", str(session_id))
+        path = "/{blueprint_instance_id}/chat"
+        path = path.replace("{blueprint_instance_id}", str(blueprint_instance_id))
         response = await self._http.request("POST", path, json=body.model_dump(by_alias=True, exclude_unset=True) if body else None)
         return ChatMessageResponse.model_validate(response)
 
-    async def send_chat_message_stream(self, session_id: str, body: "ChatMessageRequest") -> AsyncIterator[Union["", "", "", "", "", "", ""]]:
+    async def send_chat_message_stream(self, blueprint_instance_id: str, body: "ChatMessageRequest") -> None:
         """
         Send a chat message and stream the response via SSE
         
+        Send a chat message to a running chat agent workflow and stream the response as Server-Sent Events.
+        
         Args:
-            session_id: The session_id parameter
+            blueprint_instance_id: The blueprint_instance_id parameter
             body: Request body
         
         Returns:
@@ -166,6 +98,7 @@ class AsyncSessionsResource:
         Raises:
             ApiError: If the request fails
         """
-        path = "/sessions/{session_id}/chat/stream"
-        path = path.replace("{session_id}", str(session_id))
-        return self._http.stream("POST", path, json=body.model_dump(by_alias=True, exclude_unset=True) if body else None)
+        path = "/{blueprint_instance_id}/chat/stream"
+        path = path.replace("{blueprint_instance_id}", str(blueprint_instance_id))
+        response = await self._http.request("POST", path, json=body.model_dump(by_alias=True, exclude_unset=True) if body else None)
+        return response
