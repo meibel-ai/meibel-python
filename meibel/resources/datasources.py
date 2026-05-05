@@ -8,16 +8,15 @@ from typing import Optional, List, Dict, Any, Union, Iterator, AsyncIterator
 from .._http import HttpClient, AsyncHttpClient
 from ..models import *
 from ..exceptions import raise_for_status
-from .._pagination import PaginatedIterator, AsyncPaginatedIterator
 
 
 class DatasourcesResource:
-    """Datasources resource operations."""
+    """Manage data source connections"""
 
     def __init__(self, http: HttpClient):
         self._http = http
 
-    def list_datasources(self) -> PaginatedIterator["DatasourceResponse"]:
+    def list_datasources(self) -> "DatasourceListResponse":
         """
         List Datasources
         
@@ -28,14 +27,8 @@ class DatasourcesResource:
             ApiError: If the request fails
         """
         path = "/datasources"
-        return PaginatedIterator(
-            self._http,
-            "GET",
-            path,
-            items_field="datasources",
-            cursor_param="offset",
-            next_field="next_cursor",
-        )
+        response = self._http.request("GET", path)
+        return DatasourceListResponse.model_validate(response)
 
     def create_datasource(self, body: "CreateDatasourceRequest") -> "DatasourceResponse":
         """
@@ -54,12 +47,13 @@ class DatasourcesResource:
         response = self._http.request("POST", path, json=body.model_dump(by_alias=True, exclude_unset=True) if body else None)
         return DatasourceResponse.model_validate(response)
 
-    def get_datasource(self, datasource_id: str) -> "DatasourceResponse":
+    def get_datasource(self, datasource_id: str, include_tables: Optional[bool] = None) -> "DatasourceResponse":
         """
         Get Datasource
         
         Args:
             datasource_id: The datasource_id parameter
+            include_tables: Include table and column details (structured datasources only)
         
         Returns:
             Successful Response
@@ -69,7 +63,10 @@ class DatasourcesResource:
         """
         path = "/datasources/{datasource_id}"
         path = path.replace("{datasource_id}", str(datasource_id))
-        response = self._http.request("GET", path)
+        params = {}
+        if include_tables is not None:
+            params["include_tables"] = include_tables
+        response = self._http.request("GET", path, params=params)
         return DatasourceResponse.model_validate(response)
 
     def update_datasource(self, datasource_id: str, body: "UpdateDatasourceRequest") -> "DatasourceResponse":
@@ -111,12 +108,12 @@ class DatasourcesResource:
 
 
 class AsyncDatasourcesResource:
-    """Datasources resource operations (async)."""
+    """Manage data source connections (async)"""
 
     def __init__(self, http: AsyncHttpClient):
         self._http = http
 
-    async def list_datasources(self) -> AsyncPaginatedIterator["DatasourceResponse"]:
+    async def list_datasources(self) -> "DatasourceListResponse":
         """
         List Datasources
         
@@ -127,14 +124,8 @@ class AsyncDatasourcesResource:
             ApiError: If the request fails
         """
         path = "/datasources"
-        return AsyncPaginatedIterator(
-            self._http,
-            "GET",
-            path,
-            items_field="datasources",
-            cursor_param="offset",
-            next_field="next_cursor",
-        )
+        response = await self._http.request("GET", path)
+        return DatasourceListResponse.model_validate(response)
 
     async def create_datasource(self, body: "CreateDatasourceRequest") -> "DatasourceResponse":
         """
@@ -153,12 +144,13 @@ class AsyncDatasourcesResource:
         response = await self._http.request("POST", path, json=body.model_dump(by_alias=True, exclude_unset=True) if body else None)
         return DatasourceResponse.model_validate(response)
 
-    async def get_datasource(self, datasource_id: str) -> "DatasourceResponse":
+    async def get_datasource(self, datasource_id: str, include_tables: Optional[bool] = None) -> "DatasourceResponse":
         """
         Get Datasource
         
         Args:
             datasource_id: The datasource_id parameter
+            include_tables: Include table and column details (structured datasources only)
         
         Returns:
             Successful Response
@@ -168,7 +160,10 @@ class AsyncDatasourcesResource:
         """
         path = "/datasources/{datasource_id}"
         path = path.replace("{datasource_id}", str(datasource_id))
-        response = await self._http.request("GET", path)
+        params = {}
+        if include_tables is not None:
+            params["include_tables"] = include_tables
+        response = await self._http.request("GET", path, params=params)
         return DatasourceResponse.model_validate(response)
 
     async def update_datasource(self, datasource_id: str, body: "UpdateDatasourceRequest") -> "DatasourceResponse":

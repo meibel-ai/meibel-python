@@ -4,13 +4,12 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "meibel"
-version = "0.1.0b4"
-description = "The Meibel API provides document parsing, datasource management, and AI agent orchestration."
+version = "0.4.0"
+description = "The Meibel API provides document parsing, datasource management, and AI agent orchestration. Read the docs at https://docs.meibel.ai to learn more."
 readme = "README.md"
 requires-python = ">=3.8"
 license = {text = "MIT"}
 classifiers = [
-    "Development Status :: 4 - Beta",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
@@ -25,12 +24,6 @@ dependencies = [
     "httpx>=0.25.0",
     "pydantic>=2.0.0",
 ]
-
-[project.urls]
-Homepage = "https://docs.meibel.ai"
-Repository = "https://github.com/meibel-ai/meibel-python"
-Documentation = "https://docs.meibel.ai/sdk/python"
-"Bug Tracker" = "https://github.com/meibel-ai/meibel-python/issues"
 
 [project.optional-dependencies]
 dev = [

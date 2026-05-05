@@ -8,13 +8,12 @@ from typing import Optional, List, Dict, Any, Union, Iterator, AsyncIterator
 from .._http import HttpClient, AsyncHttpClient
 from ..models import *
 from ..exceptions import raise_for_status
-from .._pagination import PaginatedIterator, AsyncPaginatedIterator
 from .._streaming import SSEIterator, AsyncSSEIterator
 from typing import BinaryIO
 
 
 class DocumentsResource:
-    """Documents resource operations."""
+    """Parse and transform documents into structured data"""
 
     def __init__(self, http: HttpClient):
         self._http = http
@@ -102,7 +101,7 @@ class DocumentsResource:
         response = self._http.request("GET", path, params=params)
         return response
 
-    def list_document_children(self, job_id: str) -> PaginatedIterator[str]:
+    def list_document_children(self, job_id: str) -> List["DocumentChild"]:
         """
         List child documents
         
@@ -119,14 +118,8 @@ class DocumentsResource:
         """
         path = "/documents/{job_id}/children"
         path = path.replace("{job_id}", str(job_id))
-        return PaginatedIterator(
-            self._http,
-            "GET",
-            path,
-            items_field="items",
-            cursor_param="offset",
-            next_field="next_cursor",
-        )
+        response = self._http.request("GET", path)
+        return [DocumentChild.model_validate(item) for item in response]
 
     def stream_document_trace(self, job_id: str) -> Iterator[Union["", "", "", "", ""]]:
         """
@@ -149,7 +142,7 @@ class DocumentsResource:
 
 
 class AsyncDocumentsResource:
-    """Documents resource operations (async)."""
+    """Parse and transform documents into structured data (async)"""
 
     def __init__(self, http: AsyncHttpClient):
         self._http = http
@@ -237,7 +230,7 @@ class AsyncDocumentsResource:
         response = await self._http.request("GET", path, params=params)
         return response
 
-    async def list_document_children(self, job_id: str) -> AsyncPaginatedIterator[str]:
+    async def list_document_children(self, job_id: str) -> List["DocumentChild"]:
         """
         List child documents
         
@@ -254,14 +247,8 @@ class AsyncDocumentsResource:
         """
         path = "/documents/{job_id}/children"
         path = path.replace("{job_id}", str(job_id))
-        return AsyncPaginatedIterator(
-            self._http,
-            "GET",
-            path,
-            items_field="items",
-            cursor_param="offset",
-            next_field="next_cursor",
-        )
+        response = await self._http.request("GET", path)
+        return [DocumentChild.model_validate(item) for item in response]
 
     async def stream_document_trace(self, job_id: str) -> AsyncIterator[Union["", "", "", "", ""]]:
         """

@@ -11,6 +11,45 @@ from uuid import UUID
 from pydantic import BaseModel, Field
 
 
+class AgentDetailResponse(BaseModel):
+    id: str = ...
+    name: str = ...
+    display_name: str = ...
+    catalog_urn: str = ...
+    version: str = ...
+    parent_version: Optional[Union[str, None]] = Field(default=None)
+    type: str = ...
+    description: Optional[Union[str, None]] = Field(default=None)
+    llm_model: str = ...
+    fallback_models: List[str] = ...
+    datasources: List[str] = ...
+    instructions: str = ...
+    tools: List[str] = ...
+    artifacts: List[str] = ...
+    confidence_configs: List[str] = ...
+    temperature: Union[float, int] = ...
+    max_tokens: Optional[Union[int, None]] = Field(default=None)
+    tags: List[str] = ...
+    icon: Optional[Union[str, None]] = Field(default=None)
+    created_by: Optional[Union[str, None]] = Field(default=None)
+    created_at: Optional[Union[datetime, None]] = Field(default=None)
+    last_execution_status: Optional[Union[str, None]] = Field(default=None)
+    last_execution_time: Optional[Union[datetime, None]] = Field(default=None)
+
+
+class AgentExecutionDetailsResponse(BaseModel):
+    """AgentExecutionDetailsResponse"""
+    agent_id: Union[str, None] = ...
+    agent_name: Union[str, None] = ...
+    version: Union[str, None] = ...
+    status: str = ...
+    messages: List["MessageEntry"] = ...
+    tool_activity: List["ToolActivityEntry"] = ...
+    token_usage: List[Union[str, None]] = ...
+    file_parsing: List["FileParseEntry"] = ...
+    result: List["ArtifactEntry"] = ...
+
+
 class AgentIdentityContext(BaseModel):
     """Identity context for agent execution.  Contains only immutable identity fields that answer: - WHO: customer_id, project_id (tenant identity) - WHAT: agent_name, agent_version, agent_execution_id (agent identity, optional) - WHERE: agent_workflow_name, agent_workflow_version, agent_workflow_execution_id (parent workflow, optional) - WHICH TOOL: tool_id, tool_instance_id, tool_execution_id (tool identity, optional)  This model is FLAT - no inheritance, all fields in one model. Agent, workflow, and tool fields are optional, making this suitable for all execution contexts.  This model does NOT contain: - Configuration (see AgentExecutionConfig in agent-platform) - Runtime state (see AgentExecutionState in agent-platform)  Design Pattern - Progressive Enhancement: - Callers provide only tenant/project identity - FSMWorkflow fills in agent_workflow_* fields from AgentWorkflowSpec - ReactAgent fills in agent_* fields from AgentSpec and workflow.info().workflow_id - Tool activities add tool_* fields via model_copy() - Context gains fields as it flows through the system  Examples:     # Starting FSMWorkflow (caller provides minimal context)     context = AgentIdentityContext(         customer_id="cust_123",         project_id="proj_456"     )     # FSM fills in workflow identity     context = context.model_copy(update={         "agent_workflow_name": "support_fsm",         "agent_workflow_version": "3.0.0",         "agent_workflow_execution_id": workflow.info().workflow_id     })      # Starting ReactAgent standalone (caller provides minimal context)     context = AgentIdentityContext(         customer_id="cust_123",         project_id="proj_456"     )     # ReactAgent fills in agent identity     context = context.model_copy(update={         "agent_name": "sales_assistant",         "agent_version": "2.0.0",         "agent_execution_id": workflow.info().workflow_id     })      # ReactAgent as FSM child (inherits workflow context, adds agent identity)     child_context = parent_context.model_copy(update={         "agent_name": "router",         "agent_version": "1.0.0",         "agent_execution_id": workflow.info().workflow_id         # agent_workflow_* fields inherited from parent     })      # Tool execution (adds tool identity to agent context)     tool_context = context.model_copy(update={         'tool_id': "tool_xyz",         'tool_instance_id': "tool_inst_123",         'tool_execution_id': "tool_exec_456"     })"""
     customer_id: str = Field(description="Customer/tenant identifier")
@@ -26,6 +65,111 @@ class AgentIdentityContext(BaseModel):
     tool_execution_id: Optional[Union[str, None]] = Field(default=None)
 
 
+class AgentListResponse(BaseModel):
+    data: List["AgentSummary"] = ...
+    total: int = ...
+
+
+class AgentSummary(BaseModel):
+    id: str = ...
+    name: Optional[Union[str, None]] = Field(default=None)
+    display_name: str = ...
+    llm_model: str = ...
+    tool_count: int = ...
+    datasource_count: int = ...
+    last_execution_status: Optional[Union[str, None]] = Field(default=None)
+    last_execution_time: Optional[Union[datetime, None]] = Field(default=None)
+
+
+class AgentToolDefinition(BaseModel):
+    """AgentToolDefinition"""
+    name: str = Field(description="Instance name - what the LLM sees and calls")
+    type: str = Field(description="Tool type: rag_search, database_query, etc.")
+    description: Optional[Union[str, None]] = Field(description="Description shown to LLM", default=None)
+    config: Optional[Union[str, None]] = Field(description="Tool config passed to activity via tool_context (datasource_id, base_prompt, etc.)", default=None)
+    parameters_schema: Optional[Union[str, None]] = Field(description="Optional override for the tool's parameters schema", default=None)
+    use_for: Optional[Union[List[str], None]] = Field(description="When to use this tool (injected into system prompt)", default=None)
+    avoid_for: Optional[Union[List[str], None]] = Field(description="When NOT to use this tool (injected into system prompt)", default=None)
+    require_approval: Optional[Union[bool, None]] = Field(description="If true, workflow pauses for human approval before executing this tool", default=None)
+    approval_message: Optional[Union[str, None]] = Field(description="Message to display when requesting approval (supports {{variable}} templates)", default=None)
+
+
+class AgentVersionListResponse(BaseModel):
+    data: List["AgentVersionSummary"] = ...
+    total: int = ...
+
+
+class AgentVersionSummary(BaseModel):
+    id: str = ...
+    display_name: str = ...
+    version: str = ...
+    parent_version: Optional[Union[str, None]] = Field(default=None)
+    description: Optional[Union[str, None]] = Field(default=None)
+    llm_model: str = ...
+    created_at: Optional[Union[datetime, None]] = Field(default=None)
+    created_by: Optional[Union[str, None]] = Field(default=None)
+    is_published: bool = ...
+    published_at: Optional[Union[datetime, None]] = Field(default=None)
+    commit_message: Optional[Union[str, None]] = Field(default=None)
+
+
+class Artifact(BaseModel):
+    """A generated artifact/file from the chat agent."""
+    artifact_id: str = ...
+    filename: str = ...
+    mime_type: str = ...
+    content: Optional[Union[str, None]] = Field(default=None)
+    storage_url: Optional[Union[str, None]] = Field(default=None)
+    size_bytes: Optional[Union[int, None]] = Field(default=None)
+    created_at: Optional[Union[str, None]] = Field(default=None)
+
+
+class ArtifactEntry(BaseModel):
+    """ArtifactEntry"""
+    name: str = ...
+    content: Optional[Union[str, None]] = Field(default=None)
+    file_type: Union[str, None] = ...
+
+
+class ArtifactSchemaListResponse(BaseModel):
+    data: List["ArtifactSchemaSummary"] = ...
+    total: int = ...
+
+
+class ArtifactSchemaResponse(BaseModel):
+    id: str = ...
+    name: str = ...
+    display_name: str = ...
+    version: str = ...
+    parent_version: Optional[Union[str, None]] = Field(default=None)
+    type: str = ...
+    description: str = ...
+    required: bool = ...
+    schema_def: str = ...
+    max_size_bytes: Optional[Union[int, None]] = Field(default=None)
+    storage_strategy: str = ...
+    created_by: Optional[Union[str, None]] = Field(default=None)
+    created_at: Optional[Union[datetime, None]] = Field(default=None)
+
+
+class ArtifactSchemaSummary(BaseModel):
+    id: str = ...
+    name: str = ...
+    description: str = ...
+    type: str = ...
+    fields_summary: List["FieldSummary"] = ...
+
+
+class ArtifactStorageStrategy(BaseModel):
+    """Supported storage strategies."""
+    pass
+
+
+class ArtifactType(BaseModel):
+    """Supported artifact types."""
+    pass
+
+
 class BoundingBox(BaseModel):
     x: float = ...
     y: float = ...
@@ -34,12 +178,47 @@ class BoundingBox(BaseModel):
     page: int = ...
 
 
+class CallToAction(BaseModel):
+    """An action the user can take."""
+    label: str = ...
+    action: str = ...
+    action_data: Optional[Union[str, None]] = Field(description="Optional override for the tool's parameters schema", default=None)
+
+
+class ChatMessageRequest(BaseModel):
+    """Request body for chat message endpoints."""
+    user_message: str = Field(description="The user's chat message")
+    timeout_seconds: Optional[Union[int, None]] = Field(description="Maximum time to wait for response (seconds)", default=None)
+    include_thinking: Optional[Union[bool, None]] = Field(description="Whether to include thinking content in response", default=None)
+    include_tool_activity: Optional[Union[bool, None]] = Field(description="Whether to include tool call/result activity", default=None)
+
+
+class ChatMessageResponse(BaseModel):
+    """Response from the non-streaming chat endpoint."""
+    signal_id: str = Field(description="Unique ID for this message exchange")
+    response: "ChatResponse" = Field(description="The structured response")
+    assistant_response: str = Field(description="The assistant response in text-format")
+    tool_activity: Optional[Union[List["ToolActivity"], None]] = Field(description="Tool calls made during response generation", default=None)
+    thinking: Optional[Union[str, None]] = Field(description="LLM thinking/reasoning content", default=None)
+    token_usage: Optional[Union[Dict[str, int], None]] = Field(description="Token usage statistics", default=None)
+
+
+class ChatResponse(BaseModel):
+    """The structured chat response."""
+    message: Optional[Union[str, None]] = Field(default=None)
+    sources: Optional[Union[List["Source"], None]] = Field(default=None)
+    follow_up_questions: Optional[Union[List[str], None]] = Field(default=None)
+    call_to_actions: Optional[Union[List["CallToAction"], None]] = Field(default=None)
+    artifacts: Optional[Union[List["Artifact"], None]] = Field(default=None)
+
+
 class CloudStorageConnector(BaseModel):
     """Connect to a cloud storage bucket."""
     provider: Literal["s3", "gcs"] = Field(description="Cloud storage provider")
     bucket: str = Field(description="Bucket name")
     prefix: Optional[Union[str, None]] = Field(description="Key prefix to scope the datasource", default=None)
     role_arn: Optional[Union[str, None]] = Field(description="AWS IAM role ARN (S3 only)", default=None)
+    region: Optional[Union[str, None]] = Field(description="AWS region (S3 only)", default=None)
 
 
 class ConfidenceScoringConfig(BaseModel):
@@ -58,43 +237,100 @@ class Config(BaseModel):
     any_of_schemas: Optional[List[str]] = Field(default=None)
 
 
-class ConnectorConfigInput(BaseModel):
+class ConnectorConfig(BaseModel):
     """Datasource connection configuration. Exactly one connector type must be set."""
-    type: Literal["database", "cloud_storage", "web_crawl"] = ...
+    type: Literal["database", "cloud_storage", "web_crawl"] = Field(description="Connector type — set the matching config object: 'database' → database, 'cloud_storage' → cloud_storage, 'web_crawl' → web_crawl")
     database: Optional[Union["DatabaseConnector", None]] = Field(default=None)
     cloud_storage: Optional[Union["CloudStorageConnector", None]] = Field(default=None)
     web_crawl: Optional[Union["WebCrawlConnector", None]] = Field(default=None)
 
 
-class ConnectorConfigOutput(BaseModel):
-    """Datasource connection configuration. Exactly one connector type must be set."""
-    type: Literal["database", "cloud_storage", "web_crawl"] = ...
-    database: Optional[Union["DatabaseConnector", None]] = Field(default=None)
-    cloud_storage: Optional[Union["CloudStorageConnector", None]] = Field(default=None)
-    web_crawl: Optional[Union["WebCrawlConnector", None]] = Field(default=None)
+class CreateAgentArtifactRequest(BaseModel):
+    """Request model for creating a new agent artifact."""
+    display_name: str = Field(description="Human-readable name of the artifact (letters, numbers, and spaces only). Converted to kebab-case internally.")
+    type: "ArtifactType" = Field(description="Artifact type (json, markdown, csv, yaml, text, html, pdf)")
+    description: Optional[Union[str, None]] = Field(description="Description of the artifact", default=None)
+    required: Optional[Union[bool, None]] = Field(description="Whether agent must produce this artifact", default=None)
+    schema_def: str = Field(description="Schema definition")
+    max_size_bytes: Optional[Union[int, None]] = Field(description="Maximum artifact size in bytes", default=None)
+    storage_strategy: Optional[Union["ArtifactStorageStrategy", None]] = Field(description="Storage strategy (inline, gcs, auto)", default=None)
+    additional_properties: Optional[str] = Field(default=None)
 
 
-class CreateDataElementRequest(BaseModel):
-    name: str = Field(description="Data element name")
-    media_type: Optional[Union[str, None]] = Field(description="MIME type of the data element", default=None)
-    metadata: Optional[Union[str, None]] = Field(description="Arbitrary metadata", default=None)
+class CreateAgentDefinitionRequest(BaseModel):
+    """Request model for creating a new agent definition."""
+    display_name: str = Field(description="Human-readable name of the agent (letters, numbers, and spaces only). Converted to kebab-case internally.")
+    instructions: str = Field(description="System prompt/instructions for the agent")
+    type: Optional[Union[str, None]] = Field(description="Agent type", default=None)
+    description: Optional[Union[str, None]] = Field(description="Description of the agent", default=None)
+    llm_model: Optional[Union[str, None]] = Field(description="LLM model to use", default=None)
+    fallback_models: Optional[Union[List[str], None]] = Field(description="List of fallback models", default=None)
+    datasources: Optional[Union[List[str], None]] = Field(description="Datasource IDs the agent has access to", default=None)
+    tools: Optional[Union[List["AgentToolDefinition"], None]] = Field(description="Tools configuration", default=None)
+    artifacts: Optional[Union[List[str], None]] = Field(description="Catalog URNs of artifacts the agent produces", default=None)
+    confidence_configs: Optional[Union[List[str], None]] = Field(description="Confidence scoring module names to apply during execution", default=None)
+    temperature: Optional[Union[float, int, None]] = Field(description="LLM temperature", default=None)
+    max_tokens: Optional[Union[int, None]] = Field(description="Maximum tokens in response", default=None)
+    tags: Optional[Union[List[str], None]] = Field(description="Tags for categorization", default=None)
+    icon: Optional[Union[str, None]] = Field(description="UI icon identifier", default=None)
+    additional_properties: Optional[str] = Field(default=None)
+
+
+class CreateAgentPromptRequest(BaseModel):
+    """Request model for creating a new agent prompt."""
+    display_name: str = Field(description="Human-readable name of the prompt (letters, numbers, and spaces only). Converted to kebab-case internally.")
+    prompt: str = Field(description="Prompt text")
+
+
+class CreateAgentResponse(BaseModel):
+    id: str = ...
+    name: str = ...
+    display_name: str = ...
+    version: str = ...
+
+
+class CreateArtifactSchemaResponse(BaseModel):
+    id: str = ...
+    name: str = ...
+    display_name: str = ...
+    version: str = ...
 
 
 class CreateDatasourceRequest(BaseModel):
     name: str = Field(description="Human-readable datasource name")
     description: Optional[str] = Field(description="What this datasource contains", default=None)
-    connector: "ConnectorConfigInput" = Field(description="Connection configuration")
+    connector: "ConnectorConfig" = Field(description="Connection configuration")
+    metadata_config: Optional[Union["MetadataConfigRequest", None]] = Field(description="Optional metadata extraction config to apply after creation", default=None)
 
 
-class DataElementMetadata(BaseModel):
-    """Metadata key-value pairs on a data element."""
-    metadata: str = Field(description="Arbitrary key-value metadata")
+class CreatePromptResponse(BaseModel):
+    id: str = ...
+    name: str = ...
+    display_name: str = ...
+    version: str = ...
+
+
+class CreateSessionRequest(BaseModel):
+    prompt: Optional[Union[str, None]] = Field(default=None)
+    initial_context: Optional[Union[str, None]] = Field(default=None)
+    max_iterations_per_user_message: Optional[Union[int, None]] = Field(default=None)
+
+
+class CreateSessionResponse(BaseModel):
+    session_id: str = ...
+
+
+class DataElementListResponse(BaseModel):
+    items: List["DataElementResponse"] = ...
+    next_cursor: Optional[Union[str, None]] = Field(default=None)
+    has_next: Optional[bool] = Field(default=None)
 
 
 class DataElementResponse(BaseModel):
     id: str = ...
     datasource_id: str = ...
     name: str = ...
+    description: Optional[Union[str, None]] = Field(default=None)
     media_type: Optional[Union[str, None]] = Field(default=None)
     metadata: Optional[Union[str, None]] = Field(default=None)
     created_at: Optional[Union[str, None]] = Field(default=None)
@@ -122,9 +358,16 @@ class DatasourceResponse(BaseModel):
     id: str = ...
     name: str = ...
     description: str = ...
-    connector: "ConnectorConfigOutput" = ...
+    connector: "ConnectorConfig" = ...
     created_at: str = ...
     updated_at: str = ...
+    last_sync_at: Optional[Union[str, None]] = Field(default=None)
+    last_sync_status: Optional[Union[str, None]] = Field(default=None)
+    total_ingested_files: Optional[Union[int, None]] = Field(default=None)
+    metadata_config: Optional[Union["MetadataConfigResponse", None]] = Field(default=None)
+    files: Optional[Union["FilesSummaryResponse", None]] = Field(default=None)
+    ingest_counts: Optional[Union["IngestCountsResponse", None]] = Field(default=None)
+    tables: Optional[Union[List["TableSummaryResponse"], None]] = Field(default=None)
 
 
 class DocumentChild(BaseModel):
@@ -159,8 +402,90 @@ class DocumentStatus(BaseModel):
     error: Optional[Union[str, None]] = Field(default=None)
 
 
+class DownloadJobRequest(BaseModel):
+    content: Optional[Union[str, None]] = Field(description="Content to include: files, parsed_content, or files_and_parsed_content", default=None)
+    data_element_ids: Optional[Union[List[str], None]] = Field(description="Specific data element IDs to include", default=None)
+
+
+class DownloadJobResponse(BaseModel):
+    job_id: str = ...
+    status: str = Field(description="Current job status")
+    status_url: str = Field(description="Stream progress events from this SSE URL")
+
+
+class FieldSummary(BaseModel):
+    name: str = ...
+    type: str = ...
+
+
+class FileParseCompleteInfo(BaseModel):
+    """FileParseCompleteInfo"""
+    status: Union[str, None] = ...
+    error: Optional[Union[str, None]] = Field(default=None)
+    bbox_count: Union[int, None] = ...
+    page_count: Union[int, None] = ...
+    content_type: Union[str, None] = ...
+    timestamp: Union[str, None] = ...
+
+
+class FileParseEntry(BaseModel):
+    """FileParseEntry"""
+    file_id: str = ...
+    filename: Union[str, None] = ...
+    parse_start: Union["FileParseStartInfo", None] = ...
+    parse_complete: Union["FileParseCompleteInfo", None] = ...
+
+
+class FileParseStartInfo(BaseModel):
+    """FileParseStartInfo"""
+    attempt: Union[int, None] = ...
+    timestamp: Union[str, None] = ...
+
+
+class FileUploadSyncResponse(BaseModel):
+    datasource_id: str = ...
+    items: List["ContentItem"] = ...
+    continuation_token: Optional[Union[str, None]] = Field(default=None)
+    ingest_url: Optional[Union[str, None]] = Field(default=None)
+
+
+class FilesSummaryResponse(BaseModel):
+    total: int = ...
+    deleted: Optional[Union[int, None]] = Field(default=None)
+
+
 class HttpValidationError(BaseModel):
     detail: Optional[List["ValidationError"]] = Field(default=None)
+
+
+class IngestCountsResponse(BaseModel):
+    rag: Optional[Union["IngestMethodCountsResponse", None]] = Field(default=None)
+    tag: Optional[Union["IngestMethodCountsResponse", None]] = Field(default=None)
+    ref_graph: Optional[Union["IngestMethodCountsResponse", None]] = Field(default=None)
+
+
+class IngestMethodCountsResponse(BaseModel):
+    total: int = ...
+    new: Optional[Union[int, None]] = Field(default=None)
+    updated: Optional[Union[int, None]] = Field(default=None)
+
+
+class IngestMethodSummary(BaseModel):
+    method: str = ...
+    total_files: Optional[int] = Field(default=None)
+    processed_files: Optional[int] = Field(default=None)
+    adds: Optional[int] = Field(default=None)
+    updates: Optional[int] = Field(default=None)
+    errors: Optional[int] = Field(default=None)
+    warnings: Optional[int] = Field(default=None)
+
+
+class IngestStatusResponse(BaseModel):
+    datasource_id: str = ...
+    status: str = ...
+    started_at: Optional[Union[str, None]] = Field(default=None)
+    completed_at: Optional[Union[str, None]] = Field(default=None)
+    methods: Optional[List["IngestMethodSummary"]] = Field(default=None)
 
 
 class JudgeConfig(BaseModel):
@@ -183,11 +508,19 @@ class MeibelDocumentResult(BaseModel):
     metadata: Optional[Union[str, None]] = Field(default=None)
 
 
+class MessageEntry(BaseModel):
+    """MessageEntry"""
+    role: str = ...
+    message: str = ...
+    signal_id: Union[str, None] = ...
+    timestamp: datetime = ...
+
+
 class MetadataConfigRequest(BaseModel):
     """Configure automatic metadata extraction from documents on ingest."""
-    type: Literal["catalog", "custom"] = ...
-    model_id: Optional[Union[str, None]] = Field(description="Required when type='catalog'", default=None)
-    fields: Optional[Union[List["MetadataField"], None]] = Field(description="Required when type='custom'", default=None)
+    type: Literal["catalog", "custom"] = Field(description="Use 'catalog' to select a pre-built extraction model (set model_id); use 'custom' to define your own fields (set fields)")
+    model_id: Optional[Union[str, None]] = Field(description="Pre-built model ID from the metadata model catalog — required when type is 'catalog'", default=None)
+    fields: Optional[Union[List["MetadataField"], None]] = Field(description="Custom field definitions to extract — required when type is 'custom'", default=None)
 
 
 class MetadataConfigResponse(BaseModel):
@@ -198,8 +531,9 @@ class MetadataConfigResponse(BaseModel):
 
 class MetadataField(BaseModel):
     name: str = Field(description="Field name (snake_case)")
-    type: Literal["string", "number", "boolean", "list[string]"] = ...
+    type: Literal["string", "integer", "float", "boolean", "datetime", "uuid", "geo", "list[string]"] = Field(description="Data type of the field")
     description: str = Field(description="What this field captures")
+    index: Optional[bool] = Field(description="Whether this field is indexed for filtering", default=None)
 
 
 class MetadataModelCatalogEntry(BaseModel):
@@ -222,6 +556,7 @@ class MetadataModelField(BaseModel):
     name: str = ...
     type: str = ...
     description: str = ...
+    index: Optional[Union[bool, None]] = Field(default=None)
 
 
 class NBootstraps(BaseModel):
@@ -264,6 +599,46 @@ class ProcessDocumentResponse(BaseModel):
     result: Union["MeibelDocumentResult", str] = Field(description="MeibelDocumentResult for meibel format, str for markdown")
 
 
+class PromptListResponse(BaseModel):
+    data: List["PromptSummary"] = ...
+
+
+class PromptResponse(BaseModel):
+    id: str = ...
+    name: str = ...
+    display_name: str = ...
+    version: str = ...
+    parent_version: Optional[Union[str, None]] = Field(default=None)
+    prompt: str = ...
+    description: Optional[Union[str, None]] = Field(default=None)
+    created_by: Optional[Union[str, None]] = Field(default=None)
+    created_at: Optional[Union[datetime, None]] = Field(default=None)
+
+
+class PromptSummary(BaseModel):
+    id: str = ...
+    display_name: str = ...
+    version: str = ...
+    preview: str = ...
+
+
+class PublishAgentDefinitionRequest(BaseModel):
+    """Request model for publishing the current draft of an agent."""
+    commit_message: str = Field(description="User-provided description of what changed in this version")
+
+
+class PublishAgentDefinitionResponse(BaseModel):
+    """Response model for a publish event."""
+    id: str = Field(description="Registry entry ID")
+    agent_definition_urn: str = Field(description="Catalog URN of the published AgentDefinition version")
+    agent_name: str = Field(description="Agent name")
+    version: str = Field(description="Published version slug")
+    display_name: str = Field(description="Display name of the published version")
+    commit_message: str = Field(description="User-provided description of what changed in this version")
+    published_at: datetime = Field(description="Timestamp of the publish event")
+    published_by: Optional[Union[str, None]] = Field(description="User who published", default=None)
+
+
 class ScoreSummary(BaseModel):
     """Aggregated summary of scoring jobs matching one or two AgentIdentityContext filters.  With one level (primary only): flat aggregate of all jobs matching primary_field=primary_value. With two levels (primary + secondary): both constraints are applied; primary is the higher level and secondary is the lower level."""
     primary_field: str = ...
@@ -294,6 +669,50 @@ class ScoringStatus(BaseModel):
     pass
 
 
+class SessionListResponse(BaseModel):
+    data: List["SessionSummary"] = ...
+    total: int = ...
+
+
+class SessionMessageItem(BaseModel):
+    type: str = ...
+    timestamp: Optional[Union[str, None]] = Field(default=None)
+    message: Optional[Union[str, None]] = Field(default=None)
+    signal_id: Optional[Union[str, None]] = Field(default=None)
+    tool_id: Optional[Union[str, None]] = Field(default=None)
+    tool_name: Optional[Union[str, None]] = Field(default=None)
+    arguments: Optional[Union[str, None]] = Field(default=None)
+    result: Optional[Union[str, None]] = Field(default=None)
+
+
+class SessionMessagesResponse(BaseModel):
+    agent_id: Optional[Union[str, None]] = Field(default=None)
+    agent_name: Optional[Union[str, None]] = Field(default=None)
+    version: Optional[Union[str, None]] = Field(default=None)
+    messages: List["SessionMessageItem"] = ...
+
+
+class SessionSummary(BaseModel):
+    session_id: str = ...
+    status: str = ...
+    start_time: datetime = ...
+    end_time: Optional[Union[datetime, None]] = Field(default=None)
+    agent_name: Optional[Union[str, None]] = Field(default=None)
+    agent_version: Optional[Union[str, None]] = Field(default=None)
+    messages_count: Optional[int] = Field(default=None)
+    token_usage: Optional[Union[str, None]] = Field(default=None)
+    result: Optional[List[str]] = Field(default=None)
+
+
+class Source(BaseModel):
+    """A source/citation in the response."""
+    title: str = ...
+    url: Optional[Union[str, None]] = Field(default=None)
+    snippet: Optional[Union[str, None]] = Field(default=None)
+    data_element_id: Optional[Union[str, None]] = Field(default=None)
+    relevance_score: Optional[Union[float, int, None]] = Field(default=None)
+
+
 class Table(BaseModel):
     cells: List["TableCell"] = ...
     rows: int = ...
@@ -310,14 +729,38 @@ class TableCell(BaseModel):
     bbox: Optional[Union["BoundingBox", None]] = Field(default=None)
 
 
+class TableDescriptionUpdate(BaseModel):
+    table_name: str = ...
+    description: Optional[Union[str, None]] = Field(default=None)
+    columns: Optional[Union[List["TagColumnUpdateItem"], None]] = Field(default=None)
+
+
+class TableSummaryResponse(BaseModel):
+    name: str = ...
+    description: Optional[Union[str, None]] = Field(default=None)
+    column_count: int = ...
+
+
 class TagColumn(BaseModel):
     column_name: str = ...
+    type: Optional[Union[str, None]] = Field(default=None)
     description: Optional[Union[str, None]] = Field(default=None)
+
+
+class TagColumnUpdateItem(BaseModel):
+    column_name: str = ...
+    description: str = ...
 
 
 class TagTable(BaseModel):
     table_name: str = ...
     description: Optional[Union[str, None]] = Field(default=None)
+    columns: Optional[Union[List["TagColumn"], None]] = Field(default=None)
+
+
+class TagTableUpdateItem(BaseModel):
+    table_name: str = ...
+    description: str = ...
 
 
 class TokenConfig(BaseModel):
@@ -329,8 +772,88 @@ class TokenConfig(BaseModel):
     n_influencers: Optional[Union[int, None]] = Field(default=None)
 
 
-class UpdateTagDescriptionRequest(BaseModel):
-    description: str = Field(description="Description for AI context")
+class ToolActivity(BaseModel):
+    """Record of a tool call and its result."""
+    tool_id: str = ...
+    tool_name: str = ...
+    arguments: str = ...
+    result: Optional[Union[str, None]] = Field(description="Optional override for the tool's parameters schema", default=None)
+    timestamp: str = ...
+
+
+class ToolActivityEntry(BaseModel):
+    """ToolActivityEntry"""
+    tool_id: str = ...
+    tool_call: Union["ToolCallInfo", None] = ...
+    tool_result: Union["ToolResultInfo", None] = ...
+
+
+class ToolCallInfo(BaseModel):
+    """ToolCallInfo"""
+    tool_name: Union[str, None] = ...
+    arguments: Union[str, None] = Field(description="Optional override for the tool's parameters schema")
+    sequence: Union[str, None] = ...
+    timestamp: Union[str, None] = ...
+
+
+class ToolResultInfo(BaseModel):
+    """ToolResultInfo"""
+    tool_name: Union[str, None] = ...
+    result: Optional[Union[str, None]] = Field(default=None)
+    sequence: Union[str, None] = ...
+    timestamp: Union[str, None] = ...
+
+
+class UpdateAgentArtifactRequest(BaseModel):
+    """Request model for updating an agent artifact. Name is intentionally excluded as it serves as the stable identifier for a version chain and cannot be changed."""
+    display_name: Optional[Union[str, None]] = Field(description="Human-readable name of the artifact", default=None)
+    type: Optional[Union["ArtifactType", None]] = Field(description="Artifact type", default=None)
+    description: Optional[Union[str, None]] = Field(description="Description of the artifact", default=None)
+    required: Optional[Union[bool, None]] = Field(description="Whether agent must produce this artifact", default=None)
+    schema_def: Optional[Union[str, None]] = Field(description="Optional override for the tool's parameters schema", default=None)
+    max_size_bytes: Optional[Union[int, None]] = Field(description="Maximum artifact size in bytes", default=None)
+    storage_strategy: Optional[Union["ArtifactStorageStrategy", None]] = Field(description="Storage strategy", default=None)
+
+
+class UpdateAgentDefinitionRequest(BaseModel):
+    """Request model for updating an agent definition. Name is intentionally excluded as it serves as the stable identifier for a version chain and cannot be changed."""
+    display_name: Optional[Union[str, None]] = Field(description="Human-readable name of the agent", default=None)
+    instructions: Optional[Union[str, None]] = Field(description="System prompt/instructions", default=None)
+    type: Optional[Union[str, None]] = Field(description="Agent type", default=None)
+    description: Optional[Union[str, None]] = Field(description="Description of the agent", default=None)
+    llm_model: Optional[Union[str, None]] = Field(description="LLM model to use", default=None)
+    fallback_models: Optional[Union[List[str], None]] = Field(description="List of fallback models", default=None)
+    datasources: Optional[Union[List[str], None]] = Field(description="Datasource IDs the agent has access to", default=None)
+    tools: Optional[Union[List["AgentToolDefinition"], None]] = Field(description="Tools configuration", default=None)
+    artifacts: Optional[Union[List[str], None]] = Field(description="Catalog URNs of artifacts the agent produces", default=None)
+    confidence_configs: Optional[Union[List[str], None]] = Field(description="Confidence scoring module names to apply during execution", default=None)
+    temperature: Optional[Union[float, int, None]] = Field(description="LLM temperature", default=None)
+    max_tokens: Optional[Union[int, None]] = Field(description="Maximum tokens in response", default=None)
+    tags: Optional[Union[List[str], None]] = Field(description="Tags for categorization", default=None)
+    icon: Optional[Union[str, None]] = Field(description="UI icon identifier", default=None)
+
+
+class UpdateAgentDefinitionResponse(BaseModel):
+    """Response model for updating an agent definition."""
+    id: str = Field(description="New agent definition ID")
+    catalog_urn: str = Field(description="Catalog URN for the new version")
+    version: str = Field(description="New version number")
+
+
+class UpdateAgentPromptRequest(BaseModel):
+    """Request model for updating an agent prompt. Name is intentionally excluded as it serves as the stable identifier for a version chain and cannot be changed."""
+    display_name: Optional[Union[str, None]] = Field(description="Human-readable name of the prompt", default=None)
+    prompt: Optional[Union[str, None]] = Field(description="Prompt text", default=None)
+
+
+class UpdateArtifactSchemaResponse(BaseModel):
+    id: str = ...
+    version: str = ...
+
+
+class UpdatePromptResponse(BaseModel):
+    id: str = ...
+    version: str = ...
 
 
 class ValidationError(BaseModel):
@@ -346,34 +869,123 @@ class WebCrawlConnector(BaseModel):
     domains: Optional[Union[List["WebDomain"], None]] = Field(default=None)
 
 
+class ConnectedEvent(BaseModel):
+    """A server-sent event indicating the stream connection has been established"""
+    event: str = ...
+    data: str = ...
+
+
+class StatusEvent(BaseModel):
+    """A server-sent event containing an agent status update"""
+    event: str = ...
+    data: str = ...
+
+
+class ToolCallEvent(BaseModel):
+    """A server-sent event indicating the agent is calling a tool"""
+    event: str = ...
+    data: str = ...
+
+
+class ToolResultEvent(BaseModel):
+    """A server-sent event containing the result of a tool call"""
+    event: str = ...
+    data: str = ...
+
+
+class PartialResponseEvent(BaseModel):
+    """A server-sent event containing an incremental response from the agent"""
+    event: str = ...
+    data: str = ...
+
+
+class CompletionEvent(BaseModel):
+    """A server-sent event containing the final complete response from the agent, sent once at the end of the stream"""
+    event: str = ...
+    data: str = ...
+
+
+class ContentItem(BaseModel):
+    name: str = ...
+    path: str = ...
+    type: Optional[Union[str, None]] = Field(default=None)
+    size: Optional[Union[int, None]] = Field(default=None)
+    media_type: Optional[Union[str, None]] = Field(default=None)
+    last_modified: Optional[Union[str, None]] = Field(default=None)
+    etag: Optional[Union[str, None]] = Field(default=None)
+
+
+class ListContentResponse(BaseModel):
+    items: List["ContentItem"] = ...
+    continuation_token: Optional[Union[str, None]] = Field(default=None)
+
+
+class UploadContentResponse(BaseModel):
+    success: bool = ...
+    message: str = ...
+    datasource_id: str = ...
+    upload_id: str = ...
+    sse_url: str = ...
+    estimated_files: Optional[Union[int, None]] = Field(default=None)
+    estimated_size: Optional[Union[int, None]] = Field(default=None)
+    ingest_url: Optional[Union[str, None]] = Field(default=None)
+
+
 class UpdateDataElementRequest(BaseModel):
-    name: Optional[Union[str, None]] = Field(default=None)
-    metadata: Optional[Union[str, None]] = Field(default=None)
+    name: Optional[Union[str, None]] = Field(description="Updated name", default=None)
+    description: Optional[Union[str, None]] = Field(description="Updated description", default=None)
+    metadata: Optional[Union[str, None]] = Field(description="Metadata key-value pairs — replaces all existing metadata", default=None)
 
 
 class UpdateDatasourceRequest(BaseModel):
-    name: Optional[Union[str, None]] = Field(default=None)
-    description: Optional[Union[str, None]] = Field(default=None)
-    connector: Optional[Union["ConnectorConfigInput", None]] = Field(default=None)
+    name: Optional[Union[str, None]] = Field(description="Updated datasource name", default=None)
+    description: Optional[Union[str, None]] = Field(description="Updated description", default=None)
+    connector: Optional[Union["ConnectorConfig", None]] = Field(description="Updated connection configuration", default=None)
+    metadata_config: Optional[Union["MetadataConfigRequest", None]] = Field(description="Metadata extraction config — if changed, re-extraction triggers automatically", default=None)
+    tables: Optional[Union[List["TableDescriptionUpdate"], None]] = Field(description="Table and column descriptions to update (structured datasources only)", default=None)
 
 
 class WebDomain(BaseModel):
-    domain: str = ...
-    include_pattern: str = Field(description="URL pattern to include")
-    exclude_pattern: Optional[str] = Field(description="URL pattern to exclude", default=None)
+    domain: str = Field(description="Domain to crawl (e.g. example.com)")
+    include_pattern: str = Field(description="Regex URL pattern to include")
+    exclude_pattern: Optional[str] = Field(description="Regex URL pattern to exclude", default=None)
 
 
 # Update forward references
+AgentDetailResponse.model_rebuild()
+AgentExecutionDetailsResponse.model_rebuild()
 AgentIdentityContext.model_rebuild()
+AgentListResponse.model_rebuild()
+AgentSummary.model_rebuild()
+AgentToolDefinition.model_rebuild()
+AgentVersionListResponse.model_rebuild()
+AgentVersionSummary.model_rebuild()
+Artifact.model_rebuild()
+ArtifactEntry.model_rebuild()
+ArtifactSchemaListResponse.model_rebuild()
+ArtifactSchemaResponse.model_rebuild()
+ArtifactSchemaSummary.model_rebuild()
+ArtifactStorageStrategy.model_rebuild()
+ArtifactType.model_rebuild()
 BoundingBox.model_rebuild()
+CallToAction.model_rebuild()
+ChatMessageRequest.model_rebuild()
+ChatMessageResponse.model_rebuild()
+ChatResponse.model_rebuild()
 CloudStorageConnector.model_rebuild()
 ConfidenceScoringConfig.model_rebuild()
 Config.model_rebuild()
-ConnectorConfigInput.model_rebuild()
-ConnectorConfigOutput.model_rebuild()
-CreateDataElementRequest.model_rebuild()
+ConnectorConfig.model_rebuild()
+CreateAgentArtifactRequest.model_rebuild()
+CreateAgentDefinitionRequest.model_rebuild()
+CreateAgentPromptRequest.model_rebuild()
+CreateAgentResponse.model_rebuild()
+CreateArtifactSchemaResponse.model_rebuild()
 CreateDatasourceRequest.model_rebuild()
-DataElementMetadata.model_rebuild()
+CreatePromptResponse.model_rebuild()
+CreateSessionRequest.model_rebuild()
+CreateSessionResponse.model_rebuild()
+DataElementListResponse.model_rebuild()
 DataElementResponse.model_rebuild()
 DataElementSearchRequest.model_rebuild()
 DatabaseConnector.model_rebuild()
@@ -382,10 +994,23 @@ DatasourceResponse.model_rebuild()
 DocumentChild.model_rebuild()
 DocumentElement.model_rebuild()
 DocumentStatus.model_rebuild()
+DownloadJobRequest.model_rebuild()
+DownloadJobResponse.model_rebuild()
+FieldSummary.model_rebuild()
+FileParseCompleteInfo.model_rebuild()
+FileParseEntry.model_rebuild()
+FileParseStartInfo.model_rebuild()
+FileUploadSyncResponse.model_rebuild()
+FilesSummaryResponse.model_rebuild()
 HttpValidationError.model_rebuild()
+IngestCountsResponse.model_rebuild()
+IngestMethodCountsResponse.model_rebuild()
+IngestMethodSummary.model_rebuild()
+IngestStatusResponse.model_rebuild()
 JudgeConfig.model_rebuild()
 ListMetadataModelCatalogResponse.model_rebuild()
 MeibelDocumentResult.model_rebuild()
+MessageEntry.model_rebuild()
 MetadataConfigRequest.model_rebuild()
 MetadataConfigResponse.model_rebuild()
 MetadataField.model_rebuild()
@@ -396,17 +1021,49 @@ OcConfig.model_rebuild()
 OcrConfig.model_rebuild()
 ParseDocumentResponse.model_rebuild()
 ProcessDocumentResponse.model_rebuild()
+PromptListResponse.model_rebuild()
+PromptResponse.model_rebuild()
+PromptSummary.model_rebuild()
+PublishAgentDefinitionRequest.model_rebuild()
+PublishAgentDefinitionResponse.model_rebuild()
 ScoreSummary.model_rebuild()
 ScoringJobRecord.model_rebuild()
 ScoringStatus.model_rebuild()
+SessionListResponse.model_rebuild()
+SessionMessageItem.model_rebuild()
+SessionMessagesResponse.model_rebuild()
+SessionSummary.model_rebuild()
+Source.model_rebuild()
 Table.model_rebuild()
 TableCell.model_rebuild()
+TableDescriptionUpdate.model_rebuild()
+TableSummaryResponse.model_rebuild()
 TagColumn.model_rebuild()
+TagColumnUpdateItem.model_rebuild()
 TagTable.model_rebuild()
+TagTableUpdateItem.model_rebuild()
 TokenConfig.model_rebuild()
-UpdateTagDescriptionRequest.model_rebuild()
+ToolActivity.model_rebuild()
+ToolActivityEntry.model_rebuild()
+ToolCallInfo.model_rebuild()
+ToolResultInfo.model_rebuild()
+UpdateAgentArtifactRequest.model_rebuild()
+UpdateAgentDefinitionRequest.model_rebuild()
+UpdateAgentDefinitionResponse.model_rebuild()
+UpdateAgentPromptRequest.model_rebuild()
+UpdateArtifactSchemaResponse.model_rebuild()
+UpdatePromptResponse.model_rebuild()
 ValidationError.model_rebuild()
 WebCrawlConnector.model_rebuild()
+ConnectedEvent.model_rebuild()
+StatusEvent.model_rebuild()
+ToolCallEvent.model_rebuild()
+ToolResultEvent.model_rebuild()
+PartialResponseEvent.model_rebuild()
+CompletionEvent.model_rebuild()
+ContentItem.model_rebuild()
+ListContentResponse.model_rebuild()
+UploadContentResponse.model_rebuild()
 UpdateDataElementRequest.model_rebuild()
 UpdateDatasourceRequest.model_rebuild()
 WebDomain.model_rebuild()
