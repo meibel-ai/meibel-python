@@ -9,10 +9,11 @@ from .._http import HttpClient, AsyncHttpClient
 from ..models import *
 from ..exceptions import raise_for_status
 from .._pagination import PaginatedIterator, AsyncPaginatedIterator
+from .._streaming import SSEIterator, AsyncSSEIterator
 
 
 class AgentsSessionsResource:
-    """Manage sessions for a specific agent"""
+    """Create, manage, and chat with agent sessions"""
 
     def __init__(self, http: HttpClient):
         self._http = http
@@ -77,9 +78,46 @@ class AgentsSessionsResource:
         response = self._http.request("POST", path, json=body.model_dump(by_alias=True, exclude_unset=True) if body else None)
         return CreateSessionResponse.model_validate(response)
 
+    def send_chat_message(self, session_id: str, body: "ChatMessageRequest") -> "ChatMessageResponse":
+        """
+        Send Chat Message
+        
+        Args:
+            session_id: The session_id parameter
+            body: Request body
+        
+        Returns:
+            Successful Response
+        
+        Raises:
+            ApiError: If the request fails
+        """
+        path = "/sessions/{session_id}/chat"
+        path = path.replace("{session_id}", str(session_id))
+        response = self._http.request("POST", path, json=body.model_dump(by_alias=True, exclude_unset=True) if body else None)
+        return ChatMessageResponse.model_validate(response)
+
+    def send_chat_message_stream(self, session_id: str, body: "ChatMessageRequest") -> Iterator[Union["", "", "", "", "", "", ""]]:
+        """
+        Send a chat message and stream the response via SSE
+        
+        Args:
+            session_id: The session_id parameter
+            body: Request body
+        
+        Returns:
+            None
+        
+        Raises:
+            ApiError: If the request fails
+        """
+        path = "/sessions/{session_id}/chat/stream"
+        path = path.replace("{session_id}", str(session_id))
+        return self._http.stream("POST", path, json=body.model_dump(by_alias=True, exclude_unset=True) if body else None)
+
 
 class AsyncAgentsSessionsResource:
-    """Manage sessions for a specific agent (async)"""
+    """Create, manage, and chat with agent sessions (async)"""
 
     def __init__(self, http: AsyncHttpClient):
         self._http = http
@@ -143,3 +181,40 @@ class AsyncAgentsSessionsResource:
         path = path.replace("{agent_id}", str(agent_id))
         response = await self._http.request("POST", path, json=body.model_dump(by_alias=True, exclude_unset=True) if body else None)
         return CreateSessionResponse.model_validate(response)
+
+    async def send_chat_message(self, session_id: str, body: "ChatMessageRequest") -> "ChatMessageResponse":
+        """
+        Send Chat Message
+        
+        Args:
+            session_id: The session_id parameter
+            body: Request body
+        
+        Returns:
+            Successful Response
+        
+        Raises:
+            ApiError: If the request fails
+        """
+        path = "/sessions/{session_id}/chat"
+        path = path.replace("{session_id}", str(session_id))
+        response = await self._http.request("POST", path, json=body.model_dump(by_alias=True, exclude_unset=True) if body else None)
+        return ChatMessageResponse.model_validate(response)
+
+    async def send_chat_message_stream(self, session_id: str, body: "ChatMessageRequest") -> AsyncIterator[Union["", "", "", "", "", "", ""]]:
+        """
+        Send a chat message and stream the response via SSE
+        
+        Args:
+            session_id: The session_id parameter
+            body: Request body
+        
+        Returns:
+            None
+        
+        Raises:
+            ApiError: If the request fails
+        """
+        path = "/sessions/{session_id}/chat/stream"
+        path = path.replace("{session_id}", str(session_id))
+        return self._http.stream("POST", path, json=body.model_dump(by_alias=True, exclude_unset=True) if body else None)
