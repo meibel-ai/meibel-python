@@ -14,7 +14,7 @@ from typing import BinaryIO
 
 
 class FileUploadsResource:
-    """Upload, manage, and ingest content files"""
+    """Upload and manage content files"""
 
     def __init__(self, http: HttpClient):
         self._http = http
@@ -105,45 +105,9 @@ class FileUploadsResource:
             params=params,
         )
 
-    def trigger_ingest(self, datasource_id: str) -> str:
-        """
-        Trigger Ingest
-        
-        Args:
-            datasource_id: The datasource_id parameter
-        
-        Returns:
-            Successful Response
-        
-        Raises:
-            ApiError: If the request fails
-        """
-        path = "/datasources/{datasource_id}/trigger-ingest"
-        path = path.replace("{datasource_id}", str(datasource_id))
-        response = self._http.request("POST", path)
-        return response
-
-    def get_ingest_status(self, datasource_id: str) -> "IngestStatusResponse":
-        """
-        Get Ingest Status
-        
-        Args:
-            datasource_id: The datasource_id parameter
-        
-        Returns:
-            Successful Response
-        
-        Raises:
-            ApiError: If the request fails
-        """
-        path = "/datasources/{datasource_id}/ingest-status"
-        path = path.replace("{datasource_id}", str(datasource_id))
-        response = self._http.request("GET", path)
-        return IngestStatusResponse.model_validate(response)
-
 
 class AsyncFileUploadsResource:
-    """Upload, manage, and ingest content files (async)"""
+    """Upload and manage content files (async)"""
 
     def __init__(self, http: AsyncHttpClient):
         self._http = http
@@ -233,39 +197,3 @@ class AsyncFileUploadsResource:
             next_field="next_cursor",
             params=params,
         )
-
-    async def trigger_ingest(self, datasource_id: str) -> str:
-        """
-        Trigger Ingest
-        
-        Args:
-            datasource_id: The datasource_id parameter
-        
-        Returns:
-            Successful Response
-        
-        Raises:
-            ApiError: If the request fails
-        """
-        path = "/datasources/{datasource_id}/trigger-ingest"
-        path = path.replace("{datasource_id}", str(datasource_id))
-        response = await self._http.request("POST", path)
-        return response
-
-    async def get_ingest_status(self, datasource_id: str) -> "IngestStatusResponse":
-        """
-        Get Ingest Status
-        
-        Args:
-            datasource_id: The datasource_id parameter
-        
-        Returns:
-            Successful Response
-        
-        Raises:
-            ApiError: If the request fails
-        """
-        path = "/datasources/{datasource_id}/ingest-status"
-        path = path.replace("{datasource_id}", str(datasource_id))
-        response = await self._http.request("GET", path)
-        return IngestStatusResponse.model_validate(response)

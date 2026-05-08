@@ -14,6 +14,7 @@ from .resources.datasources import DatasourcesResource, AsyncDatasourcesResource
 from .resources.data_elements import DataElementsResource, AsyncDataElementsResource
 from .resources.downloads import DownloadsResource, AsyncDownloadsResource
 from .resources.file_uploads import FileUploadsResource, AsyncFileUploadsResource
+from .resources.ingest import IngestResource, AsyncIngestResource
 from .resources.tables import TablesResource, AsyncTablesResource
 from .resources.documents import DocumentsResource, AsyncDocumentsResource
 from .resources.metadata_model_catalog import MetadataModelCatalogResource, AsyncMetadataModelCatalogResource
@@ -52,6 +53,7 @@ class MeibelClient:
         self.datasources.data_elements = DataElementsResource(self._http)
         self.datasources.downloads = DownloadsResource(self._http)
         self.datasources.file_uploads = FileUploadsResource(self._http)
+        self.datasources.ingest = IngestResource(self._http)
         self.datasources.tables = TablesResource(self._http)
 
     def close(self) -> None:
@@ -96,6 +98,7 @@ class AsyncMeibelClient:
         self.datasources.data_elements = AsyncDataElementsResource(self._http)
         self.datasources.downloads = AsyncDownloadsResource(self._http)
         self.datasources.file_uploads = AsyncFileUploadsResource(self._http)
+        self.datasources.ingest = AsyncIngestResource(self._http)
         self.datasources.tables = AsyncTablesResource(self._http)
 
     async def close(self) -> None:

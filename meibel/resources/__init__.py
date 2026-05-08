@@ -20,6 +20,8 @@ from .downloads import DownloadsResource
 from .downloads import AsyncDownloadsResource
 from .file_uploads import FileUploadsResource
 from .file_uploads import AsyncFileUploadsResource
+from .ingest import IngestResource
+from .ingest import AsyncIngestResource
 from .tables import TablesResource
 from .tables import AsyncTablesResource
 from .documents import DocumentsResource
@@ -48,6 +50,8 @@ __all__ = [
     "AsyncDownloadsResource",
     "FileUploadsResource",
     "AsyncFileUploadsResource",
+    "IngestResource",
+    "AsyncIngestResource",
     "TablesResource",
     "AsyncTablesResource",
     "DocumentsResource",
