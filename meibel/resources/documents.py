@@ -13,7 +13,7 @@ from typing import BinaryIO
 
 
 class DocumentsResource:
-    """Documents resource operations."""
+    """Parse and transform documents into structured data"""
 
     def __init__(self, http: HttpClient):
         self._http = http
@@ -142,7 +142,7 @@ class DocumentsResource:
 
 
 class AsyncDocumentsResource:
-    """Documents resource operations (async)."""
+    """Parse and transform documents into structured data (async)"""
 
     def __init__(self, http: AsyncHttpClient):
         self._http = http

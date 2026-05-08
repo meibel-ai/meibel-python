@@ -12,7 +12,7 @@ from .._streaming import SSEIterator, AsyncSSEIterator
 
 
 class DownloadsResource:
-    """Downloads resource operations."""
+    """Export datasources as downloadable files"""
 
     def __init__(self, http: HttpClient):
         self._http = http
@@ -96,7 +96,7 @@ class DownloadsResource:
 
 
 class AsyncDownloadsResource:
-    """Downloads resource operations (async)."""
+    """Export datasources as downloadable files (async)"""
 
     def __init__(self, http: AsyncHttpClient):
         self._http = http

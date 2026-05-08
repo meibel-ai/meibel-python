@@ -11,7 +11,7 @@ from ..exceptions import raise_for_status
 
 
 class DatasourcesResource:
-    """Datasources resource operations."""
+    """Manage data source connections"""
 
     def __init__(self, http: HttpClient):
         self._http = http
@@ -108,7 +108,7 @@ class DatasourcesResource:
 
 
 class AsyncDatasourcesResource:
-    """Datasources resource operations (async)."""
+    """Manage data source connections (async)"""
 
     def __init__(self, http: AsyncHttpClient):
         self._http = http

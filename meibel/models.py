@@ -74,6 +74,7 @@ class AgentSummary(BaseModel):
     id: str = ...
     name: Optional[Union[str, None]] = Field(default=None)
     display_name: str = ...
+    description: Optional[Union[str, None]] = Field(default=None)
     llm_model: str = ...
     tool_count: int = ...
     datasource_count: int = ...
@@ -168,6 +169,77 @@ class ArtifactStorageStrategy(BaseModel):
 class ArtifactType(BaseModel):
     """Supported artifact types."""
     pass
+
+
+class BatchDefinitionFilters(BaseModel):
+    """Recipe-level filters. element_ids belongs here; per-execution overrides use BatchInputOverrides on the execution row."""
+    regex: Optional[Union[str, None]] = Field(description="Filter Data Elements by name pattern (regex)", default=None)
+    media_types: Optional[Union[List[str], None]] = Field(description="Filter Data Elements by content type", default=None)
+    element_ids: Optional[Union[List[str], None]] = Field(description="Recipe-pinned subset of Data Element IDs.", default=None)
+
+
+class BatchDefinitionResponse(BaseModel):
+    """Full BatchDefinition snapshot."""
+    id: str = ...
+    customer_id: str = ...
+    project_id: str = ...
+    name: str = ...
+    version: str = ...
+    parent_version: Union[str, None] = ...
+    catalog_urn: str = ...
+    agent_urn: str = ...
+    agent_spec_json: str = ...
+    input_datasource_id: str = ...
+    filters: Optional[Union[str, None]] = Field(description="Optional override for the tool's parameters schema", default=None)
+    output_datasource_id: Optional[Union[str, None]] = Field(default=None)
+    user_message: Optional[Union[str, None]] = Field(default=None)
+    concurrency: int = ...
+    retry_limit: int = ...
+    recurrence_cron: Optional[Union[str, None]] = Field(default=None)
+    description: Optional[Union[str, None]] = Field(default=None)
+    created_at: datetime = ...
+    created_by: str = ...
+    deleted_at: Optional[Union[datetime, None]] = Field(default=None)
+
+
+class BatchExecutionResponse(BaseModel):
+    """Response shape for a single batch execution. The legacy `batch_spec_json` / `agent_spec_json` / `agent_urn` / `input_datasource_id` fields are kept for client compatibility (DEL-1376 §5.5) — they are reconstructed from the linked BatchDefinition by the router, not stored on the execution row."""
+    id: str = Field(description="Execution ID — also the Temporal workflow ID for direct queries")
+    batch_definition_id: str = Field(description="FK to the BatchDefinition this execution ran against")
+    customer_id: str = ...
+    project_id: str = ...
+    agent_urn: Optional[Union[str, None]] = Field(default=None)
+    batch_spec_json: Optional[Union[str, None]] = Field(description="Optional override for the tool's parameters schema", default=None)
+    agent_spec_json: Optional[Union[str, None]] = Field(default=None)
+    input_datasource_id: Optional[Union[str, None]] = Field(default=None)
+    output_datasource_id: Optional[Union[str, None]] = Field(default=None)
+    input_overrides: Optional[Union[str, None]] = Field(description="Optional override for the tool's parameters schema", default=None)
+    total_items: Optional[Union[int, None]] = Field(default=None)
+    succeeded: Optional[Union[int, None]] = Field(default=None)
+    failed: Optional[Union[int, None]] = Field(default=None)
+    start_time: datetime = ...
+    end_time: Optional[Union[datetime, None]] = Field(default=None)
+    status: str = ...
+    error: Optional[Union[str, None]] = Field(description="Overall error message", default=None)
+    items: Optional[Union[List["BatchItemResult"], None]] = Field(description="Per-item results (populated on completion by status callback)", default=None)
+
+
+class BatchItemResult(BaseModel):
+    """Per-item result from the Temporal workflow."""
+    input_data_element_id: str = ...
+    filename: str = ...
+    status: str = ...
+    error: Optional[Union[str, None]] = Field(default=None)
+    output_artifacts: Optional[Union[List[Union[str, None]], None]] = Field(default=None)
+    attempts: Optional[Union[int, None]] = Field(default=None)
+
+
+class BodySendChatMessageStream(BaseModel):
+    user_message: Optional[Union[str, None]] = Field(default=None)
+    timeout_seconds: Optional[Union[int, None]] = Field(default=None)
+    include_thinking: Optional[Union[bool, None]] = Field(default=None)
+    include_tool_activity: Optional[Union[bool, None]] = Field(default=None)
+    files: Optional[Union[List[bytes], None]] = Field(default=None)
 
 
 class BoundingBox(BaseModel):
@@ -296,6 +368,33 @@ class CreateArtifactSchemaResponse(BaseModel):
     version: str = ...
 
 
+class CreateBatchDefinitionRequest(BaseModel):
+    """Create a new BatchDefinition lineage."""
+    name: str = Field(description="Kebab-case label (non-unique within tenant)")
+    agent_id: str = Field(description="AgentDefinition ID; resolved + pinned at creation time")
+    input_datasource_id: str = Field(description="Datasource holding the input Data Elements")
+    filters: Optional[Union["BatchDefinitionFilters", None]] = Field(default=None)
+    output_datasource_id: Optional[Union[str, None]] = Field(description="Pinned output sink. NULL = workflow auto-creates per execution.", default=None)
+    user_message: Optional[Union[str, None]] = Field(default=None)
+    concurrency: Optional[Union[int, None]] = Field(default=None)
+    retry_limit: Optional[Union[int, None]] = Field(default=None)
+    recurrence_cron: Optional[Union[str, None]] = Field(description="Cron expression validated by croniter; not yet scheduled in DEL-1376.", default=None)
+    description: Optional[Union[str, None]] = Field(default=None)
+
+
+class CreateBatchDefinitionResponse(BaseModel):
+    """Compact post-create payload mirroring CreateAgentDefinitionResponse."""
+    id: str = ...
+    catalog_urn: str = ...
+    name: str = ...
+    version: str = ...
+
+
+class CreateBatchExecutionRequest(BaseModel):
+    """Legacy request body for POST /batch-execution/ (pre-DEL-1376 compat shim)."""
+    batch_spec_json: "LegacyBatchSpecJson" = ...
+
+
 class CreateDatasourceRequest(BaseModel):
     name: str = Field(description="Human-readable datasource name")
     description: Optional[str] = Field(description="What this datasource contains", default=None)
@@ -413,6 +512,12 @@ class DownloadJobResponse(BaseModel):
     status_url: str = Field(description="Stream progress events from this SSE URL")
 
 
+class ExecuteBatchDefinitionResponse(BaseModel):
+    """ExecuteBatchDefinitionResponse"""
+    execution_id: str = ...
+    workflow_id: str = ...
+
+
 class FieldSummary(BaseModel):
     name: str = ...
     type: str = ...
@@ -454,6 +559,18 @@ class FilesSummaryResponse(BaseModel):
     deleted: Optional[Union[int, None]] = Field(default=None)
 
 
+class GetBatchDefinitionsResponse(BaseModel):
+    """GetBatchDefinitionsResponse"""
+    data: List["BatchDefinitionResponse"] = ...
+    pagination: "PaginationMeta" = ...
+
+
+class GetBatchExecutionsResponse(BaseModel):
+    """Response model for listing batch executions."""
+    data: List["BatchExecutionResponse"] = ...
+    pagination: "PaginationMeta" = ...
+
+
 class HttpValidationError(BaseModel):
     detail: Optional[List["ValidationError"]] = Field(default=None)
 
@@ -493,6 +610,43 @@ class JudgeConfig(BaseModel):
     prompt: str = ...
     temperature_max: Optional[Union[float, int, None]] = Field(default=None)
     temperature_step: Optional[Union[float, int, None]] = Field(default=None)
+
+
+class LegacyBatchExecutionParams(BaseModel):
+    """LegacyBatchExecutionParams"""
+    concurrency: Optional[Union[int, None]] = Field(default=None)
+    retry_limit: Optional[Union[int, None]] = Field(default=None)
+
+
+class LegacyBatchInputConfig(BaseModel):
+    """LegacyBatchInputConfig"""
+    datasource_id: str = ...
+    filters: Optional[Union["LegacyBatchInputFilters", None]] = Field(default=None)
+
+
+class LegacyBatchInputFilters(BaseModel):
+    """LegacyBatchInputFilters"""
+    regex: Optional[Union[str, None]] = Field(default=None)
+    media_types: Optional[Union[List[str], None]] = Field(default=None)
+    element_ids: Optional[Union[List[str], None]] = Field(default=None)
+    additional_properties: Optional[str] = Field(default=None)
+
+
+class LegacyBatchOutputConfig(BaseModel):
+    """LegacyBatchOutputConfig"""
+    datasource_id: Optional[Union[str, None]] = Field(default=None)
+
+
+class LegacyBatchSpecJson(BaseModel):
+    """LegacyBatchSpecJson"""
+    name: str = ...
+    version: Optional[Union[str, None]] = Field(default=None)
+    agent: str = Field(description="AgentDefinition ID")
+    user_message: Optional[Union[str, None]] = Field(default=None)
+    input: "LegacyBatchInputConfig" = ...
+    output: Optional[Union["LegacyBatchOutputConfig", None]] = Field(default=None)
+    execution: Optional[Union["LegacyBatchExecutionParams", None]] = Field(default=None)
+    additional_properties: Optional[str] = Field(default=None)
 
 
 class ListMetadataModelCatalogResponse(BaseModel):
@@ -584,6 +738,13 @@ class OcrConfig(BaseModel):
     """Configuration for OCR confidence scoring."""
     calibration_model: Optional[Union[str, None]] = Field(default=None)
     ocr_confidence_scores: Optional[Union[List[Union[float, int]], None]] = Field(default=None)
+
+
+class PaginationMeta(BaseModel):
+    """Pagination metadata included in list responses."""
+    total: int = Field(description="Total number of items matching the query")
+    offset: int = Field(description="Number of items skipped")
+    limit: Optional[Union[int, None]] = Field(description="Maximum number of items returned (None means no limit applied)", default=None)
 
 
 class ParseDocumentResponse(BaseModel):
@@ -851,6 +1012,40 @@ class UpdateArtifactSchemaResponse(BaseModel):
     version: str = ...
 
 
+class UpdateBatchDefinitionRequest(BaseModel):
+    """Patch a BatchDefinition; the service forks a new version row."""
+    name: Optional[Union[str, None]] = Field(default=None)
+    agent_id: Optional[Union[str, None]] = Field(description="If set, re-resolves and re-pins the agent spec", default=None)
+    input_datasource_id: Optional[Union[str, None]] = Field(default=None)
+    filters: Optional[Union["BatchDefinitionFilters", None]] = Field(default=None)
+    output_datasource_id: Optional[Union[str, None]] = Field(default=None)
+    user_message: Optional[Union[str, None]] = Field(default=None)
+    concurrency: Optional[Union[int, None]] = Field(default=None)
+    retry_limit: Optional[Union[int, None]] = Field(default=None)
+    recurrence_cron: Optional[Union[str, None]] = Field(default=None)
+    description: Optional[Union[str, None]] = Field(default=None)
+
+
+class UpdateBatchDefinitionResponse(BaseModel):
+    """New version metadata returned after a successful update fork."""
+    id: str = ...
+    catalog_urn: str = ...
+    version: str = ...
+
+
+class UpdateBatchExecutionRequest(BaseModel):
+    """Runtime-only patch fields. Identity, definition link, and overrides are immutable."""
+    status: Optional[Union[str, None]] = Field(description="Execution status", default=None)
+    end_time: Optional[Union[datetime, None]] = Field(description="Execution end time", default=None)
+    total_items: Optional[Union[int, None]] = Field(description="Total items in batch", default=None)
+    succeeded: Optional[Union[int, None]] = Field(description="Number of succeeded items", default=None)
+    failed: Optional[Union[int, None]] = Field(description="Number of failed items", default=None)
+    output_datasource_id: Optional[Union[str, None]] = Field(description="Output datasource ID", default=None)
+    items: Optional[Union[List[Union[str, None]], None]] = Field(description="Per-item results", default=None)
+    error: Optional[Union[str, None]] = Field(description="Overall error message", default=None)
+    additional_properties: Optional[str] = Field(default=None)
+
+
 class UpdatePromptResponse(BaseModel):
     id: str = ...
     version: str = ...
@@ -928,7 +1123,6 @@ class UploadContentResponse(BaseModel):
     sse_url: str = ...
     estimated_files: Optional[Union[int, None]] = Field(default=None)
     estimated_size: Optional[Union[int, None]] = Field(default=None)
-    ingest_url: Optional[Union[str, None]] = Field(default=None)
 
 
 class UpdateDataElementRequest(BaseModel):
@@ -967,6 +1161,11 @@ ArtifactSchemaResponse.model_rebuild()
 ArtifactSchemaSummary.model_rebuild()
 ArtifactStorageStrategy.model_rebuild()
 ArtifactType.model_rebuild()
+BatchDefinitionFilters.model_rebuild()
+BatchDefinitionResponse.model_rebuild()
+BatchExecutionResponse.model_rebuild()
+BatchItemResult.model_rebuild()
+BodySendChatMessageStream.model_rebuild()
 BoundingBox.model_rebuild()
 CallToAction.model_rebuild()
 ChatMessageRequest.model_rebuild()
@@ -981,6 +1180,9 @@ CreateAgentDefinitionRequest.model_rebuild()
 CreateAgentPromptRequest.model_rebuild()
 CreateAgentResponse.model_rebuild()
 CreateArtifactSchemaResponse.model_rebuild()
+CreateBatchDefinitionRequest.model_rebuild()
+CreateBatchDefinitionResponse.model_rebuild()
+CreateBatchExecutionRequest.model_rebuild()
 CreateDatasourceRequest.model_rebuild()
 CreatePromptResponse.model_rebuild()
 CreateSessionRequest.model_rebuild()
@@ -996,18 +1198,26 @@ DocumentElement.model_rebuild()
 DocumentStatus.model_rebuild()
 DownloadJobRequest.model_rebuild()
 DownloadJobResponse.model_rebuild()
+ExecuteBatchDefinitionResponse.model_rebuild()
 FieldSummary.model_rebuild()
 FileParseCompleteInfo.model_rebuild()
 FileParseEntry.model_rebuild()
 FileParseStartInfo.model_rebuild()
 FileUploadSyncResponse.model_rebuild()
 FilesSummaryResponse.model_rebuild()
+GetBatchDefinitionsResponse.model_rebuild()
+GetBatchExecutionsResponse.model_rebuild()
 HttpValidationError.model_rebuild()
 IngestCountsResponse.model_rebuild()
 IngestMethodCountsResponse.model_rebuild()
 IngestMethodSummary.model_rebuild()
 IngestStatusResponse.model_rebuild()
 JudgeConfig.model_rebuild()
+LegacyBatchExecutionParams.model_rebuild()
+LegacyBatchInputConfig.model_rebuild()
+LegacyBatchInputFilters.model_rebuild()
+LegacyBatchOutputConfig.model_rebuild()
+LegacyBatchSpecJson.model_rebuild()
 ListMetadataModelCatalogResponse.model_rebuild()
 MeibelDocumentResult.model_rebuild()
 MessageEntry.model_rebuild()
@@ -1019,6 +1229,7 @@ MetadataModelField.model_rebuild()
 NBootstraps.model_rebuild()
 OcConfig.model_rebuild()
 OcrConfig.model_rebuild()
+PaginationMeta.model_rebuild()
 ParseDocumentResponse.model_rebuild()
 ProcessDocumentResponse.model_rebuild()
 PromptListResponse.model_rebuild()
@@ -1052,6 +1263,9 @@ UpdateAgentDefinitionRequest.model_rebuild()
 UpdateAgentDefinitionResponse.model_rebuild()
 UpdateAgentPromptRequest.model_rebuild()
 UpdateArtifactSchemaResponse.model_rebuild()
+UpdateBatchDefinitionRequest.model_rebuild()
+UpdateBatchDefinitionResponse.model_rebuild()
+UpdateBatchExecutionRequest.model_rebuild()
 UpdatePromptResponse.model_rebuild()
 ValidationError.model_rebuild()
 WebCrawlConnector.model_rebuild()

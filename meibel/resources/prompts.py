@@ -11,7 +11,7 @@ from ..exceptions import raise_for_status
 
 
 class PromptsResource:
-    """Prompts resource operations."""
+    """Manage reusable prompt templates"""
 
     def __init__(self, http: HttpClient):
         self._http = http
@@ -104,7 +104,7 @@ class PromptsResource:
 
 
 class AsyncPromptsResource:
-    """Prompts resource operations (async)."""
+    """Manage reusable prompt templates (async)"""
 
     def __init__(self, http: AsyncHttpClient):
         self._http = http
