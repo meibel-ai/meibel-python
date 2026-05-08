@@ -34,7 +34,7 @@ class DocumentsResource:
             ApiError: If the request fails
         """
         path = "/documents"
-        response = self._http.upload("POST", path, file=file, file_name=file_name)
+        response = self._http.upload("POST", path, file=file, file_name=file_name, field_name="file")
         return ParseDocumentResponse.model_validate(response)
 
     def process_document(self, file: BinaryIO, file_name: str) -> "ProcessDocumentResponse":
@@ -54,7 +54,7 @@ class DocumentsResource:
             ApiError: If the request fails
         """
         path = "/documents/process"
-        response = self._http.upload("POST", path, file=file, file_name=file_name)
+        response = self._http.upload("POST", path, file=file, file_name=file_name, field_name="file")
         return ProcessDocumentResponse.model_validate(response)
 
     def get_document_status(self, job_id: str) -> "DocumentStatus":
@@ -163,7 +163,7 @@ class AsyncDocumentsResource:
             ApiError: If the request fails
         """
         path = "/documents"
-        response = await self._http.upload("POST", path, file=file, file_name=file_name)
+        response = await self._http.upload("POST", path, file=file, file_name=file_name, field_name="file")
         return ParseDocumentResponse.model_validate(response)
 
     async def process_document(self, file: BinaryIO, file_name: str) -> "ProcessDocumentResponse":
@@ -183,7 +183,7 @@ class AsyncDocumentsResource:
             ApiError: If the request fails
         """
         path = "/documents/process"
-        response = await self._http.upload("POST", path, file=file, file_name=file_name)
+        response = await self._http.upload("POST", path, file=file, file_name=file_name, field_name="file")
         return ProcessDocumentResponse.model_validate(response)
 
     async def get_document_status(self, job_id: str) -> "DocumentStatus":

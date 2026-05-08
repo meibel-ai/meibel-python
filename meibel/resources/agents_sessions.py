@@ -98,7 +98,7 @@ class AgentsSessionsResource:
         response = self._http.request("POST", path, json=body.model_dump(by_alias=True, exclude_unset=True) if body else None)
         return ChatMessageResponse.model_validate(response)
 
-    def send_chat_message_stream(self, session_id: str, file: BinaryIO, file_name: str, user_message: Union[str, None], timeout_seconds: Union[int, None], include_thinking: Union[bool, None], include_tool_activity: Union[bool, None], files: Union[List[bytes], None]) -> None:
+    def send_chat_message_stream(self, session_id: str, file: BinaryIO, file_name: str, user_message: Optional[Union[str, None]] = None, timeout_seconds: Optional[Union[int, None]] = None, include_thinking: Optional[Union[bool, None]] = None, include_tool_activity: Optional[Union[bool, None]] = None, files: Optional[Union[List[bytes], None]] = None) -> None:
         """
         Send a chat message with file attachments and stream the response via SSE
         
@@ -114,7 +114,18 @@ class AgentsSessionsResource:
         """
         path = "/sessions/{session_id}/chat/stream"
         path = path.replace("{session_id}", str(session_id))
-        response = self._http.upload("POST", path, file=file, file_name=file_name)
+        form_fields = {}
+        if user_message is not None:
+            form_fields["user_message"] = str(user_message)
+        if timeout_seconds is not None:
+            form_fields["timeout_seconds"] = str(timeout_seconds)
+        if include_thinking is not None:
+            form_fields["include_thinking"] = str(include_thinking)
+        if include_tool_activity is not None:
+            form_fields["include_tool_activity"] = str(include_tool_activity)
+        if files is not None:
+            form_fields["files"] = str(files)
+        response = self._http.upload("POST", path, file=file, file_name=file_name, field_name="file", form_fields=form_fields)
         return response
 
 
@@ -203,7 +214,7 @@ class AsyncAgentsSessionsResource:
         response = await self._http.request("POST", path, json=body.model_dump(by_alias=True, exclude_unset=True) if body else None)
         return ChatMessageResponse.model_validate(response)
 
-    async def send_chat_message_stream(self, session_id: str, file: BinaryIO, file_name: str, user_message: Union[str, None], timeout_seconds: Union[int, None], include_thinking: Union[bool, None], include_tool_activity: Union[bool, None], files: Union[List[bytes], None]) -> None:
+    async def send_chat_message_stream(self, session_id: str, file: BinaryIO, file_name: str, user_message: Optional[Union[str, None]] = None, timeout_seconds: Optional[Union[int, None]] = None, include_thinking: Optional[Union[bool, None]] = None, include_tool_activity: Optional[Union[bool, None]] = None, files: Optional[Union[List[bytes], None]] = None) -> None:
         """
         Send a chat message with file attachments and stream the response via SSE
         
@@ -219,5 +230,16 @@ class AsyncAgentsSessionsResource:
         """
         path = "/sessions/{session_id}/chat/stream"
         path = path.replace("{session_id}", str(session_id))
-        response = await self._http.upload("POST", path, file=file, file_name=file_name)
+        form_fields = {}
+        if user_message is not None:
+            form_fields["user_message"] = str(user_message)
+        if timeout_seconds is not None:
+            form_fields["timeout_seconds"] = str(timeout_seconds)
+        if include_thinking is not None:
+            form_fields["include_thinking"] = str(include_thinking)
+        if include_tool_activity is not None:
+            form_fields["include_tool_activity"] = str(include_tool_activity)
+        if files is not None:
+            form_fields["files"] = str(files)
+        response = await self._http.upload("POST", path, file=file, file_name=file_name, field_name="file", form_fields=form_fields)
         return response

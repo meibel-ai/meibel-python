@@ -1145,6 +1145,31 @@ class WebDomain(BaseModel):
     exclude_pattern: Optional[str] = Field(description="Regex URL pattern to exclude", default=None)
 
 
+class BodyUploadContent(BaseModel):
+    files: List[bytes] = Field(description="One or more files to upload")
+    datasource_id: Optional[str] = Field(description="ID of an existing datasource to upload to. Provide this or name.", default=None)
+    name: Optional[str] = Field(description="Name for a new datasource to create. Provide this or datasource_id.", default=None)
+    description: Optional[str] = Field(description="Description of the new datasource (only used when creating with name).", default=None)
+    metadata_config: Optional["MetadataConfigRequest"] = Field(default=None)
+
+
+class BodyUploadAndListContent(BaseModel):
+    files: List[bytes] = Field(description="One or more files to upload")
+    datasource_id: Optional[str] = Field(description="ID of an existing datasource to upload to. Provide this or name.", default=None)
+    name: Optional[str] = Field(description="Name for a new datasource to create. Provide this or datasource_id.", default=None)
+    description: Optional[str] = Field(description="Description of the new datasource (only used when creating with name).", default=None)
+    metadata_config: Optional["MetadataConfigRequest"] = Field(default=None)
+    trigger_ingest: Optional[bool] = Field(description="Start ingestion after upload completes. Returns ingest_url to poll for status.", default=None)
+
+
+class BodyParseDocument(BaseModel):
+    file: bytes = Field(description="The document file to parse")
+
+
+class BodyProcessDocument(BaseModel):
+    file: bytes = Field(description="The document file to process")
+
+
 # Update forward references
 AgentDetailResponse.model_rebuild()
 AgentExecutionDetailsResponse.model_rebuild()
@@ -1281,3 +1306,7 @@ UploadContentResponse.model_rebuild()
 UpdateDataElementRequest.model_rebuild()
 UpdateDatasourceRequest.model_rebuild()
 WebDomain.model_rebuild()
+BodyUploadContent.model_rebuild()
+BodyUploadAndListContent.model_rebuild()
+BodyParseDocument.model_rebuild()
+BodyProcessDocument.model_rebuild()
