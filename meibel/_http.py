@@ -81,6 +81,42 @@ class HttpClient:
 
         return self._handle_response(response, response_model)
 
+    def stream(
+        self,
+        method: str,
+        path: str,
+        *,
+        params: Optional[Dict[str, Any]] = None,
+        json: Optional[Any] = None,
+        headers: Optional[Dict[str, str]] = None,
+    ) -> "SSEIterator":
+        """Make an HTTP request and return a streaming SSE iterator."""
+        from ._streaming import SSEIterator
+
+        if params:
+            params = {k: v for k, v in params.items() if v is not None}
+
+        request_headers = {**self._headers, "Accept": "text/event-stream"}
+        if headers:
+            request_headers.update(headers)
+
+        response = self._client.send(
+            self._client.build_request(
+                method=method,
+                url=path,
+                params=params,
+                json=self._serialize_body(json),
+                headers=request_headers,
+            ),
+            stream=True,
+        )
+
+        if response.status_code >= 400:
+            response.read()
+            self._raise_error(response)
+
+        return SSEIterator(response)
+
     def upload(
         self,
         method: str,
@@ -227,6 +263,42 @@ class AsyncHttpClient:
         )
 
         return self._handle_response(response, response_model)
+
+    async def stream(
+        self,
+        method: str,
+        path: str,
+        *,
+        params: Optional[Dict[str, Any]] = None,
+        json: Optional[Any] = None,
+        headers: Optional[Dict[str, str]] = None,
+    ) -> "AsyncSSEIterator":
+        """Make an HTTP request and return a streaming SSE iterator."""
+        from ._streaming import AsyncSSEIterator
+
+        if params:
+            params = {k: v for k, v in params.items() if v is not None}
+
+        request_headers = {**self._headers, "Accept": "text/event-stream"}
+        if headers:
+            request_headers.update(headers)
+
+        response = await self._client.send(
+            self._client.build_request(
+                method=method,
+                url=path,
+                params=params,
+                json=self._serialize_body(json),
+                headers=request_headers,
+            ),
+            stream=True,
+        )
+
+        if response.status_code >= 400:
+            await response.aread()
+            self._raise_error(response)
+
+        return AsyncSSEIterator(response)
 
     async def upload(
         self,
