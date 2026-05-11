@@ -88,9 +88,15 @@ class HttpClient:
         *,
         params: Optional[Dict[str, Any]] = None,
         json: Optional[Any] = None,
+        data: Optional[Dict[str, str]] = None,
         headers: Optional[Dict[str, str]] = None,
     ) -> "SSEIterator":
-        """Make an HTTP request and return a streaming SSE iterator."""
+        """Make an HTTP request and return a streaming SSE iterator.
+
+        Args:
+            data: Form fields to send as application/x-www-form-urlencoded.
+                  Mutually exclusive with json.
+        """
         from ._streaming import SSEIterator
 
         if params:
@@ -105,7 +111,8 @@ class HttpClient:
                 method=method,
                 url=path,
                 params=params,
-                json=self._serialize_body(json),
+                json=self._serialize_body(json) if json is not None else None,
+                data=data,
                 headers=request_headers,
             ),
             stream=True,
@@ -271,9 +278,15 @@ class AsyncHttpClient:
         *,
         params: Optional[Dict[str, Any]] = None,
         json: Optional[Any] = None,
+        data: Optional[Dict[str, str]] = None,
         headers: Optional[Dict[str, str]] = None,
     ) -> "AsyncSSEIterator":
-        """Make an HTTP request and return a streaming SSE iterator."""
+        """Make an HTTP request and return a streaming SSE iterator.
+
+        Args:
+            data: Form fields to send as application/x-www-form-urlencoded.
+                  Mutually exclusive with json.
+        """
         from ._streaming import AsyncSSEIterator
 
         if params:
@@ -288,7 +301,8 @@ class AsyncHttpClient:
                 method=method,
                 url=path,
                 params=params,
-                json=self._serialize_body(json),
+                json=self._serialize_body(json) if json is not None else None,
+                data=data,
                 headers=request_headers,
             ),
             stream=True,

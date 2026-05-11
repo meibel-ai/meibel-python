@@ -126,7 +126,7 @@ class AgentsSessionsResource:
         if files is not None:
             return self._http.upload_stream("POST", path, file=files, file_name=files_name or "file", field_name="files", form_fields=form_fields)
         else:
-            return self._http.stream("POST", path, json=form_fields)
+            return self._http.stream("POST", path, data=form_fields)
 
 
 class AsyncAgentsSessionsResource:
@@ -242,4 +242,4 @@ class AsyncAgentsSessionsResource:
         if files is not None:
             return await self._http.upload_stream("POST", path, file=files, file_name=files_name or "file", field_name="files", form_fields=form_fields)
         else:
-            return self._http.stream("POST", path, json=form_fields)
+            return await self._http.stream("POST", path, data=form_fields)
