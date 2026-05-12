@@ -54,6 +54,7 @@ class BatchExecutionsResource:
             cursor_param="offset",
             next_field="next_cursor",
             params=params,
+            model_class=BatchExecutionResponse,
         )
 
     def create(self, body: "CreateBatchExecutionRequest") -> "BatchExecutionResponse":
@@ -208,6 +209,7 @@ class AsyncBatchExecutionsResource:
             cursor_param="offset",
             next_field="next_cursor",
             params=params,
+            model_class=BatchExecutionResponse,
         )
 
     async def create(self, body: "CreateBatchExecutionRequest") -> "BatchExecutionResponse":

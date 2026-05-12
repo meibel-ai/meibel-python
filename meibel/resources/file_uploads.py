@@ -123,6 +123,7 @@ class FileUploadsResource:
             cursor_param="continuation_token",
             next_field="next_cursor",
             params=params,
+            model_class=ContentItem,
         )
 
 
@@ -236,4 +237,5 @@ class AsyncFileUploadsResource:
             cursor_param="continuation_token",
             next_field="next_cursor",
             params=params,
+            model_class=ContentItem,
         )

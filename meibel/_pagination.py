@@ -10,11 +10,13 @@ from typing import (
     TYPE_CHECKING,
     Any,
     AsyncIterator,
+    Callable,
     Dict,
     Generic,
     Iterator,
     List,
     Optional,
+    Type,
     TypeVar,
 )
 
@@ -42,6 +44,7 @@ class PaginatedIterator(Generic[T]):
         cursor_param: str = "cursor",
         next_field: str = "next_cursor",
         params: Optional[Dict[str, Any]] = None,
+        model_class: Optional[Type[T]] = None,
     ):
         self._http = http
         self._method = method
@@ -50,8 +53,14 @@ class PaginatedIterator(Generic[T]):
         self._cursor_param = cursor_param
         self._next_field = next_field
         self._params = dict(params) if params else {}
+        self._model_class = model_class
         self._buffer: List[T] = []
         self._exhausted = False
+
+    def _parse_item(self, item: Any) -> T:
+        if self._model_class is not None and isinstance(item, dict):
+            return self._model_class.model_validate(item)
+        return item
 
     def __iter__(self) -> Iterator[T]:
         return self
@@ -75,8 +84,9 @@ class PaginatedIterator(Generic[T]):
         if not items:
             raise StopIteration
 
-        self._buffer = items[1:]
-        return items[0]
+        parsed = [self._parse_item(i) for i in items]
+        self._buffer = parsed[1:]
+        return parsed[0]
 
     def collect(self) -> List[T]:
         """Collect all items into a list."""
@@ -110,6 +120,7 @@ class AsyncPaginatedIterator(Generic[T]):
         cursor_param: str = "cursor",
         next_field: str = "next_cursor",
         params: Optional[Dict[str, Any]] = None,
+        model_class: Optional[Type[T]] = None,
     ):
         self._http = http
         self._method = method
@@ -118,8 +129,14 @@ class AsyncPaginatedIterator(Generic[T]):
         self._cursor_param = cursor_param
         self._next_field = next_field
         self._params = dict(params) if params else {}
+        self._model_class = model_class
         self._buffer: List[T] = []
         self._exhausted = False
+
+    def _parse_item(self, item: Any) -> T:
+        if self._model_class is not None and isinstance(item, dict):
+            return self._model_class.model_validate(item)
+        return item
 
     def __aiter__(self) -> AsyncIterator[T]:
         return self
@@ -143,8 +160,9 @@ class AsyncPaginatedIterator(Generic[T]):
         if not items:
             raise StopAsyncIteration
 
-        self._buffer = items[1:]
-        return items[0]
+        parsed = [self._parse_item(i) for i in items]
+        self._buffer = parsed[1:]
+        return parsed[0]
 
     async def collect(self) -> List[T]:
         """Collect all items into a list."""

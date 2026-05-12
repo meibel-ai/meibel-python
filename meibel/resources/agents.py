@@ -53,6 +53,7 @@ class AgentsResource:
             cursor_param="offset",
             next_field="next_cursor",
             params=params,
+            model_class=AgentSummary,
         )
 
     def create(self, body: "CreateAgentDefinitionRequest") -> "CreateAgentResponse":
@@ -183,6 +184,7 @@ class AgentsResource:
             cursor_param="offset",
             next_field="next_cursor",
             params=params,
+            model_class=AgentVersionSummary,
         )
 
 
@@ -222,6 +224,7 @@ class AsyncAgentsResource:
             cursor_param="offset",
             next_field="next_cursor",
             params=params,
+            model_class=AgentSummary,
         )
 
     async def create(self, body: "CreateAgentDefinitionRequest") -> "CreateAgentResponse":
@@ -352,4 +355,5 @@ class AsyncAgentsResource:
             cursor_param="offset",
             next_field="next_cursor",
             params=params,
+            model_class=AgentVersionSummary,
         )

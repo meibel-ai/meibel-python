@@ -88,6 +88,7 @@ class DataElementsResource:
             cursor_param="cursor",
             next_field="next_cursor",
             params=params,
+            model_class=DataElementResponse,
         )
 
     def search(self, datasource_id: str, body: "DataElementSearchRequest", cursor: Optional[Union[str, None]] = None, limit: Optional[int] = None) -> "DataElementListResponse":
@@ -194,6 +195,7 @@ class AsyncDataElementsResource:
             cursor_param="cursor",
             next_field="next_cursor",
             params=params,
+            model_class=DataElementResponse,
         )
 
     async def search(self, datasource_id: str, body: "DataElementSearchRequest", cursor: Optional[Union[str, None]] = None, limit: Optional[int] = None) -> "DataElementListResponse":

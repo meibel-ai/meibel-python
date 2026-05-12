@@ -45,6 +45,7 @@ class BatchDefinitionsResource:
             cursor_param="offset",
             next_field="next_cursor",
             params=params,
+            model_class=BatchDefinitionResponse,
         )
 
     def create(self, body: "CreateBatchDefinitionRequest") -> "CreateBatchDefinitionResponse":
@@ -169,6 +170,7 @@ class BatchDefinitionsResource:
             cursor_param="offset",
             next_field="next_cursor",
             params=params,
+            model_class=BatchDefinitionResponse,
         )
 
     def execute(self, definition_id: str) -> "ExecuteBatchDefinitionResponse":
@@ -224,6 +226,7 @@ class AsyncBatchDefinitionsResource:
             cursor_param="offset",
             next_field="next_cursor",
             params=params,
+            model_class=BatchDefinitionResponse,
         )
 
     async def create(self, body: "CreateBatchDefinitionRequest") -> "CreateBatchDefinitionResponse":
@@ -348,6 +351,7 @@ class AsyncBatchDefinitionsResource:
             cursor_param="offset",
             next_field="next_cursor",
             params=params,
+            model_class=BatchDefinitionResponse,
         )
 
     async def execute(self, definition_id: str) -> "ExecuteBatchDefinitionResponse":

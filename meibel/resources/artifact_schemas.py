@@ -51,6 +51,7 @@ class ArtifactSchemasResource:
             cursor_param="offset",
             next_field="next_cursor",
             params=params,
+            model_class=ArtifactSchemaSummary,
         )
 
     def create(self, body: "CreateAgentArtifactRequest") -> "CreateArtifactSchemaResponse":
@@ -166,6 +167,7 @@ class AsyncArtifactSchemasResource:
             cursor_param="offset",
             next_field="next_cursor",
             params=params,
+            model_class=ArtifactSchemaSummary,
         )
 
     async def create(self, body: "CreateAgentArtifactRequest") -> "CreateArtifactSchemaResponse":

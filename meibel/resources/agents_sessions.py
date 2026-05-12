@@ -58,6 +58,7 @@ class AgentsSessionsResource:
             cursor_param="offset",
             next_field="next_cursor",
             params=params,
+            model_class=SessionSummary,
         )
 
     def create(self, agent_id: str, body: Optional[Union["CreateSessionRequest", None]] = None) -> "CreateSessionResponse":
@@ -174,6 +175,7 @@ class AsyncAgentsSessionsResource:
             cursor_param="offset",
             next_field="next_cursor",
             params=params,
+            model_class=SessionSummary,
         )
 
     async def create(self, agent_id: str, body: Optional[Union["CreateSessionRequest", None]] = None) -> "CreateSessionResponse":
