@@ -19,7 +19,7 @@ class AgentsSessionsResource:
     def __init__(self, http: HttpClient):
         self._http = http
 
-    def list_sessions(self, agent_id: str, offset: Optional[int] = None, limit: Optional[Union[int, None]] = None, sort_by: Optional[str] = None, sort_order: Optional[str] = None, status: Optional[Union[str, None]] = None) -> PaginatedIterator["SessionSummary"]:
+    def list(self, agent_id: str, offset: Optional[int] = None, limit: Optional[Union[int, None]] = None, sort_by: Optional[str] = None, sort_order: Optional[str] = None, status: Optional[Union[str, None]] = None) -> PaginatedIterator["SessionSummary"]:
         """
         List Sessions
         
@@ -60,7 +60,7 @@ class AgentsSessionsResource:
             params=params,
         )
 
-    def create_session(self, agent_id: str, body: Optional[Union["CreateSessionRequest", None]] = None) -> "CreateSessionResponse":
+    def create(self, agent_id: str, body: Optional[Union["CreateSessionRequest", None]] = None) -> "CreateSessionResponse":
         """
         Create Session
         
@@ -135,7 +135,7 @@ class AsyncAgentsSessionsResource:
     def __init__(self, http: AsyncHttpClient):
         self._http = http
 
-    async def list_sessions(self, agent_id: str, offset: Optional[int] = None, limit: Optional[Union[int, None]] = None, sort_by: Optional[str] = None, sort_order: Optional[str] = None, status: Optional[Union[str, None]] = None) -> AsyncPaginatedIterator["SessionSummary"]:
+    async def list(self, agent_id: str, offset: Optional[int] = None, limit: Optional[Union[int, None]] = None, sort_by: Optional[str] = None, sort_order: Optional[str] = None, status: Optional[Union[str, None]] = None) -> AsyncPaginatedIterator["SessionSummary"]:
         """
         List Sessions
         
@@ -176,7 +176,7 @@ class AsyncAgentsSessionsResource:
             params=params,
         )
 
-    async def create_session(self, agent_id: str, body: Optional[Union["CreateSessionRequest", None]] = None) -> "CreateSessionResponse":
+    async def create(self, agent_id: str, body: Optional[Union["CreateSessionRequest", None]] = None) -> "CreateSessionResponse":
         """
         Create Session
         

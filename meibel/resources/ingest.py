@@ -16,7 +16,7 @@ class IngestResource:
     def __init__(self, http: HttpClient):
         self._http = http
 
-    def trigger_ingest(self, datasource_id: str) -> str:
+    def trigger(self, datasource_id: str) -> str:
         """
         Trigger Ingest
         
@@ -34,7 +34,7 @@ class IngestResource:
         response = self._http.request("POST", path)
         return response
 
-    def get_ingest_status(self, datasource_id: str) -> "IngestStatusResponse":
+    def get_status(self, datasource_id: str) -> "IngestStatusResponse":
         """
         Get Ingest Status
         
@@ -59,7 +59,7 @@ class AsyncIngestResource:
     def __init__(self, http: AsyncHttpClient):
         self._http = http
 
-    async def trigger_ingest(self, datasource_id: str) -> str:
+    async def trigger(self, datasource_id: str) -> str:
         """
         Trigger Ingest
         
@@ -77,7 +77,7 @@ class AsyncIngestResource:
         response = await self._http.request("POST", path)
         return response
 
-    async def get_ingest_status(self, datasource_id: str) -> "IngestStatusResponse":
+    async def get_status(self, datasource_id: str) -> "IngestStatusResponse":
         """
         Get Ingest Status
         

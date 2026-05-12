@@ -16,7 +16,7 @@ class TablesResource:
     def __init__(self, http: HttpClient):
         self._http = http
 
-    def list_tables(self, datasource_id: str, include_columns: Optional[bool] = None) -> List["TagTable"]:
+    def list(self, datasource_id: str, include_columns: Optional[bool] = None) -> List["TagTable"]:
         """
         List Tables
         
@@ -38,7 +38,7 @@ class TablesResource:
         response = self._http.request("GET", path, params=params)
         return [TagTable.model_validate(item) for item in response]
 
-    def update_table_descriptions(self, datasource_id: str, body: List["TagTableUpdateItem"]) -> List["TagTable"]:
+    def update_descriptions(self, datasource_id: str, body: List["TagTableUpdateItem"]) -> List["TagTable"]:
         """
         Update Table Descriptions
         
@@ -105,7 +105,7 @@ class AsyncTablesResource:
     def __init__(self, http: AsyncHttpClient):
         self._http = http
 
-    async def list_tables(self, datasource_id: str, include_columns: Optional[bool] = None) -> List["TagTable"]:
+    async def list(self, datasource_id: str, include_columns: Optional[bool] = None) -> List["TagTable"]:
         """
         List Tables
         
@@ -127,7 +127,7 @@ class AsyncTablesResource:
         response = await self._http.request("GET", path, params=params)
         return [TagTable.model_validate(item) for item in response]
 
-    async def update_table_descriptions(self, datasource_id: str, body: List["TagTableUpdateItem"]) -> List["TagTable"]:
+    async def update_descriptions(self, datasource_id: str, body: List["TagTableUpdateItem"]) -> List["TagTable"]:
         """
         Update Table Descriptions
         

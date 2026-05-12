@@ -16,7 +16,7 @@ class PromptsResource:
     def __init__(self, http: HttpClient):
         self._http = http
 
-    def list_prompts(self) -> "PromptListResponse":
+    def list(self) -> "PromptListResponse":
         """
         List Prompts
         
@@ -30,7 +30,7 @@ class PromptsResource:
         response = self._http.request("GET", path)
         return PromptListResponse.model_validate(response)
 
-    def create_prompt(self, body: "CreateAgentPromptRequest") -> "CreatePromptResponse":
+    def create(self, body: "CreateAgentPromptRequest") -> "CreatePromptResponse":
         """
         Create Prompt
         
@@ -47,7 +47,7 @@ class PromptsResource:
         response = self._http.request("POST", path, json=body.model_dump(by_alias=True, exclude_unset=True) if body else None)
         return CreatePromptResponse.model_validate(response)
 
-    def get_prompt(self, prompt_id: str) -> "PromptResponse":
+    def get(self, prompt_id: str) -> "PromptResponse":
         """
         Get Prompt
         
@@ -65,7 +65,7 @@ class PromptsResource:
         response = self._http.request("GET", path)
         return PromptResponse.model_validate(response)
 
-    def update_prompt(self, prompt_id: str, body: "UpdateAgentPromptRequest") -> "UpdatePromptResponse":
+    def update(self, prompt_id: str, body: "UpdateAgentPromptRequest") -> "UpdatePromptResponse":
         """
         Update Prompt
         
@@ -84,7 +84,7 @@ class PromptsResource:
         response = self._http.request("PUT", path, json=body.model_dump(by_alias=True, exclude_unset=True) if body else None)
         return UpdatePromptResponse.model_validate(response)
 
-    def delete_prompt(self, prompt_id: str) -> None:
+    def delete(self, prompt_id: str) -> None:
         """
         Delete Prompt
         
@@ -109,7 +109,7 @@ class AsyncPromptsResource:
     def __init__(self, http: AsyncHttpClient):
         self._http = http
 
-    async def list_prompts(self) -> "PromptListResponse":
+    async def list(self) -> "PromptListResponse":
         """
         List Prompts
         
@@ -123,7 +123,7 @@ class AsyncPromptsResource:
         response = await self._http.request("GET", path)
         return PromptListResponse.model_validate(response)
 
-    async def create_prompt(self, body: "CreateAgentPromptRequest") -> "CreatePromptResponse":
+    async def create(self, body: "CreateAgentPromptRequest") -> "CreatePromptResponse":
         """
         Create Prompt
         
@@ -140,7 +140,7 @@ class AsyncPromptsResource:
         response = await self._http.request("POST", path, json=body.model_dump(by_alias=True, exclude_unset=True) if body else None)
         return CreatePromptResponse.model_validate(response)
 
-    async def get_prompt(self, prompt_id: str) -> "PromptResponse":
+    async def get(self, prompt_id: str) -> "PromptResponse":
         """
         Get Prompt
         
@@ -158,7 +158,7 @@ class AsyncPromptsResource:
         response = await self._http.request("GET", path)
         return PromptResponse.model_validate(response)
 
-    async def update_prompt(self, prompt_id: str, body: "UpdateAgentPromptRequest") -> "UpdatePromptResponse":
+    async def update(self, prompt_id: str, body: "UpdateAgentPromptRequest") -> "UpdatePromptResponse":
         """
         Update Prompt
         
@@ -177,7 +177,7 @@ class AsyncPromptsResource:
         response = await self._http.request("PUT", path, json=body.model_dump(by_alias=True, exclude_unset=True) if body else None)
         return UpdatePromptResponse.model_validate(response)
 
-    async def delete_prompt(self, prompt_id: str) -> None:
+    async def delete(self, prompt_id: str) -> None:
         """
         Delete Prompt
         

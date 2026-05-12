@@ -18,7 +18,7 @@ class DocumentsResource:
     def __init__(self, http: HttpClient):
         self._http = http
 
-    def parse_document(self, file: BinaryIO, file_name: str) -> "ParseDocumentResponse":
+    def parse(self, file: BinaryIO, file_name: str) -> "ParseDocumentResponse":
         """
         Parse a document (async)
         
@@ -37,7 +37,7 @@ class DocumentsResource:
         response = self._http.upload("POST", path, file=file, file_name=file_name, field_name="file")
         return ParseDocumentResponse.model_validate(response)
 
-    def process_document(self, file: BinaryIO, file_name: str) -> "ProcessDocumentResponse":
+    def process(self, file: BinaryIO, file_name: str) -> "ProcessDocumentResponse":
         """
         Parse a document (sync)
         
@@ -57,7 +57,7 @@ class DocumentsResource:
         response = self._http.upload("POST", path, file=file, file_name=file_name, field_name="file")
         return ProcessDocumentResponse.model_validate(response)
 
-    def get_document_status(self, job_id: str) -> "DocumentStatus":
+    def get_status(self, job_id: str) -> "DocumentStatus":
         """
         Get document parsing status
         
@@ -77,7 +77,7 @@ class DocumentsResource:
         response = self._http.request("GET", path)
         return DocumentStatus.model_validate(response)
 
-    def get_document_result(self, job_id: str, format: Optional[str] = None) -> str:
+    def get_result(self, job_id: str, format: Optional[str] = None) -> str:
         """
         Get parsed document result
         
@@ -101,7 +101,7 @@ class DocumentsResource:
         response = self._http.request("GET", path, params=params)
         return response
 
-    def list_document_children(self, job_id: str) -> List["DocumentChild"]:
+    def list_children(self, job_id: str) -> List["DocumentChild"]:
         """
         List child documents
         
@@ -121,7 +121,7 @@ class DocumentsResource:
         response = self._http.request("GET", path)
         return [DocumentChild.model_validate(item) for item in response]
 
-    def stream_document_trace(self, job_id: str) -> Iterator[Union["LayoutDetectedEvent", "TableExtractedEvent", "OcrPageEvent", "CompletedEvent", "ErrorEvent"]]:
+    def stream_trace(self, job_id: str) -> Iterator[Union["LayoutDetectedEvent", "TableExtractedEvent", "OcrPageEvent", "CompletedEvent", "ErrorEvent"]]:
         """
         Stream document parsing trace
         
@@ -147,7 +147,7 @@ class AsyncDocumentsResource:
     def __init__(self, http: AsyncHttpClient):
         self._http = http
 
-    async def parse_document(self, file: BinaryIO, file_name: str) -> "ParseDocumentResponse":
+    async def parse(self, file: BinaryIO, file_name: str) -> "ParseDocumentResponse":
         """
         Parse a document (async)
         
@@ -166,7 +166,7 @@ class AsyncDocumentsResource:
         response = await self._http.upload("POST", path, file=file, file_name=file_name, field_name="file")
         return ParseDocumentResponse.model_validate(response)
 
-    async def process_document(self, file: BinaryIO, file_name: str) -> "ProcessDocumentResponse":
+    async def process(self, file: BinaryIO, file_name: str) -> "ProcessDocumentResponse":
         """
         Parse a document (sync)
         
@@ -186,7 +186,7 @@ class AsyncDocumentsResource:
         response = await self._http.upload("POST", path, file=file, file_name=file_name, field_name="file")
         return ProcessDocumentResponse.model_validate(response)
 
-    async def get_document_status(self, job_id: str) -> "DocumentStatus":
+    async def get_status(self, job_id: str) -> "DocumentStatus":
         """
         Get document parsing status
         
@@ -206,7 +206,7 @@ class AsyncDocumentsResource:
         response = await self._http.request("GET", path)
         return DocumentStatus.model_validate(response)
 
-    async def get_document_result(self, job_id: str, format: Optional[str] = None) -> str:
+    async def get_result(self, job_id: str, format: Optional[str] = None) -> str:
         """
         Get parsed document result
         
@@ -230,7 +230,7 @@ class AsyncDocumentsResource:
         response = await self._http.request("GET", path, params=params)
         return response
 
-    async def list_document_children(self, job_id: str) -> List["DocumentChild"]:
+    async def list_children(self, job_id: str) -> List["DocumentChild"]:
         """
         List child documents
         
@@ -250,7 +250,7 @@ class AsyncDocumentsResource:
         response = await self._http.request("GET", path)
         return [DocumentChild.model_validate(item) for item in response]
 
-    async def stream_document_trace(self, job_id: str) -> AsyncIterator[Union["LayoutDetectedEvent", "TableExtractedEvent", "OcrPageEvent", "CompletedEvent", "ErrorEvent"]]:
+    async def stream_trace(self, job_id: str) -> AsyncIterator[Union["LayoutDetectedEvent", "TableExtractedEvent", "OcrPageEvent", "CompletedEvent", "ErrorEvent"]]:
         """
         Stream document parsing trace
         

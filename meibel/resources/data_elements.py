@@ -17,7 +17,7 @@ class DataElementsResource:
     def __init__(self, http: HttpClient):
         self._http = http
 
-    def get_data_element(self, datasource_id: str, data_element_id: str) -> "DataElementResponse":
+    def get(self, datasource_id: str, data_element_id: str) -> "DataElementResponse":
         """
         Get Data Element
         
@@ -37,7 +37,7 @@ class DataElementsResource:
         response = self._http.request("GET", path)
         return DataElementResponse.model_validate(response)
 
-    def update_data_element(self, datasource_id: str, data_element_id: str, body: "UpdateDataElementRequest") -> "DataElementResponse":
+    def update(self, datasource_id: str, data_element_id: str, body: "UpdateDataElementRequest") -> "DataElementResponse":
         """
         Update Data Element
         
@@ -58,7 +58,7 @@ class DataElementsResource:
         response = self._http.request("PUT", path, json=body.model_dump(by_alias=True, exclude_unset=True) if body else None)
         return DataElementResponse.model_validate(response)
 
-    def list_data_elements(self, datasource_id: str, cursor: Optional[Union[str, None]] = None, limit: Optional[int] = None) -> PaginatedIterator["DataElementResponse"]:
+    def list(self, datasource_id: str, cursor: Optional[Union[str, None]] = None, limit: Optional[int] = None) -> PaginatedIterator["DataElementResponse"]:
         """
         List Data Elements
         
@@ -90,7 +90,7 @@ class DataElementsResource:
             params=params,
         )
 
-    def search_data_elements(self, datasource_id: str, body: "DataElementSearchRequest", cursor: Optional[Union[str, None]] = None, limit: Optional[int] = None) -> "DataElementListResponse":
+    def search(self, datasource_id: str, body: "DataElementSearchRequest", cursor: Optional[Union[str, None]] = None, limit: Optional[int] = None) -> "DataElementListResponse":
         """
         Search Data Elements
         
@@ -123,7 +123,7 @@ class AsyncDataElementsResource:
     def __init__(self, http: AsyncHttpClient):
         self._http = http
 
-    async def get_data_element(self, datasource_id: str, data_element_id: str) -> "DataElementResponse":
+    async def get(self, datasource_id: str, data_element_id: str) -> "DataElementResponse":
         """
         Get Data Element
         
@@ -143,7 +143,7 @@ class AsyncDataElementsResource:
         response = await self._http.request("GET", path)
         return DataElementResponse.model_validate(response)
 
-    async def update_data_element(self, datasource_id: str, data_element_id: str, body: "UpdateDataElementRequest") -> "DataElementResponse":
+    async def update(self, datasource_id: str, data_element_id: str, body: "UpdateDataElementRequest") -> "DataElementResponse":
         """
         Update Data Element
         
@@ -164,7 +164,7 @@ class AsyncDataElementsResource:
         response = await self._http.request("PUT", path, json=body.model_dump(by_alias=True, exclude_unset=True) if body else None)
         return DataElementResponse.model_validate(response)
 
-    async def list_data_elements(self, datasource_id: str, cursor: Optional[Union[str, None]] = None, limit: Optional[int] = None) -> AsyncPaginatedIterator["DataElementResponse"]:
+    async def list(self, datasource_id: str, cursor: Optional[Union[str, None]] = None, limit: Optional[int] = None) -> AsyncPaginatedIterator["DataElementResponse"]:
         """
         List Data Elements
         
@@ -196,7 +196,7 @@ class AsyncDataElementsResource:
             params=params,
         )
 
-    async def search_data_elements(self, datasource_id: str, body: "DataElementSearchRequest", cursor: Optional[Union[str, None]] = None, limit: Optional[int] = None) -> "DataElementListResponse":
+    async def search(self, datasource_id: str, body: "DataElementSearchRequest", cursor: Optional[Union[str, None]] = None, limit: Optional[int] = None) -> "DataElementListResponse":
         """
         Search Data Elements
         

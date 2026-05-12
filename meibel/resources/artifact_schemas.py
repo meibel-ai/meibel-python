@@ -17,7 +17,7 @@ class ArtifactSchemasResource:
     def __init__(self, http: HttpClient):
         self._http = http
 
-    def list_artifact_schemas(self, offset: Optional[int] = None, limit: Optional[Union[int, None]] = None, sort_by: Optional[Union[str, None]] = None, sort_order: Optional[Union[str, None]] = None) -> PaginatedIterator["ArtifactSchemaSummary"]:
+    def list(self, offset: Optional[int] = None, limit: Optional[Union[int, None]] = None, sort_by: Optional[Union[str, None]] = None, sort_order: Optional[Union[str, None]] = None) -> PaginatedIterator["ArtifactSchemaSummary"]:
         """
         List Artifact Schemas
         
@@ -53,7 +53,7 @@ class ArtifactSchemasResource:
             params=params,
         )
 
-    def create_artifact_schema(self, body: "CreateAgentArtifactRequest") -> "CreateArtifactSchemaResponse":
+    def create(self, body: "CreateAgentArtifactRequest") -> "CreateArtifactSchemaResponse":
         """
         Create Artifact Schema
         
@@ -70,7 +70,7 @@ class ArtifactSchemasResource:
         response = self._http.request("POST", path, json=body.model_dump(by_alias=True, exclude_unset=True) if body else None)
         return CreateArtifactSchemaResponse.model_validate(response)
 
-    def get_artifact_schema(self, artifact_id: str) -> "ArtifactSchemaResponse":
+    def get(self, artifact_id: str) -> "ArtifactSchemaResponse":
         """
         Get Artifact Schema
         
@@ -88,7 +88,7 @@ class ArtifactSchemasResource:
         response = self._http.request("GET", path)
         return ArtifactSchemaResponse.model_validate(response)
 
-    def update_artifact_schema(self, artifact_id: str, body: "UpdateAgentArtifactRequest") -> "UpdateArtifactSchemaResponse":
+    def update(self, artifact_id: str, body: "UpdateAgentArtifactRequest") -> "UpdateArtifactSchemaResponse":
         """
         Update Artifact Schema
         
@@ -107,7 +107,7 @@ class ArtifactSchemasResource:
         response = self._http.request("PUT", path, json=body.model_dump(by_alias=True, exclude_unset=True) if body else None)
         return UpdateArtifactSchemaResponse.model_validate(response)
 
-    def delete_artifact_schema(self, artifact_id: str) -> None:
+    def delete(self, artifact_id: str) -> None:
         """
         Delete Artifact Schema
         
@@ -132,7 +132,7 @@ class AsyncArtifactSchemasResource:
     def __init__(self, http: AsyncHttpClient):
         self._http = http
 
-    async def list_artifact_schemas(self, offset: Optional[int] = None, limit: Optional[Union[int, None]] = None, sort_by: Optional[Union[str, None]] = None, sort_order: Optional[Union[str, None]] = None) -> AsyncPaginatedIterator["ArtifactSchemaSummary"]:
+    async def list(self, offset: Optional[int] = None, limit: Optional[Union[int, None]] = None, sort_by: Optional[Union[str, None]] = None, sort_order: Optional[Union[str, None]] = None) -> AsyncPaginatedIterator["ArtifactSchemaSummary"]:
         """
         List Artifact Schemas
         
@@ -168,7 +168,7 @@ class AsyncArtifactSchemasResource:
             params=params,
         )
 
-    async def create_artifact_schema(self, body: "CreateAgentArtifactRequest") -> "CreateArtifactSchemaResponse":
+    async def create(self, body: "CreateAgentArtifactRequest") -> "CreateArtifactSchemaResponse":
         """
         Create Artifact Schema
         
@@ -185,7 +185,7 @@ class AsyncArtifactSchemasResource:
         response = await self._http.request("POST", path, json=body.model_dump(by_alias=True, exclude_unset=True) if body else None)
         return CreateArtifactSchemaResponse.model_validate(response)
 
-    async def get_artifact_schema(self, artifact_id: str) -> "ArtifactSchemaResponse":
+    async def get(self, artifact_id: str) -> "ArtifactSchemaResponse":
         """
         Get Artifact Schema
         
@@ -203,7 +203,7 @@ class AsyncArtifactSchemasResource:
         response = await self._http.request("GET", path)
         return ArtifactSchemaResponse.model_validate(response)
 
-    async def update_artifact_schema(self, artifact_id: str, body: "UpdateAgentArtifactRequest") -> "UpdateArtifactSchemaResponse":
+    async def update(self, artifact_id: str, body: "UpdateAgentArtifactRequest") -> "UpdateArtifactSchemaResponse":
         """
         Update Artifact Schema
         
@@ -222,7 +222,7 @@ class AsyncArtifactSchemasResource:
         response = await self._http.request("PUT", path, json=body.model_dump(by_alias=True, exclude_unset=True) if body else None)
         return UpdateArtifactSchemaResponse.model_validate(response)
 
-    async def delete_artifact_schema(self, artifact_id: str) -> None:
+    async def delete(self, artifact_id: str) -> None:
         """
         Delete Artifact Schema
         

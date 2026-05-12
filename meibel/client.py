@@ -9,6 +9,8 @@ from ._http import HttpClient, AsyncHttpClient
 from .resources.agents import AgentsResource, AsyncAgentsResource
 from .resources.agents_sessions import AgentsSessionsResource, AsyncAgentsSessionsResource
 from .resources.artifact_schemas import ArtifactSchemasResource, AsyncArtifactSchemasResource
+from .resources.batch_definitions import BatchDefinitionsResource, AsyncBatchDefinitionsResource
+from .resources.batch_executions import BatchExecutionsResource, AsyncBatchExecutionsResource
 from .resources.confidence_scoring import ConfidenceScoringResource, AsyncConfidenceScoringResource
 from .resources.datasources import DatasourcesResource, AsyncDatasourcesResource
 from .resources.data_elements import DataElementsResource, AsyncDataElementsResource
@@ -43,6 +45,8 @@ class MeibelClient:
 
         self.agents = AgentsResource(self._http)
         self.artifact_schemas = ArtifactSchemasResource(self._http)
+        self.batch_definitions = BatchDefinitionsResource(self._http)
+        self.batch_executions = BatchExecutionsResource(self._http)
         self.confidence_scoring = ConfidenceScoringResource(self._http)
         self.datasources = DatasourcesResource(self._http)
         self.documents = DocumentsResource(self._http)
@@ -88,6 +92,8 @@ class AsyncMeibelClient:
 
         self.agents = AsyncAgentsResource(self._http)
         self.artifact_schemas = AsyncArtifactSchemasResource(self._http)
+        self.batch_definitions = AsyncBatchDefinitionsResource(self._http)
+        self.batch_executions = AsyncBatchExecutionsResource(self._http)
         self.confidence_scoring = AsyncConfidenceScoringResource(self._http)
         self.datasources = AsyncDatasourcesResource(self._http)
         self.documents = AsyncDocumentsResource(self._http)

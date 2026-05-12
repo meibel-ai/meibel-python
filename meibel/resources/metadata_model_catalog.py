@@ -16,7 +16,7 @@ class MetadataModelCatalogResource:
     def __init__(self, http: HttpClient):
         self._http = http
 
-    def list_metadata_model_catalog(self, scope: Optional[Union[str, None]] = None) -> "ListMetadataModelCatalogResponse":
+    def list(self, scope: Optional[Union[str, None]] = None) -> "ListMetadataModelCatalogResponse":
         """
         List Metadata Model Catalog
         
@@ -36,7 +36,7 @@ class MetadataModelCatalogResource:
         response = self._http.request("GET", path, params=params)
         return ListMetadataModelCatalogResponse.model_validate(response)
 
-    def get_metadata_model_catalog_entry(self, model_id: str) -> "MetadataModelCatalogEntry":
+    def get_entry(self, model_id: str) -> "MetadataModelCatalogEntry":
         """
         Get Metadata Model Catalog Entry
         
@@ -61,7 +61,7 @@ class AsyncMetadataModelCatalogResource:
     def __init__(self, http: AsyncHttpClient):
         self._http = http
 
-    async def list_metadata_model_catalog(self, scope: Optional[Union[str, None]] = None) -> "ListMetadataModelCatalogResponse":
+    async def list(self, scope: Optional[Union[str, None]] = None) -> "ListMetadataModelCatalogResponse":
         """
         List Metadata Model Catalog
         
@@ -81,7 +81,7 @@ class AsyncMetadataModelCatalogResource:
         response = await self._http.request("GET", path, params=params)
         return ListMetadataModelCatalogResponse.model_validate(response)
 
-    async def get_metadata_model_catalog_entry(self, model_id: str) -> "MetadataModelCatalogEntry":
+    async def get_entry(self, model_id: str) -> "MetadataModelCatalogEntry":
         """
         Get Metadata Model Catalog Entry
         

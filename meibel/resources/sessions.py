@@ -16,7 +16,7 @@ class SessionsResource:
     def __init__(self, http: HttpClient):
         self._http = http
 
-    def get_session(self, session_id: str) -> "AgentExecutionDetailsResponse":
+    def get(self, session_id: str) -> "AgentExecutionDetailsResponse":
         """
         Get Session
         
@@ -34,7 +34,7 @@ class SessionsResource:
         response = self._http.request("GET", path)
         return AgentExecutionDetailsResponse.model_validate(response)
 
-    def get_session_messages(self, session_id: str) -> "SessionMessagesResponse":
+    def get_messages(self, session_id: str) -> "SessionMessagesResponse":
         """
         Get Session Messages
         
@@ -59,7 +59,7 @@ class AsyncSessionsResource:
     def __init__(self, http: AsyncHttpClient):
         self._http = http
 
-    async def get_session(self, session_id: str) -> "AgentExecutionDetailsResponse":
+    async def get(self, session_id: str) -> "AgentExecutionDetailsResponse":
         """
         Get Session
         
@@ -77,7 +77,7 @@ class AsyncSessionsResource:
         response = await self._http.request("GET", path)
         return AgentExecutionDetailsResponse.model_validate(response)
 
-    async def get_session_messages(self, session_id: str) -> "SessionMessagesResponse":
+    async def get_messages(self, session_id: str) -> "SessionMessagesResponse":
         """
         Get Session Messages
         

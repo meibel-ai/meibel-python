@@ -17,7 +17,7 @@ class DownloadsResource:
     def __init__(self, http: HttpClient):
         self._http = http
 
-    def create_download_job(self, datasource_id: str, body: Optional[Union["DownloadJobRequest", None]] = None) -> "DownloadJobResponse":
+    def create_job(self, datasource_id: str, body: Optional[Union["DownloadJobRequest", None]] = None) -> "DownloadJobResponse":
         """
         Create Download Job (async)
         
@@ -36,7 +36,7 @@ class DownloadsResource:
         response = self._http.request("POST", path, json=body.model_dump(by_alias=True, exclude_unset=True) if body else None)
         return DownloadJobResponse.model_validate(response)
 
-    def stream_download_progress(self, datasource_id: str, job_id: str) -> Iterator[Union["ConnectedEvent", "ProgressEvent", "StreamCompleteEvent", "ErrorEvent"]]:
+    def stream_progress(self, datasource_id: str, job_id: str) -> Iterator[Union["ConnectedEvent", "ProgressEvent", "StreamCompleteEvent", "ErrorEvent"]]:
         """
         Stream Download Progress
         
@@ -75,7 +75,7 @@ class DownloadsResource:
         response = self._http.request("GET", path)
         return response
 
-    def process_download(self, datasource_id: str, body: Optional[Union["DownloadJobRequest", None]] = None) -> str:
+    def process(self, datasource_id: str, body: Optional[Union["DownloadJobRequest", None]] = None) -> str:
         """
         Process Download (sync)
         
@@ -101,7 +101,7 @@ class AsyncDownloadsResource:
     def __init__(self, http: AsyncHttpClient):
         self._http = http
 
-    async def create_download_job(self, datasource_id: str, body: Optional[Union["DownloadJobRequest", None]] = None) -> "DownloadJobResponse":
+    async def create_job(self, datasource_id: str, body: Optional[Union["DownloadJobRequest", None]] = None) -> "DownloadJobResponse":
         """
         Create Download Job (async)
         
@@ -120,7 +120,7 @@ class AsyncDownloadsResource:
         response = await self._http.request("POST", path, json=body.model_dump(by_alias=True, exclude_unset=True) if body else None)
         return DownloadJobResponse.model_validate(response)
 
-    async def stream_download_progress(self, datasource_id: str, job_id: str) -> AsyncIterator[Union["ConnectedEvent", "ProgressEvent", "StreamCompleteEvent", "ErrorEvent"]]:
+    async def stream_progress(self, datasource_id: str, job_id: str) -> AsyncIterator[Union["ConnectedEvent", "ProgressEvent", "StreamCompleteEvent", "ErrorEvent"]]:
         """
         Stream Download Progress
         
@@ -159,7 +159,7 @@ class AsyncDownloadsResource:
         response = await self._http.request("GET", path)
         return response
 
-    async def process_download(self, datasource_id: str, body: Optional[Union["DownloadJobRequest", None]] = None) -> str:
+    async def process(self, datasource_id: str, body: Optional[Union["DownloadJobRequest", None]] = None) -> str:
         """
         Process Download (sync)
         

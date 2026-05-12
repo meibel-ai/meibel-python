@@ -32,7 +32,7 @@ class DatasourcesResource:
     def __init__(self, http: HttpClient):
         self._http = http
 
-    def list_datasources(self) -> "DatasourceListResponse":
+    def list(self) -> "DatasourceListResponse":
         """
         List Datasources
         
@@ -46,7 +46,7 @@ class DatasourcesResource:
         response = self._http.request("GET", path)
         return DatasourceListResponse.model_validate(response)
 
-    def create_datasource(self, body: "CreateDatasourceRequest") -> "DatasourceResponse":
+    def create(self, body: "CreateDatasourceRequest") -> "DatasourceResponse":
         """
         Create Datasource
         
@@ -63,7 +63,7 @@ class DatasourcesResource:
         response = self._http.request("POST", path, json=body.model_dump(by_alias=True, exclude_unset=True) if body else None)
         return DatasourceResponse.model_validate(response)
 
-    def get_datasource(self, datasource_id: str, include_tables: Optional[bool] = None) -> "DatasourceResponse":
+    def get(self, datasource_id: str, include_tables: Optional[bool] = None) -> "DatasourceResponse":
         """
         Get Datasource
         
@@ -85,7 +85,7 @@ class DatasourcesResource:
         response = self._http.request("GET", path, params=params)
         return DatasourceResponse.model_validate(response)
 
-    def update_datasource(self, datasource_id: str, body: "UpdateDatasourceRequest") -> "DatasourceResponse":
+    def update(self, datasource_id: str, body: "UpdateDatasourceRequest") -> "DatasourceResponse":
         """
         Update Datasource
         
@@ -104,7 +104,7 @@ class DatasourcesResource:
         response = self._http.request("PUT", path, json=body.model_dump(by_alias=True, exclude_unset=True) if body else None)
         return DatasourceResponse.model_validate(response)
 
-    def delete_datasource(self, datasource_id: str) -> str:
+    def delete(self, datasource_id: str) -> str:
         """
         Delete Datasource
         
@@ -135,7 +135,7 @@ class AsyncDatasourcesResource:
     def __init__(self, http: AsyncHttpClient):
         self._http = http
 
-    async def list_datasources(self) -> "DatasourceListResponse":
+    async def list(self) -> "DatasourceListResponse":
         """
         List Datasources
         
@@ -149,7 +149,7 @@ class AsyncDatasourcesResource:
         response = await self._http.request("GET", path)
         return DatasourceListResponse.model_validate(response)
 
-    async def create_datasource(self, body: "CreateDatasourceRequest") -> "DatasourceResponse":
+    async def create(self, body: "CreateDatasourceRequest") -> "DatasourceResponse":
         """
         Create Datasource
         
@@ -166,7 +166,7 @@ class AsyncDatasourcesResource:
         response = await self._http.request("POST", path, json=body.model_dump(by_alias=True, exclude_unset=True) if body else None)
         return DatasourceResponse.model_validate(response)
 
-    async def get_datasource(self, datasource_id: str, include_tables: Optional[bool] = None) -> "DatasourceResponse":
+    async def get(self, datasource_id: str, include_tables: Optional[bool] = None) -> "DatasourceResponse":
         """
         Get Datasource
         
@@ -188,7 +188,7 @@ class AsyncDatasourcesResource:
         response = await self._http.request("GET", path, params=params)
         return DatasourceResponse.model_validate(response)
 
-    async def update_datasource(self, datasource_id: str, body: "UpdateDatasourceRequest") -> "DatasourceResponse":
+    async def update(self, datasource_id: str, body: "UpdateDatasourceRequest") -> "DatasourceResponse":
         """
         Update Datasource
         
@@ -207,7 +207,7 @@ class AsyncDatasourcesResource:
         response = await self._http.request("PUT", path, json=body.model_dump(by_alias=True, exclude_unset=True) if body else None)
         return DatasourceResponse.model_validate(response)
 
-    async def delete_datasource(self, datasource_id: str) -> str:
+    async def delete(self, datasource_id: str) -> str:
         """
         Delete Datasource
         

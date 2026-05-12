@@ -25,7 +25,7 @@ class AgentsResource:
     def __init__(self, http: HttpClient):
         self._http = http
 
-    def list_agents(self, offset: Optional[int] = None, limit: Optional[Union[int, None]] = None) -> PaginatedIterator["AgentSummary"]:
+    def list(self, offset: Optional[int] = None, limit: Optional[Union[int, None]] = None) -> PaginatedIterator["AgentSummary"]:
         """
         List Agents
         
@@ -55,7 +55,7 @@ class AgentsResource:
             params=params,
         )
 
-    def create_agent(self, body: "CreateAgentDefinitionRequest") -> "CreateAgentResponse":
+    def create(self, body: "CreateAgentDefinitionRequest") -> "CreateAgentResponse":
         """
         Create Agent
         
@@ -72,7 +72,7 @@ class AgentsResource:
         response = self._http.request("POST", path, json=body.model_dump(by_alias=True, exclude_unset=True) if body else None)
         return CreateAgentResponse.model_validate(response)
 
-    def get_agent(self, agent_id: str) -> "AgentDetailResponse":
+    def get(self, agent_id: str) -> "AgentDetailResponse":
         """
         Get Agent
         
@@ -90,7 +90,7 @@ class AgentsResource:
         response = self._http.request("GET", path)
         return AgentDetailResponse.model_validate(response)
 
-    def update_agent(self, agent_id: str, body: "UpdateAgentDefinitionRequest") -> "UpdateAgentDefinitionResponse":
+    def update(self, agent_id: str, body: "UpdateAgentDefinitionRequest") -> "UpdateAgentDefinitionResponse":
         """
         Update Agent
         
@@ -109,7 +109,7 @@ class AgentsResource:
         response = self._http.request("PUT", path, json=body.model_dump(by_alias=True, exclude_unset=True) if body else None)
         return UpdateAgentDefinitionResponse.model_validate(response)
 
-    def delete_agent(self, agent_id: str) -> None:
+    def delete(self, agent_id: str) -> None:
         """
         Delete Agent
         
@@ -127,7 +127,7 @@ class AgentsResource:
         response = self._http.request("DELETE", path)
         return response
 
-    def publish_agent(self, agent_id: str, body: "PublishAgentDefinitionRequest", override_draft: Optional[bool] = None) -> "PublishAgentDefinitionResponse":
+    def publish(self, agent_id: str, body: "PublishAgentDefinitionRequest", override_draft: Optional[bool] = None) -> "PublishAgentDefinitionResponse":
         """
         Publish Agent
         
@@ -150,7 +150,7 @@ class AgentsResource:
         response = self._http.request("POST", path, params=params, json=body.model_dump(by_alias=True, exclude_unset=True) if body else None)
         return PublishAgentDefinitionResponse.model_validate(response)
 
-    def list_agent_versions(self, agent_id: str, published: Optional[Union[bool, None]] = None, offset: Optional[int] = None, limit: Optional[Union[int, None]] = None) -> PaginatedIterator["AgentVersionSummary"]:
+    def list_versions(self, agent_id: str, published: Optional[Union[bool, None]] = None, offset: Optional[int] = None, limit: Optional[Union[int, None]] = None) -> PaginatedIterator["AgentVersionSummary"]:
         """
         List Agent Versions
         
@@ -194,7 +194,7 @@ class AsyncAgentsResource:
     def __init__(self, http: AsyncHttpClient):
         self._http = http
 
-    async def list_agents(self, offset: Optional[int] = None, limit: Optional[Union[int, None]] = None) -> AsyncPaginatedIterator["AgentSummary"]:
+    async def list(self, offset: Optional[int] = None, limit: Optional[Union[int, None]] = None) -> AsyncPaginatedIterator["AgentSummary"]:
         """
         List Agents
         
@@ -224,7 +224,7 @@ class AsyncAgentsResource:
             params=params,
         )
 
-    async def create_agent(self, body: "CreateAgentDefinitionRequest") -> "CreateAgentResponse":
+    async def create(self, body: "CreateAgentDefinitionRequest") -> "CreateAgentResponse":
         """
         Create Agent
         
@@ -241,7 +241,7 @@ class AsyncAgentsResource:
         response = await self._http.request("POST", path, json=body.model_dump(by_alias=True, exclude_unset=True) if body else None)
         return CreateAgentResponse.model_validate(response)
 
-    async def get_agent(self, agent_id: str) -> "AgentDetailResponse":
+    async def get(self, agent_id: str) -> "AgentDetailResponse":
         """
         Get Agent
         
@@ -259,7 +259,7 @@ class AsyncAgentsResource:
         response = await self._http.request("GET", path)
         return AgentDetailResponse.model_validate(response)
 
-    async def update_agent(self, agent_id: str, body: "UpdateAgentDefinitionRequest") -> "UpdateAgentDefinitionResponse":
+    async def update(self, agent_id: str, body: "UpdateAgentDefinitionRequest") -> "UpdateAgentDefinitionResponse":
         """
         Update Agent
         
@@ -278,7 +278,7 @@ class AsyncAgentsResource:
         response = await self._http.request("PUT", path, json=body.model_dump(by_alias=True, exclude_unset=True) if body else None)
         return UpdateAgentDefinitionResponse.model_validate(response)
 
-    async def delete_agent(self, agent_id: str) -> None:
+    async def delete(self, agent_id: str) -> None:
         """
         Delete Agent
         
@@ -296,7 +296,7 @@ class AsyncAgentsResource:
         response = await self._http.request("DELETE", path)
         return response
 
-    async def publish_agent(self, agent_id: str, body: "PublishAgentDefinitionRequest", override_draft: Optional[bool] = None) -> "PublishAgentDefinitionResponse":
+    async def publish(self, agent_id: str, body: "PublishAgentDefinitionRequest", override_draft: Optional[bool] = None) -> "PublishAgentDefinitionResponse":
         """
         Publish Agent
         
@@ -319,7 +319,7 @@ class AsyncAgentsResource:
         response = await self._http.request("POST", path, params=params, json=body.model_dump(by_alias=True, exclude_unset=True) if body else None)
         return PublishAgentDefinitionResponse.model_validate(response)
 
-    async def list_agent_versions(self, agent_id: str, published: Optional[Union[bool, None]] = None, offset: Optional[int] = None, limit: Optional[Union[int, None]] = None) -> AsyncPaginatedIterator["AgentVersionSummary"]:
+    async def list_versions(self, agent_id: str, published: Optional[Union[bool, None]] = None, offset: Optional[int] = None, limit: Optional[Union[int, None]] = None) -> AsyncPaginatedIterator["AgentVersionSummary"]:
         """
         List Agent Versions
         
