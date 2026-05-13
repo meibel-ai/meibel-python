@@ -8,6 +8,8 @@ from typing import Optional, List, Dict, Any, Union, Iterator, AsyncIterator
 from .._http import HttpClient, AsyncHttpClient
 from ..models import *
 from ..exceptions import raise_for_status
+from pydantic import BaseModel
+from typing import Type
 from .._metadata import metadata_schema_from_model
 from .data_elements import DataElementsResource, AsyncDataElementsResource
 from .downloads import DownloadsResource, AsyncDownloadsResource
