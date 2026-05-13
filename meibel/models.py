@@ -24,7 +24,7 @@ class AgentDetailResponse(BaseModel):
     fallback_models: List[str] = ...
     datasources: List[str] = ...
     instructions: str = ...
-    tools: List[str] = ...
+    tools: List[Dict[str, Any]] = ...
     artifacts: List[str] = ...
     confidence_configs: List[str] = ...
     temperature: Union[float, int] = ...
@@ -45,7 +45,7 @@ class AgentExecutionDetailsResponse(BaseModel):
     status: str = ...
     messages: List["MessageEntry"] = ...
     tool_activity: List["ToolActivityEntry"] = ...
-    token_usage: List[Union[str, None]] = ...
+    token_usage: List[Union[Dict[str, Any], None]] = ...
     file_parsing: List["FileParseEntry"] = ...
     result: List["ArtifactEntry"] = ...
 
@@ -87,8 +87,8 @@ class AgentToolDefinition(BaseModel):
     name: str = Field(description="Instance name - what the LLM sees and calls")
     type: str = Field(description="Tool type: rag_search, database_query, etc.")
     description: Optional[Union[str, None]] = Field(description="Description shown to LLM", default=None)
-    config: Optional[Union[str, None]] = Field(description="Tool config passed to activity via tool_context (datasource_id, base_prompt, etc.)", default=None)
-    parameters_schema: Optional[Union[str, None]] = Field(description="Optional override for the tool's parameters schema", default=None)
+    config: Optional[Union[Dict[str, Any], None]] = Field(description="Tool config passed to activity via tool_context (datasource_id, base_prompt, etc.)", default=None)
+    parameters_schema: Optional[Union[Dict[str, Any], None]] = Field(description="Optional override for the tool's parameters schema", default=None)
     use_for: Optional[Union[List[str], None]] = Field(description="When to use this tool (injected into system prompt)", default=None)
     avoid_for: Optional[Union[List[str], None]] = Field(description="When NOT to use this tool (injected into system prompt)", default=None)
     require_approval: Optional[Union[bool, None]] = Field(description="If true, workflow pauses for human approval before executing this tool", default=None)
@@ -146,7 +146,7 @@ class ArtifactSchemaResponse(BaseModel):
     type: str = ...
     description: str = ...
     required: bool = ...
-    schema_def: str = ...
+    schema_def: Dict[str, Any] = ...
     max_size_bytes: Optional[Union[int, None]] = Field(default=None)
     storage_strategy: str = ...
     created_by: Optional[Union[str, None]] = Field(default=None)
@@ -188,9 +188,9 @@ class BatchDefinitionResponse(BaseModel):
     parent_version: Union[str, None] = ...
     catalog_urn: str = ...
     agent_urn: str = ...
-    agent_spec_json: str = ...
+    agent_spec_json: Dict[str, Any] = ...
     input_datasource_id: str = ...
-    filters: Optional[Union[str, None]] = Field(description="Optional override for the tool's parameters schema", default=None)
+    filters: Optional[Union[Dict[str, Any], None]] = Field(description="Optional override for the tool's parameters schema", default=None)
     output_datasource_id: Optional[Union[str, None]] = Field(default=None)
     user_message: Optional[Union[str, None]] = Field(default=None)
     concurrency: int = ...
@@ -209,11 +209,11 @@ class BatchExecutionResponse(BaseModel):
     customer_id: str = ...
     project_id: str = ...
     agent_urn: Optional[Union[str, None]] = Field(default=None)
-    batch_spec_json: Optional[Union[str, None]] = Field(description="Optional override for the tool's parameters schema", default=None)
-    agent_spec_json: Optional[Union[str, None]] = Field(default=None)
+    batch_spec_json: Optional[Union[Dict[str, Any], None]] = Field(description="Optional override for the tool's parameters schema", default=None)
+    agent_spec_json: Optional[Union[Dict[str, Any], None]] = Field(default=None)
     input_datasource_id: Optional[Union[str, None]] = Field(default=None)
     output_datasource_id: Optional[Union[str, None]] = Field(default=None)
-    input_overrides: Optional[Union[str, None]] = Field(description="Optional override for the tool's parameters schema", default=None)
+    input_overrides: Optional[Union[Dict[str, Any], None]] = Field(description="Optional override for the tool's parameters schema", default=None)
     total_items: Optional[Union[int, None]] = Field(default=None)
     succeeded: Optional[Union[int, None]] = Field(default=None)
     failed: Optional[Union[int, None]] = Field(default=None)
@@ -230,7 +230,7 @@ class BatchItemResult(BaseModel):
     filename: str = ...
     status: str = ...
     error: Optional[Union[str, None]] = Field(default=None)
-    output_artifacts: Optional[Union[List[Union[str, None]], None]] = Field(default=None)
+    output_artifacts: Optional[Union[List[Union[Dict[str, Any], None]], None]] = Field(default=None)
     attempts: Optional[Union[int, None]] = Field(default=None)
 
 
@@ -254,7 +254,7 @@ class CallToAction(BaseModel):
     """An action the user can take."""
     label: str = ...
     action: str = ...
-    action_data: Optional[Union[str, None]] = Field(description="Optional override for the tool's parameters schema", default=None)
+    action_data: Optional[Union[Dict[str, Any], None]] = Field(description="Optional override for the tool's parameters schema", default=None)
 
 
 class ChatMessageRequest(BaseModel):
@@ -323,10 +323,10 @@ class CreateAgentArtifactRequest(BaseModel):
     type: "ArtifactType" = Field(description="Artifact type (json, markdown, csv, yaml, text, html, pdf)")
     description: Optional[Union[str, None]] = Field(description="Description of the artifact", default=None)
     required: Optional[Union[bool, None]] = Field(description="Whether agent must produce this artifact", default=None)
-    schema_def: str = Field(description="Schema definition")
+    schema_def: Dict[str, Any] = Field(description="Schema definition")
     max_size_bytes: Optional[Union[int, None]] = Field(description="Maximum artifact size in bytes", default=None)
     storage_strategy: Optional[Union["ArtifactStorageStrategy", None]] = Field(description="Storage strategy (inline, gcs, auto)", default=None)
-    additional_properties: Optional[str] = Field(default=None)
+    additional_properties: Optional[Dict[str, Any]] = Field(default=None)
 
 
 class CreateAgentDefinitionRequest(BaseModel):
@@ -345,7 +345,7 @@ class CreateAgentDefinitionRequest(BaseModel):
     max_tokens: Optional[Union[int, None]] = Field(description="Maximum tokens in response", default=None)
     tags: Optional[Union[List[str], None]] = Field(description="Tags for categorization", default=None)
     icon: Optional[Union[str, None]] = Field(description="UI icon identifier", default=None)
-    additional_properties: Optional[str] = Field(default=None)
+    additional_properties: Optional[Dict[str, Any]] = Field(default=None)
 
 
 class CreateAgentPromptRequest(BaseModel):
@@ -411,7 +411,7 @@ class CreatePromptResponse(BaseModel):
 
 class CreateSessionRequest(BaseModel):
     prompt: Optional[Union[str, None]] = Field(default=None)
-    initial_context: Optional[Union[str, None]] = Field(default=None)
+    initial_context: Optional[Union[Dict[str, Any], None]] = Field(default=None)
     max_iterations_per_user_message: Optional[Union[int, None]] = Field(default=None)
 
 
@@ -431,7 +431,7 @@ class DataElementResponse(BaseModel):
     name: str = ...
     description: Optional[Union[str, None]] = Field(default=None)
     media_type: Optional[Union[str, None]] = Field(default=None)
-    metadata: Optional[Union[str, None]] = Field(default=None)
+    metadata: Optional[Union[Dict[str, Any], None]] = Field(default=None)
     created_at: Optional[Union[str, None]] = Field(default=None)
     updated_at: Optional[Union[str, None]] = Field(default=None)
 
@@ -629,7 +629,7 @@ class LegacyBatchInputFilters(BaseModel):
     regex: Optional[Union[str, None]] = Field(default=None)
     media_types: Optional[Union[List[str], None]] = Field(default=None)
     element_ids: Optional[Union[List[str], None]] = Field(default=None)
-    additional_properties: Optional[str] = Field(default=None)
+    additional_properties: Optional[Dict[str, Any]] = Field(default=None)
 
 
 class LegacyBatchOutputConfig(BaseModel):
@@ -646,7 +646,7 @@ class LegacyBatchSpecJson(BaseModel):
     input: "LegacyBatchInputConfig" = ...
     output: Optional[Union["LegacyBatchOutputConfig", None]] = Field(default=None)
     execution: Optional[Union["LegacyBatchExecutionParams", None]] = Field(default=None)
-    additional_properties: Optional[str] = Field(default=None)
+    additional_properties: Optional[Dict[str, Any]] = Field(default=None)
 
 
 class ListMetadataModelCatalogResponse(BaseModel):
@@ -659,7 +659,7 @@ class MeibelDocumentResult(BaseModel):
     elements: List["DocumentElement"] = ...
     pages: int = ...
     tables: int = ...
-    metadata: Optional[Union[str, None]] = Field(default=None)
+    metadata: Optional[Union[Dict[str, Any], None]] = Field(default=None)
 
 
 class MessageEntry(BaseModel):
@@ -727,7 +727,7 @@ class OcConfig(BaseModel):
     max_tokens: Optional[Union[int, None]] = Field(default=None)
     temperature: Optional[Union[float, int, None]] = Field(default=None)
     models: Optional[Union[List[Union[str, None]], None]] = Field(default=None)
-    nli_model_config: str = ...
+    nli_model_config: Dict[str, Any] = ...
     n_bootstraps: Optional[Union["NBootstraps", None]] = Field(default=None)
     token_limit: Optional[Union[int, None]] = Field(default=None)
     original_completion: Optional[Union[str, None]] = Field(default=None)
@@ -842,7 +842,7 @@ class SessionMessageItem(BaseModel):
     signal_id: Optional[Union[str, None]] = Field(default=None)
     tool_id: Optional[Union[str, None]] = Field(default=None)
     tool_name: Optional[Union[str, None]] = Field(default=None)
-    arguments: Optional[Union[str, None]] = Field(default=None)
+    arguments: Optional[Union[Dict[str, Any], None]] = Field(default=None)
     result: Optional[Union[str, None]] = Field(default=None)
 
 
@@ -861,8 +861,8 @@ class SessionSummary(BaseModel):
     agent_name: Optional[Union[str, None]] = Field(default=None)
     agent_version: Optional[Union[str, None]] = Field(default=None)
     messages_count: Optional[int] = Field(default=None)
-    token_usage: Optional[Union[str, None]] = Field(default=None)
-    result: Optional[List[str]] = Field(default=None)
+    token_usage: Optional[Union[Dict[str, Any], None]] = Field(default=None)
+    result: Optional[List[Dict[str, Any]]] = Field(default=None)
 
 
 class Source(BaseModel):
@@ -937,8 +937,8 @@ class ToolActivity(BaseModel):
     """Record of a tool call and its result."""
     tool_id: str = ...
     tool_name: str = ...
-    arguments: str = ...
-    result: Optional[Union[str, None]] = Field(description="Optional override for the tool's parameters schema", default=None)
+    arguments: Dict[str, Any] = ...
+    result: Optional[Union[Dict[str, Any], None]] = Field(description="Optional override for the tool's parameters schema", default=None)
     timestamp: str = ...
 
 
@@ -952,7 +952,7 @@ class ToolActivityEntry(BaseModel):
 class ToolCallInfo(BaseModel):
     """ToolCallInfo"""
     tool_name: Union[str, None] = ...
-    arguments: Union[str, None] = Field(description="Optional override for the tool's parameters schema")
+    arguments: Union[Dict[str, Any], None] = Field(description="Optional override for the tool's parameters schema")
     sequence: Union[str, None] = ...
     timestamp: Union[str, None] = ...
 
@@ -971,7 +971,7 @@ class UpdateAgentArtifactRequest(BaseModel):
     type: Optional[Union["ArtifactType", None]] = Field(description="Artifact type", default=None)
     description: Optional[Union[str, None]] = Field(description="Description of the artifact", default=None)
     required: Optional[Union[bool, None]] = Field(description="Whether agent must produce this artifact", default=None)
-    schema_def: Optional[Union[str, None]] = Field(description="Optional override for the tool's parameters schema", default=None)
+    schema_def: Optional[Union[Dict[str, Any], None]] = Field(description="Optional override for the tool's parameters schema", default=None)
     max_size_bytes: Optional[Union[int, None]] = Field(description="Maximum artifact size in bytes", default=None)
     storage_strategy: Optional[Union["ArtifactStorageStrategy", None]] = Field(description="Storage strategy", default=None)
 
@@ -1041,9 +1041,9 @@ class UpdateBatchExecutionRequest(BaseModel):
     succeeded: Optional[Union[int, None]] = Field(description="Number of succeeded items", default=None)
     failed: Optional[Union[int, None]] = Field(description="Number of failed items", default=None)
     output_datasource_id: Optional[Union[str, None]] = Field(description="Output datasource ID", default=None)
-    items: Optional[Union[List[Union[str, None]], None]] = Field(description="Per-item results", default=None)
+    items: Optional[Union[List[Union[Dict[str, Any], None]], None]] = Field(description="Per-item results", default=None)
     error: Optional[Union[str, None]] = Field(description="Overall error message", default=None)
-    additional_properties: Optional[str] = Field(default=None)
+    additional_properties: Optional[Dict[str, Any]] = Field(default=None)
 
 
 class UpdatePromptResponse(BaseModel):
@@ -1128,7 +1128,7 @@ class UploadContentResponse(BaseModel):
 class UpdateDataElementRequest(BaseModel):
     name: Optional[Union[str, None]] = Field(description="Updated name", default=None)
     description: Optional[Union[str, None]] = Field(description="Updated description", default=None)
-    metadata: Optional[Union[str, None]] = Field(description="Metadata key-value pairs — replaces all existing metadata", default=None)
+    metadata: Optional[Union[Dict[str, Any], None]] = Field(description="Metadata key-value pairs — replaces all existing metadata", default=None)
 
 
 class UpdateDatasourceRequest(BaseModel):
