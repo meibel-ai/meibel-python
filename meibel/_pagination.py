@@ -88,6 +88,10 @@ class PaginatedIterator(Generic[T]):
         self._buffer = parsed[1:]
         return parsed[0]
 
+    def __repr__(self) -> str:
+        name = self._model_class.__name__ if self._model_class else "unknown"
+        return f"PaginatedIterator[{name}]"
+
     def collect(self) -> List[T]:
         """Collect all items into a list."""
         return list(self)
@@ -163,6 +167,10 @@ class AsyncPaginatedIterator(Generic[T]):
         parsed = [self._parse_item(i) for i in items]
         self._buffer = parsed[1:]
         return parsed[0]
+
+    def __repr__(self) -> str:
+        name = self._model_class.__name__ if self._model_class else "unknown"
+        return f"AsyncPaginatedIterator[{name}]"
 
     async def collect(self) -> List[T]:
         """Collect all items into a list."""
