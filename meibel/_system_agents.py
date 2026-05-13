@@ -134,3 +134,63 @@ def submit_document_transform(
         prompt=prompt,
         prompt_id=prompt_id,
     ))
+
+
+async def transform_document_async(
+    client,
+    *,
+    file: str,
+    schema: Union[str, Dict[str, Any], Type[BaseModel]],
+    model: Optional[str] = None,
+    prompt: Optional[str] = None,
+    prompt_id: Optional[str] = None,
+    timeout_seconds: int = 600,
+):
+    """Async version of :func:`transform_document`.
+
+    Use with :class:`AsyncMeibelClient`::
+
+        from meibel import AsyncMeibelClient, transform_document_async
+
+        client = AsyncMeibelClient(api_key="...")
+        result = await transform_document_async(client, file="invoice.pdf", schema=InvoiceOutput)
+    """
+    from .models import TransformDocumentRequest
+
+    return await client.documents.transform(body=TransformDocumentRequest(
+        file=file,
+        artifact_schema=_resolve_schema(schema),
+        model=model,
+        prompt=prompt,
+        prompt_id=prompt_id,
+        timeout_seconds=timeout_seconds,
+    ))
+
+
+async def submit_document_transform_async(
+    client,
+    *,
+    file: str,
+    schema: Union[str, Dict[str, Any], Type[BaseModel]],
+    model: Optional[str] = None,
+    prompt: Optional[str] = None,
+    prompt_id: Optional[str] = None,
+):
+    """Async version of :func:`submit_document_transform`.
+
+    Use with :class:`AsyncMeibelClient`::
+
+        from meibel import AsyncMeibelClient, submit_document_transform_async
+
+        client = AsyncMeibelClient(api_key="...")
+        job = await submit_document_transform_async(client, file="invoice.pdf", schema=InvoiceOutput)
+    """
+    from .models import TransformDocumentRequest
+
+    return await client.documents.submit_transform(body=TransformDocumentRequest(
+        file=file,
+        artifact_schema=_resolve_schema(schema),
+        model=model,
+        prompt=prompt,
+        prompt_id=prompt_id,
+    ))
