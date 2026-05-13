@@ -11,12 +11,12 @@ from .client import AsyncMeibelClient
 from .models import *
 from .exceptions import *
 from ._metadata import metadata_schema_from_model
-from ._artifacts import artifact_schema
+from ._artifacts import artifact_schema_from_model
 
 __all__ = [
     "MeibelClient",
     "AsyncMeibelClient",
     "metadata_schema_from_model",
-    "artifact_schema",
+    "artifact_schema_from_model",
     "__version__",
 ]

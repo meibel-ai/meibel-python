@@ -177,7 +177,7 @@ def _build_schema_def(model_cls: Optional[Type[BaseModel]], artifact_type: str) 
 # Public API
 # ---------------------------------------------------------------------------
 
-def artifact_schema(
+def artifact_schema_from_model(
     model: Optional[Type[BaseModel]] = None,
     *,
     display_name: str,
@@ -195,7 +195,7 @@ def artifact_schema(
             vendor_name: str = Field(description="Name of the vendor")
             total_amount: float = Field(description="Invoice total")
 
-        request = artifact_schema(
+        request = artifact_schema_from_model(
             InvoiceOutput,
             display_name="Invoice Output",
         )
@@ -203,7 +203,7 @@ def artifact_schema(
 
     For freeform markdown (no model)::
 
-        request = artifact_schema(
+        request = artifact_schema_from_model(
             display_name="Exploration Report",
             type="markdown",
         )
