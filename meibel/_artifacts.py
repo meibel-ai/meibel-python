@@ -150,6 +150,15 @@ def _model_to_markdown_sections(
 
 def _build_schema_def(model_cls: Optional[Type[BaseModel]], artifact_type: str) -> str:
     """Build the schema_def JSON string based on artifact type and model."""
+    if model_cls is not None:
+        if not isinstance(model_cls, type) or not issubclass(model_cls, BaseModel):
+            hint = ""
+            if hasattr(model_cls, "__dataclass_fields__"):
+                hint = " If you're using a dataclass, convert it to a Pydantic BaseModel."
+            raise TypeError(
+                f"Expected a Pydantic BaseModel subclass, got {model_cls!r}.{hint} "
+                f"Define your schema as: class MyModel(BaseModel): ..."
+            )
     if model_cls is None:
         if artifact_type in _SCHEMA_REQUIRED_TYPES:
             raise ValueError(
@@ -177,6 +186,30 @@ def _build_schema_def(model_cls: Optional[Type[BaseModel]], artifact_type: str) 
 # Public API
 # ---------------------------------------------------------------------------
 
+class _ArtifactRequestProxy:
+    """Proxy that duck-types as CreateAgentArtifactRequest for serialization.
+
+    The generated resource methods call ``body.model_dump(by_alias=True, exclude_unset=True)``
+    to serialize request objects. Because ArtifactType and ArtifactStorageStrategy are
+    generated as empty BaseModel classes, Pydantic's serializer chokes on plain string
+    values for those fields. This proxy stores the raw dict and returns it verbatim from
+    ``model_dump()``, bypassing Pydantic serialization entirely.
+    """
+
+    def __init__(self, data: Dict[str, Any]) -> None:
+        self._data = data
+
+    def model_dump(self, **kwargs: Any) -> Dict[str, Any]:
+        data = dict(self._data)
+        if kwargs.get("exclude_unset"):
+            # All keys in _data were explicitly set, so nothing to exclude
+            pass
+        if kwargs.get("by_alias"):
+            # Field names are already in snake_case which matches the API
+            pass
+        return data
+
+
 def artifact_schema_from_model(
     model: Optional[Type[BaseModel]] = None,
     *,
@@ -186,8 +219,11 @@ def artifact_schema_from_model(
     required: Optional[bool] = None,
     max_size_bytes: Optional[int] = None,
     storage_strategy: Optional[str] = None,
-) -> "CreateAgentArtifactRequest":
-    """Convert a Pydantic BaseModel into a CreateAgentArtifactRequest.
+) -> "_ArtifactRequestProxy":
+    """Convert a Pydantic BaseModel into a request object for artifact schema creation.
+
+    The returned object is duck-type compatible with ``CreateAgentArtifactRequest`` —
+    it can be passed directly to ``client.artifact_schemas.create(body=...)``.
 
     Usage::
 
@@ -219,13 +255,11 @@ def artifact_schema_from_model(
         storage_strategy: Storage strategy — inline, gcs, auto.
 
     Returns:
-        A CreateAgentArtifactRequest ready to pass to the API.
+        A request object ready to pass to ``client.artifact_schemas.create(body=...)``.
 
     Raises:
         ValueError: If a model is required but not provided.
     """
-    from .models import CreateAgentArtifactRequest
-
     schema_def = _build_schema_def(model, type)
 
     data: Dict[str, Any] = {
@@ -242,7 +276,9 @@ def artifact_schema_from_model(
     if storage_strategy is not None:
         data["storage_strategy"] = storage_strategy
 
-    # Use model_construct to bypass Pydantic validation — ArtifactType and
-    # ArtifactStorageStrategy are generated as empty BaseModel classes, so
-    # model_validate rejects plain strings for those fields.
-    return CreateAgentArtifactRequest.model_construct(**data)
+    # Return a thin wrapper instead of CreateAgentArtifactRequest directly.
+    # ArtifactType and ArtifactStorageStrategy are generated as empty BaseModel
+    # classes, so Pydantic's model_dump() can't serialize plain strings for those
+    # fields. The wrapper provides a model_dump() that returns the raw dict,
+    # which the resource's create()/update() methods call for JSON serialization.
+    return _ArtifactRequestProxy(data)
