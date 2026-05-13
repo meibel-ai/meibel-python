@@ -12,11 +12,14 @@ from .models import *
 from .exceptions import *
 from ._metadata import metadata_schema_from_model
 from ._artifacts import artifact_schema_from_model
+from ._system_agents import transform_document, submit_document_transform
 
 __all__ = [
     "MeibelClient",
     "AsyncMeibelClient",
     "metadata_schema_from_model",
     "artifact_schema_from_model",
+    "transform_document",
+    "submit_document_transform",
     "__version__",
 ]

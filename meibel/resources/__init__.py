@@ -10,10 +10,10 @@ from .agents_sessions import AgentsSessionsResource
 from .agents_sessions import AsyncAgentsSessionsResource
 from .artifact_schemas import ArtifactSchemasResource
 from .artifact_schemas import AsyncArtifactSchemasResource
-from .batch_definitions import BatchDefinitionsResource
-from .batch_definitions import AsyncBatchDefinitionsResource
-from .batch_executions import BatchExecutionsResource
-from .batch_executions import AsyncBatchExecutionsResource
+from .batches import BatchesResource
+from .batches import AsyncBatchesResource
+from .executions import ExecutionsResource
+from .executions import AsyncExecutionsResource
 from .confidence_scoring import ConfidenceScoringResource
 from .confidence_scoring import AsyncConfidenceScoringResource
 from .datasources import DatasourcesResource
@@ -44,10 +44,10 @@ __all__ = [
     "AsyncAgentsSessionsResource",
     "ArtifactSchemasResource",
     "AsyncArtifactSchemasResource",
-    "BatchDefinitionsResource",
-    "AsyncBatchDefinitionsResource",
-    "BatchExecutionsResource",
-    "AsyncBatchExecutionsResource",
+    "BatchesResource",
+    "AsyncBatchesResource",
+    "ExecutionsResource",
+    "AsyncExecutionsResource",
     "ConfidenceScoringResource",
     "AsyncConfidenceScoringResource",
     "DatasourcesResource",

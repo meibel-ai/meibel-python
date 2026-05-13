@@ -72,7 +72,6 @@ class AgentListResponse(BaseModel):
 
 class AgentSummary(BaseModel):
     id: str = ...
-    name: Optional[Union[str, None]] = Field(default=None)
     display_name: str = ...
     description: Optional[Union[str, None]] = Field(default=None)
     llm_model: str = ...
@@ -284,6 +283,12 @@ class ChatResponse(BaseModel):
     artifacts: Optional[Union[List["Artifact"], None]] = Field(default=None)
 
 
+class ChatWithDatasourceRequest(BaseModel):
+    datasource_ids: List[str] = Field(description="Datasources to query")
+    message: str = Field(description="User question")
+    model: Optional[Union[str, None]] = Field(description="LLM model override", default=None)
+
+
 class CloudStorageConnector(BaseModel):
     """Connect to a cloud storage bucket."""
     provider: Literal["s3", "gcs"] = Field(description="Cloud storage provider")
@@ -396,6 +401,7 @@ class CreateBatchExecutionRequest(BaseModel):
 
 
 class CreateDatasourceRequest(BaseModel):
+    """Body for creating a new datasource."""
     name: str = Field(description="Human-readable datasource name")
     description: Optional[str] = Field(description="What this datasource contains", default=None)
     connector: "ConnectorConfig" = Field(description="Connection configuration")
@@ -420,23 +426,26 @@ class CreateSessionResponse(BaseModel):
 
 
 class DataElementListResponse(BaseModel):
-    items: List["DataElementResponse"] = ...
-    next_cursor: Optional[Union[str, None]] = Field(default=None)
-    has_next: Optional[bool] = Field(default=None)
+    """Paginated list of data elements."""
+    items: List["DataElementResponse"] = Field(description="Page of data elements")
+    next_cursor: Optional[Union[str, None]] = Field(description="Pass to the next request as `cursor` to fetch the next page. Null when there are no more pages", default=None)
+    has_next: Optional[bool] = Field(description="True if more pages are available", default=None)
 
 
 class DataElementResponse(BaseModel):
-    id: str = ...
-    datasource_id: str = ...
-    name: str = ...
-    description: Optional[Union[str, None]] = Field(default=None)
-    media_type: Optional[Union[str, None]] = Field(default=None)
-    metadata: Optional[Union[Dict[str, Any], None]] = Field(default=None)
-    created_at: Optional[Union[str, None]] = Field(default=None)
-    updated_at: Optional[Union[str, None]] = Field(default=None)
+    """A single data element on a datasource."""
+    id: str = Field(description="Unique data element ID")
+    datasource_id: str = Field(description="ID of the datasource this element belongs to")
+    name: str = Field(description="Data element name")
+    description: Optional[Union[str, None]] = Field(description="Human-authored description", default=None)
+    media_type: Optional[Union[str, None]] = Field(description="MIME type of the underlying content", default=None)
+    metadata: Optional[Union[Dict[str, Any], None]] = Field(description="Arbitrary metadata key-value pairs", default=None)
+    created_at: Optional[Union[str, None]] = Field(description="ISO 8601 creation timestamp", default=None)
+    updated_at: Optional[Union[str, None]] = Field(description="ISO 8601 last-update timestamp", default=None)
 
 
 class DataElementSearchRequest(BaseModel):
+    """Body for searching data elements on a datasource."""
     regex_filter: Optional[Union[str, None]] = Field(description="Regex pattern to filter by name", default=None)
     media_type_filters: Optional[Union[List[str], None]] = Field(description="Filter by MIME types", default=None)
 
@@ -450,23 +459,25 @@ class DatabaseConnector(BaseModel):
 
 
 class DatasourceListResponse(BaseModel):
-    datasources: List["DatasourceResponse"] = ...
+    """List of datasources visible to the caller."""
+    datasources: List["DatasourceResponse"] = Field(description="Datasources in the caller's project")
 
 
 class DatasourceResponse(BaseModel):
-    id: str = ...
-    name: str = ...
-    description: str = ...
-    connector: "ConnectorConfig" = ...
-    created_at: str = ...
-    updated_at: str = ...
-    last_sync_at: Optional[Union[str, None]] = Field(default=None)
-    last_sync_status: Optional[Union[str, None]] = Field(default=None)
-    total_ingested_files: Optional[Union[int, None]] = Field(default=None)
-    metadata_config: Optional[Union["MetadataConfigResponse", None]] = Field(default=None)
-    files: Optional[Union["FilesSummaryResponse", None]] = Field(default=None)
-    ingest_counts: Optional[Union["IngestCountsResponse", None]] = Field(default=None)
-    tables: Optional[Union[List["TableSummaryResponse"], None]] = Field(default=None)
+    """A datasource with its latest sync/ingest state and (optionally) table details."""
+    id: str = Field(description="Unique datasource ID")
+    name: str = Field(description="Human-readable datasource name")
+    description: str = Field(description="What this datasource contains")
+    connector: "ConnectorConfig" = Field(description="Connection configuration")
+    created_at: str = Field(description="ISO 8601 creation timestamp")
+    updated_at: str = Field(description="ISO 8601 last-update timestamp")
+    last_sync_at: Optional[Union[str, None]] = Field(description="ISO 8601 timestamp of the most recent ingest run", default=None)
+    last_sync_status: Optional[Union[str, None]] = Field(description="Status of the most recent ingest run (e.g. 'completed', 'failed')", default=None)
+    total_ingested_files: Optional[Union[int, None]] = Field(description="Total number of files ingested across all runs", default=None)
+    metadata_config: Optional[Union["MetadataConfigResponse", None]] = Field(description="Current metadata extraction configuration", default=None)
+    files: Optional[Union["FilesSummaryResponse", None]] = Field(description="File counts for the datasource", default=None)
+    ingest_counts: Optional[Union["IngestCountsResponse", None]] = Field(description="Per-method counts from the latest ingest run", default=None)
+    tables: Optional[Union[List["TableSummaryResponse"], None]] = Field(description="Tables discovered on a structured datasource — only populated when include_tables=true", default=None)
 
 
 class DocumentChild(BaseModel):
@@ -502,12 +513,14 @@ class DocumentStatus(BaseModel):
 
 
 class DownloadJobRequest(BaseModel):
+    """Body for creating a download job. Omit both fields to download all files."""
     content: Optional[Union[str, None]] = Field(description="Content to include: files, parsed_content, or files_and_parsed_content", default=None)
     data_element_ids: Optional[Union[List[str], None]] = Field(description="Specific data element IDs to include", default=None)
 
 
 class DownloadJobResponse(BaseModel):
-    job_id: str = ...
+    """Result of creating a download job."""
+    job_id: str = Field(description="Identifier for the job — use with the status_url to track progress")
     status: str = Field(description="Current job status")
     status_url: str = Field(description="Stream progress events from this SSE URL")
 
@@ -548,15 +561,17 @@ class FileParseStartInfo(BaseModel):
 
 
 class FileUploadSyncResponse(BaseModel):
-    datasource_id: str = ...
-    items: List["ContentItem"] = ...
-    continuation_token: Optional[Union[str, None]] = Field(default=None)
-    ingest_url: Optional[Union[str, None]] = Field(default=None)
+    """Result of a synchronous upload — waits until files are persisted, optionally triggers ingest, and returns the resulting content listing."""
+    datasource_id: str = Field(description="ID of the datasource the files were uploaded to")
+    items: List["ContentItem"] = Field(description="Content items present on the datasource after the upload completes")
+    continuation_token: Optional[Union[str, None]] = Field(description="Set when the listing is truncated — pass to GET /datasources/{id}/content to fetch the rest", default=None)
+    ingest_url: Optional[Union[str, None]] = Field(description="URL to poll for ingest status. Only set when `trigger_ingest=true` was supplied", default=None)
 
 
 class FilesSummaryResponse(BaseModel):
-    total: int = ...
-    deleted: Optional[Union[int, None]] = Field(default=None)
+    """File-count summary across the datasource's content."""
+    total: int = Field(description="Total files currently tracked on the datasource")
+    deleted: Optional[Union[int, None]] = Field(description="Files that have been removed since the last ingest", default=None)
 
 
 class GetBatchDefinitionsResponse(BaseModel):
@@ -576,33 +591,42 @@ class HttpValidationError(BaseModel):
 
 
 class IngestCountsResponse(BaseModel):
-    rag: Optional[Union["IngestMethodCountsResponse", None]] = Field(default=None)
-    tag: Optional[Union["IngestMethodCountsResponse", None]] = Field(default=None)
-    ref_graph: Optional[Union["IngestMethodCountsResponse", None]] = Field(default=None)
+    """File counts broken down by ingest method for the latest run."""
+    rag: Optional[Union["IngestMethodCountsResponse", None]] = Field(description="Counts for the RAG ingest method", default=None)
+    tag: Optional[Union["IngestMethodCountsResponse", None]] = Field(description="Counts for the TAG (tables/columns) ingest method", default=None)
+    ref_graph: Optional[Union["IngestMethodCountsResponse", None]] = Field(description="Counts for the reference-graph ingest method", default=None)
 
 
 class IngestMethodCountsResponse(BaseModel):
-    total: int = ...
-    new: Optional[Union[int, None]] = Field(default=None)
-    updated: Optional[Union[int, None]] = Field(default=None)
+    """Per-method file counts produced by the latest ingest run."""
+    total: int = Field(description="Total files processed by this ingest method")
+    new: Optional[Union[int, None]] = Field(description="Files newly added in this run", default=None)
+    updated: Optional[Union[int, None]] = Field(description="Files re-processed because they changed", default=None)
 
 
 class IngestMethodSummary(BaseModel):
-    method: str = ...
-    total_files: Optional[int] = Field(default=None)
-    processed_files: Optional[int] = Field(default=None)
-    adds: Optional[int] = Field(default=None)
-    updates: Optional[int] = Field(default=None)
-    errors: Optional[int] = Field(default=None)
-    warnings: Optional[int] = Field(default=None)
+    """Per-method aggregate counts for the current ingest run."""
+    method: str = Field(description="Ingest method name (e.g. 'rag', 'tag', 'ref_graph')")
+    total_files: Optional[int] = Field(description="Total files this method intends to process", default=None)
+    processed_files: Optional[int] = Field(description="Files this method has finished processing", default=None)
+    adds: Optional[int] = Field(description="Files added in this run", default=None)
+    updates: Optional[int] = Field(description="Files re-processed because they changed", default=None)
+    errors: Optional[int] = Field(description="Files that errored during processing", default=None)
+    warnings: Optional[int] = Field(description="Files that produced warnings during processing", default=None)
+
+
+class IngestStatus(BaseModel):
+    """Lifecycle state of an ingest run."""
+    pass
 
 
 class IngestStatusResponse(BaseModel):
-    datasource_id: str = ...
-    status: str = ...
-    started_at: Optional[Union[str, None]] = Field(default=None)
-    completed_at: Optional[Union[str, None]] = Field(default=None)
-    methods: Optional[List["IngestMethodSummary"]] = Field(default=None)
+    """Status of the most recent ingest run for a datasource."""
+    datasource_id: str = Field(description="ID of the datasource")
+    status: "IngestStatus" = Field(description="Overall run status")
+    started_at: Optional[Union[str, None]] = Field(description="ISO 8601 timestamp when this run started", default=None)
+    completed_at: Optional[Union[str, None]] = Field(description="ISO 8601 timestamp when this run finished — null while still running", default=None)
+    methods: Optional[List["IngestMethodSummary"]] = Field(description="Per-method progress and counts for this run", default=None)
 
 
 class JudgeConfig(BaseModel):
@@ -649,11 +673,6 @@ class LegacyBatchSpecJson(BaseModel):
     additional_properties: Optional[Dict[str, Any]] = Field(default=None)
 
 
-class ListMetadataModelCatalogResponse(BaseModel):
-    """ListMetadataModelCatalogResponse"""
-    models: List["MetadataModelCatalogEntry"] = ...
-
-
 class MeibelDocumentResult(BaseModel):
     """Full structured parse result (meibel format)."""
     elements: List["DocumentElement"] = ...
@@ -678,39 +697,18 @@ class MetadataConfigRequest(BaseModel):
 
 
 class MetadataConfigResponse(BaseModel):
-    type: Literal["catalog", "custom", "default"] = ...
-    model_id: Optional[Union[str, None]] = Field(default=None)
-    fields: List["MetadataField"] = ...
+    """Current metadata extraction configuration on a datasource."""
+    type: Literal["catalog", "custom", "default"] = Field(description="'catalog' = using a pre-built model, 'custom' = user-defined fields, 'default' = no extraction configured")
+    model_id: Optional[Union[str, None]] = Field(description="Catalog model ID — only set when type is 'catalog'", default=None)
+    fields: List["MetadataField"] = Field(description="Resolved field definitions in effect. Empty when type is 'default'")
 
 
 class MetadataField(BaseModel):
+    """A single field extracted from documents during ingest."""
     name: str = Field(description="Field name (snake_case)")
     type: Literal["string", "integer", "float", "boolean", "datetime", "uuid", "geo", "list[string]"] = Field(description="Data type of the field")
     description: str = Field(description="What this field captures")
     index: Optional[bool] = Field(description="Whether this field is indexed for filtering", default=None)
-
-
-class MetadataModelCatalogEntry(BaseModel):
-    """MetadataModelCatalogEntry"""
-    model_id: str = ...
-    name: str = ...
-    description: Optional[Union[str, None]] = Field(default=None)
-    scope: str = ...
-    customer_id: Optional[Union[str, None]] = Field(default=None)
-    project_id: Optional[Union[str, None]] = Field(default=None)
-    fields: List["MetadataModelField"] = ...
-    created_by: Optional[Union[str, None]] = Field(default=None)
-    updated_by: Optional[Union[str, None]] = Field(default=None)
-    created_at: Optional[Union[datetime, None]] = Field(default=None)
-    updated_at: Optional[Union[datetime, None]] = Field(default=None)
-
-
-class MetadataModelField(BaseModel):
-    """MetadataModelField"""
-    name: str = ...
-    type: str = ...
-    description: str = ...
-    index: Optional[Union[bool, None]] = Field(default=None)
 
 
 class NBootstraps(BaseModel):
@@ -874,6 +872,10 @@ class Source(BaseModel):
     relevance_score: Optional[Union[float, int, None]] = Field(default=None)
 
 
+class SubmitDocumentTransformResponse(BaseModel):
+    execution_id: str = Field(description="Poll via client.sessions.get(execution_id)")
+
+
 class Table(BaseModel):
     cells: List["TableCell"] = ...
     rows: int = ...
@@ -891,37 +893,43 @@ class TableCell(BaseModel):
 
 
 class TableDescriptionUpdate(BaseModel):
-    table_name: str = ...
-    description: Optional[Union[str, None]] = Field(default=None)
-    columns: Optional[Union[List["TagColumnUpdateItem"], None]] = Field(default=None)
+    """A nested table-update entry used inside UpdateDatasourceRequest.tables."""
+    table_name: str = Field(description="Name of the table to update")
+    description: Optional[Union[str, None]] = Field(description="Updated description for the table (omit to leave unchanged)", default=None)
+    columns: Optional[Union[List["TagColumnUpdateItem"], None]] = Field(description="Optional list of column-description updates for this table", default=None)
 
 
 class TableSummaryResponse(BaseModel):
-    name: str = ...
-    description: Optional[Union[str, None]] = Field(default=None)
-    column_count: int = ...
+    """Summary of a single table discovered on a structured datasource."""
+    name: str = Field(description="Table name")
+    description: Optional[Union[str, None]] = Field(description="Human-authored description of the table", default=None)
+    column_count: int = Field(description="Number of columns on the table")
 
 
 class TagColumn(BaseModel):
-    column_name: str = ...
-    type: Optional[Union[str, None]] = Field(default=None)
-    description: Optional[Union[str, None]] = Field(default=None)
+    """A column on a structured-datasource table, with its description."""
+    column_name: str = Field(description="Column name as defined in the source table")
+    type: Optional[Union[str, None]] = Field(description="SQL data type of the column (e.g. 'varchar', 'integer')", default=None)
+    description: Optional[Union[str, None]] = Field(description="Human-authored description of what this column represents", default=None)
 
 
 class TagColumnUpdateItem(BaseModel):
-    column_name: str = ...
-    description: str = ...
+    """A single column-description update entry within an UpdateTagColumnsRequest."""
+    column_name: str = Field(description="Name of the column to update")
+    description: str = Field(description="New description for the column")
 
 
 class TagTable(BaseModel):
-    table_name: str = ...
-    description: Optional[Union[str, None]] = Field(default=None)
-    columns: Optional[Union[List["TagColumn"], None]] = Field(default=None)
+    """A table on a structured datasource, with its description and optionally its columns."""
+    table_name: str = Field(description="Table name as defined on the datasource")
+    description: Optional[Union[str, None]] = Field(description="Human-authored description of what this table represents", default=None)
+    columns: Optional[Union[List["TagColumn"], None]] = Field(description="Columns on the table — only populated when explicitly requested via include_columns", default=None)
 
 
 class TagTableUpdateItem(BaseModel):
-    table_name: str = ...
-    description: str = ...
+    """A single table-description update entry within an UpdateTagTablesRequest."""
+    table_name: str = Field(description="Name of the table to update")
+    description: str = Field(description="New description for the table")
 
 
 class TokenConfig(BaseModel):
@@ -963,6 +971,27 @@ class ToolResultInfo(BaseModel):
     result: Optional[Union[str, None]] = Field(default=None)
     sequence: Union[str, None] = ...
     timestamp: Union[str, None] = ...
+
+
+class TransformDocumentRequest(BaseModel):
+    file: str = Field(description="File path, URL, or GCS URI to transform")
+    artifact_schema: Union[str, Dict[str, Any]] = Field(description="Schema name/ID or inline JSON Schema")
+    model: Optional[Union[str, None]] = Field(description="LLM model override", default=None)
+    prompt: Optional[Union[str, None]] = Field(description="Extraction instructions override", default=None)
+    prompt_id: Optional[Union[str, None]] = Field(description="Prompt template reference", default=None)
+    timeout_seconds: Optional[Union[int, None]] = Field(description="Max wait time in seconds (sync only)", default=None)
+
+
+class TransformDocumentResponse(BaseModel):
+    execution_id: str = Field(description="Execution ID for debugging/tracing")
+    data: Dict[str, Any] = Field(description="Extracted artifact data")
+    token_usage: Optional[Union[Dict[str, Any], None]] = Field(description="LLM token consumption", default=None)
+
+
+class TriggerIngestResponse(BaseModel):
+    """Acknowledgement that ingest was kicked off for a datasource."""
+    message: str = Field(description="Human-readable confirmation message")
+    datasource_id: str = Field(description="ID of the datasource ingest was triggered on")
 
 
 class UpdateAgentArtifactRequest(BaseModel):
@@ -1051,6 +1080,16 @@ class UpdatePromptResponse(BaseModel):
     version: str = ...
 
 
+class UpdateTagColumnsRequest(BaseModel):
+    """Bulk update of column descriptions on a single table."""
+    columns: List["TagColumnUpdateItem"] = Field(description="One entry per column to update on the target table")
+
+
+class UpdateTagTablesRequest(BaseModel):
+    """Bulk update of table descriptions on a datasource."""
+    tables: List["TagTableUpdateItem"] = Field(description="One entry per table to update")
+
+
 class ValidationError(BaseModel):
     loc: List[Union[str, int]] = ...
     msg: str = ...
@@ -1061,7 +1100,7 @@ class WebCrawlConnector(BaseModel):
     """Connect to a website for crawling."""
     base_url: str = Field(description="Starting URL for the crawl")
     javascript_render: Optional[bool] = Field(description="Enable JavaScript rendering", default=None)
-    domains: Optional[Union[List["WebDomain"], None]] = Field(default=None)
+    domains: Optional[Union[List["WebDomain"], None]] = Field(description="Per-domain include/exclude rules. If omitted, the crawler stays on the base_url's domain", default=None)
 
 
 class ConnectedEvent(BaseModel):
@@ -1101,37 +1140,47 @@ class CompletionEvent(BaseModel):
 
 
 class ContentItem(BaseModel):
-    name: str = ...
-    path: str = ...
-    type: Optional[Union[str, None]] = Field(default=None)
-    size: Optional[Union[int, None]] = Field(default=None)
-    media_type: Optional[Union[str, None]] = Field(default=None)
-    last_modified: Optional[Union[str, None]] = Field(default=None)
-    etag: Optional[Union[str, None]] = Field(default=None)
+    """A single file in a datasource's content store."""
+    name: str = Field(description="Filename")
+    path: str = Field(description="Object-storage path to the file relative to the datasource")
+    type: Optional[Union[str, None]] = Field(description="Object kind reported by storage (e.g. 'file', 'directory')", default=None)
+    size: Optional[Union[int, None]] = Field(description="File size in bytes", default=None)
+    media_type: Optional[Union[str, None]] = Field(description="MIME type of the file", default=None)
+    last_modified: Optional[Union[str, None]] = Field(description="ISO 8601 timestamp of last modification in object storage", default=None)
+    etag: Optional[Union[str, None]] = Field(description="Object-storage ETag for the file", default=None)
 
 
 class ListContentResponse(BaseModel):
-    items: List["ContentItem"] = ...
-    continuation_token: Optional[Union[str, None]] = Field(default=None)
+    """Paginated list of files in a datasource's content store."""
+    items: List["ContentItem"] = Field(description="Page of content items")
+    continuation_token: Optional[Union[str, None]] = Field(description="Pass to the next request as `continuation_token` to fetch the next page. Null when there are no more pages", default=None)
 
 
 class UploadContentResponse(BaseModel):
-    success: bool = ...
-    message: str = ...
-    datasource_id: str = ...
-    upload_id: str = ...
-    sse_url: str = ...
-    estimated_files: Optional[Union[int, None]] = Field(default=None)
-    estimated_size: Optional[Union[int, None]] = Field(default=None)
+    """Result of an async upload — files are accepted and streamed asynchronously."""
+    success: bool = Field(description="True if the upload was accepted for processing")
+    message: str = Field(description="Human-readable status message")
+    datasource_id: str = Field(description="ID of the datasource the files were uploaded to (created on the fly if `name` was supplied)")
+    upload_id: str = Field(description="Identifier for this upload batch — use with the SSE stream to track progress")
+    sse_url: str = Field(description="Server-sent-events URL to stream upload progress until 'stream_complete'")
+    estimated_files: Optional[Union[int, None]] = Field(description="Number of files the server expects to process for this upload", default=None)
+    estimated_size: Optional[Union[int, None]] = Field(description="Total estimated size of the upload in bytes", default=None)
 
 
 class UpdateDataElementRequest(BaseModel):
+    """Body for updating a data element. Omit a field to leave it unchanged."""
     name: Optional[Union[str, None]] = Field(description="Updated name", default=None)
     description: Optional[Union[str, None]] = Field(description="Updated description", default=None)
     metadata: Optional[Union[Dict[str, Any], None]] = Field(description="Metadata key-value pairs — replaces all existing metadata", default=None)
 
 
+class DeleteDatasourceResponse(BaseModel):
+    """Result of deleting a datasource."""
+    id: str = Field(description="ID of the datasource that was deleted")
+
+
 class UpdateDatasourceRequest(BaseModel):
+    """Body for updating a datasource. Omit a field to leave it unchanged."""
     name: Optional[Union[str, None]] = Field(description="Updated datasource name", default=None)
     description: Optional[Union[str, None]] = Field(description="Updated description", default=None)
     connector: Optional[Union["ConnectorConfig", None]] = Field(description="Updated connection configuration", default=None)
@@ -1140,9 +1189,24 @@ class UpdateDatasourceRequest(BaseModel):
 
 
 class WebDomain(BaseModel):
+    """An allowed domain for a web-crawl datasource, with include/exclude URL patterns."""
     domain: str = Field(description="Domain to crawl (e.g. example.com)")
     include_pattern: str = Field(description="Regex URL pattern to include")
     exclude_pattern: Optional[str] = Field(description="Regex URL pattern to exclude", default=None)
+
+
+class ListMetadataModelCatalogResponse(BaseModel):
+    """List of available metadata-extraction models in the catalog."""
+    models: List["MetadataModelCatalogEntry"] = Field(description="Catalog entries visible to the caller, filtered by the optional scope query param")
+
+
+class MetadataModelCatalogEntry(BaseModel):
+    """A pre-built metadata extraction model from the catalog, selectable by model_id."""
+    model_id: str = Field(description="Stable ID used to reference this model when configuring a datasource")
+    name: str = Field(description="Human-readable model name")
+    description: Optional[Union[str, None]] = Field(description="What this model is designed to extract", default=None)
+    scope: str = Field(description="Visibility of the model (e.g. 'global', 'customer', 'project')")
+    fields: List["MetadataField"] = Field(description="Field definitions this model extracts")
 
 
 class BodyUploadContent(BaseModel):
@@ -1196,6 +1260,7 @@ CallToAction.model_rebuild()
 ChatMessageRequest.model_rebuild()
 ChatMessageResponse.model_rebuild()
 ChatResponse.model_rebuild()
+ChatWithDatasourceRequest.model_rebuild()
 CloudStorageConnector.model_rebuild()
 ConfidenceScoringConfig.model_rebuild()
 Config.model_rebuild()
@@ -1236,6 +1301,7 @@ HttpValidationError.model_rebuild()
 IngestCountsResponse.model_rebuild()
 IngestMethodCountsResponse.model_rebuild()
 IngestMethodSummary.model_rebuild()
+IngestStatus.model_rebuild()
 IngestStatusResponse.model_rebuild()
 JudgeConfig.model_rebuild()
 LegacyBatchExecutionParams.model_rebuild()
@@ -1243,14 +1309,11 @@ LegacyBatchInputConfig.model_rebuild()
 LegacyBatchInputFilters.model_rebuild()
 LegacyBatchOutputConfig.model_rebuild()
 LegacyBatchSpecJson.model_rebuild()
-ListMetadataModelCatalogResponse.model_rebuild()
 MeibelDocumentResult.model_rebuild()
 MessageEntry.model_rebuild()
 MetadataConfigRequest.model_rebuild()
 MetadataConfigResponse.model_rebuild()
 MetadataField.model_rebuild()
-MetadataModelCatalogEntry.model_rebuild()
-MetadataModelField.model_rebuild()
 NBootstraps.model_rebuild()
 OcConfig.model_rebuild()
 OcrConfig.model_rebuild()
@@ -1270,6 +1333,7 @@ SessionMessageItem.model_rebuild()
 SessionMessagesResponse.model_rebuild()
 SessionSummary.model_rebuild()
 Source.model_rebuild()
+SubmitDocumentTransformResponse.model_rebuild()
 Table.model_rebuild()
 TableCell.model_rebuild()
 TableDescriptionUpdate.model_rebuild()
@@ -1283,6 +1347,9 @@ ToolActivity.model_rebuild()
 ToolActivityEntry.model_rebuild()
 ToolCallInfo.model_rebuild()
 ToolResultInfo.model_rebuild()
+TransformDocumentRequest.model_rebuild()
+TransformDocumentResponse.model_rebuild()
+TriggerIngestResponse.model_rebuild()
 UpdateAgentArtifactRequest.model_rebuild()
 UpdateAgentDefinitionRequest.model_rebuild()
 UpdateAgentDefinitionResponse.model_rebuild()
@@ -1292,6 +1359,8 @@ UpdateBatchDefinitionRequest.model_rebuild()
 UpdateBatchDefinitionResponse.model_rebuild()
 UpdateBatchExecutionRequest.model_rebuild()
 UpdatePromptResponse.model_rebuild()
+UpdateTagColumnsRequest.model_rebuild()
+UpdateTagTablesRequest.model_rebuild()
 ValidationError.model_rebuild()
 WebCrawlConnector.model_rebuild()
 ConnectedEvent.model_rebuild()
@@ -1304,8 +1373,11 @@ ContentItem.model_rebuild()
 ListContentResponse.model_rebuild()
 UploadContentResponse.model_rebuild()
 UpdateDataElementRequest.model_rebuild()
+DeleteDatasourceResponse.model_rebuild()
 UpdateDatasourceRequest.model_rebuild()
 WebDomain.model_rebuild()
+ListMetadataModelCatalogResponse.model_rebuild()
+MetadataModelCatalogEntry.model_rebuild()
 BodyUploadContent.model_rebuild()
 BodyUploadAndListContent.model_rebuild()
 BodyParseDocument.model_rebuild()

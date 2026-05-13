@@ -140,6 +140,44 @@ class DocumentsResource:
         path = path.replace("{job_id}", str(job_id))
         return self._http.stream("GET", path)
 
+    def transform(self, body: "TransformDocumentRequest") -> "TransformDocumentResponse":
+        """
+        Transform a document using AI extraction (sync)
+        
+        Submit a document for AI-powered structured extraction and block until complete. Internally orchestrates a system agent session, polls for completion, and returns the extracted data.
+        
+        Args:
+            body: Request body
+        
+        Returns:
+            Successful Response
+        
+        Raises:
+            ApiError: If the request fails
+        """
+        path = "/documents/transform"
+        response = self._http.request("POST", path, json=body.model_dump(by_alias=True, exclude_unset=True) if body else None)
+        return TransformDocumentResponse.model_validate(response)
+
+    def submit_transform(self, body: "TransformDocumentRequest") -> "SubmitDocumentTransformResponse":
+        """
+        Submit a document transform (async)
+        
+        Submit a document for AI-powered extraction and return immediately. Poll for completion via client.sessions.get(execution_id).
+        
+        Args:
+            body: Request body
+        
+        Returns:
+            Successful Response
+        
+        Raises:
+            ApiError: If the request fails
+        """
+        path = "/documents/transform/submit"
+        response = self._http.request("POST", path, json=body.model_dump(by_alias=True, exclude_unset=True) if body else None)
+        return SubmitDocumentTransformResponse.model_validate(response)
+
 
 class AsyncDocumentsResource:
     """Parse and transform documents into structured data (async)"""
@@ -268,3 +306,41 @@ class AsyncDocumentsResource:
         path = "/documents/{job_id}/trace"
         path = path.replace("{job_id}", str(job_id))
         return self._http.stream("GET", path)
+
+    async def transform(self, body: "TransformDocumentRequest") -> "TransformDocumentResponse":
+        """
+        Transform a document using AI extraction (sync)
+        
+        Submit a document for AI-powered structured extraction and block until complete. Internally orchestrates a system agent session, polls for completion, and returns the extracted data.
+        
+        Args:
+            body: Request body
+        
+        Returns:
+            Successful Response
+        
+        Raises:
+            ApiError: If the request fails
+        """
+        path = "/documents/transform"
+        response = await self._http.request("POST", path, json=body.model_dump(by_alias=True, exclude_unset=True) if body else None)
+        return TransformDocumentResponse.model_validate(response)
+
+    async def submit_transform(self, body: "TransformDocumentRequest") -> "SubmitDocumentTransformResponse":
+        """
+        Submit a document transform (async)
+        
+        Submit a document for AI-powered extraction and return immediately. Poll for completion via client.sessions.get(execution_id).
+        
+        Args:
+            body: Request body
+        
+        Returns:
+            Successful Response
+        
+        Raises:
+            ApiError: If the request fails
+        """
+        path = "/documents/transform/submit"
+        response = await self._http.request("POST", path, json=body.model_dump(by_alias=True, exclude_unset=True) if body else None)
+        return SubmitDocumentTransformResponse.model_validate(response)

@@ -38,7 +38,7 @@ class TablesResource:
         response = self._http.request("GET", path, params=params)
         return [TagTable.model_validate(item) for item in response]
 
-    def update_descriptions(self, datasource_id: str, body: List["TagTableUpdateItem"]) -> List["TagTable"]:
+    def update_descriptions(self, datasource_id: str, body: "UpdateTagTablesRequest") -> List["TagTable"]:
         """
         Update Table Descriptions
         
@@ -77,7 +77,7 @@ class TablesResource:
         response = self._http.request("GET", path)
         return [TagColumn.model_validate(item) for item in response]
 
-    def update_column_descriptions(self, datasource_id: str, table_name: str, body: List["TagColumnUpdateItem"]) -> List["TagColumn"]:
+    def update_column_descriptions(self, datasource_id: str, table_name: str, body: "UpdateTagColumnsRequest") -> List["TagColumn"]:
         """
         Update Column Descriptions
         
@@ -127,7 +127,7 @@ class AsyncTablesResource:
         response = await self._http.request("GET", path, params=params)
         return [TagTable.model_validate(item) for item in response]
 
-    async def update_descriptions(self, datasource_id: str, body: List["TagTableUpdateItem"]) -> List["TagTable"]:
+    async def update_descriptions(self, datasource_id: str, body: "UpdateTagTablesRequest") -> List["TagTable"]:
         """
         Update Table Descriptions
         
@@ -166,7 +166,7 @@ class AsyncTablesResource:
         response = await self._http.request("GET", path)
         return [TagColumn.model_validate(item) for item in response]
 
-    async def update_column_descriptions(self, datasource_id: str, table_name: str, body: List["TagColumnUpdateItem"]) -> List["TagColumn"]:
+    async def update_column_descriptions(self, datasource_id: str, table_name: str, body: "UpdateTagColumnsRequest") -> List["TagColumn"]:
         """
         Update Column Descriptions
         

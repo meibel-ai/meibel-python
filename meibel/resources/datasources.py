@@ -98,7 +98,7 @@ class DatasourcesResource:
         response = self._http.request("PUT", path, json=body.model_dump(by_alias=True, exclude_unset=True) if body else None)
         return DatasourceResponse.model_validate(response)
 
-    def delete(self, datasource_id: str) -> str:
+    def delete(self, datasource_id: str) -> "DeleteDatasourceResponse":
         """
         Delete Datasource
         
@@ -114,6 +114,25 @@ class DatasourcesResource:
         path = "/datasources/{datasource_id}"
         path = path.replace("{datasource_id}", str(datasource_id))
         response = self._http.request("DELETE", path)
+        return DeleteDatasourceResponse.model_validate(response)
+
+    def chat_with(self, body: "ChatWithDatasourceRequest") -> None:
+        """
+        Chat with datasources via AI (streaming)
+        
+        Ask a question against one or more datasources. Returns a streaming SSE response with the AI-generated answer.
+        
+        Args:
+            body: Request body
+        
+        Returns:
+            None
+        
+        Raises:
+            ApiError: If the request fails
+        """
+        path = "/datasources/chat"
+        response = self._http.request("POST", path, json=body.model_dump(by_alias=True, exclude_unset=True) if body else None)
         return response
 
 
@@ -200,7 +219,7 @@ class AsyncDatasourcesResource:
         response = await self._http.request("PUT", path, json=body.model_dump(by_alias=True, exclude_unset=True) if body else None)
         return DatasourceResponse.model_validate(response)
 
-    async def delete(self, datasource_id: str) -> str:
+    async def delete(self, datasource_id: str) -> "DeleteDatasourceResponse":
         """
         Delete Datasource
         
@@ -216,4 +235,23 @@ class AsyncDatasourcesResource:
         path = "/datasources/{datasource_id}"
         path = path.replace("{datasource_id}", str(datasource_id))
         response = await self._http.request("DELETE", path)
+        return DeleteDatasourceResponse.model_validate(response)
+
+    async def chat_with(self, body: "ChatWithDatasourceRequest") -> None:
+        """
+        Chat with datasources via AI (streaming)
+        
+        Ask a question against one or more datasources. Returns a streaming SSE response with the AI-generated answer.
+        
+        Args:
+            body: Request body
+        
+        Returns:
+            None
+        
+        Raises:
+            ApiError: If the request fails
+        """
+        path = "/datasources/chat"
+        response = await self._http.request("POST", path, json=body.model_dump(by_alias=True, exclude_unset=True) if body else None)
         return response
