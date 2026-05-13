@@ -242,4 +242,7 @@ def artifact_schema(
     if storage_strategy is not None:
         data["storage_strategy"] = storage_strategy
 
-    return CreateAgentArtifactRequest.model_validate(data)
+    # Use model_construct to bypass Pydantic validation — ArtifactType and
+    # ArtifactStorageStrategy are generated as empty BaseModel classes, so
+    # model_validate rejects plain strings for those fields.
+    return CreateAgentArtifactRequest.model_construct(**data)
