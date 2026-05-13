@@ -10,6 +10,8 @@ from ..models import *
 from ..exceptions import raise_for_status
 from .._streaming import SSEIterator, AsyncSSEIterator
 from typing import BinaryIO
+from pydantic import BaseModel
+from typing import Type
 
 
 class DocumentsResource:
@@ -140,7 +142,7 @@ class DocumentsResource:
         path = path.replace("{job_id}", str(job_id))
         return self._http.stream("GET", path)
 
-    def transform(self, body: "TransformDocumentRequest") -> "TransformDocumentResponse":
+    def transform(self, file: str, schema: Union[str, Dict[str, Any], Type[BaseModel]], model: Optional[Union[str, None]] = None, prompt: Optional[Union[str, None]] = None, prompt_id: Optional[Union[str, None]] = None, timeout_seconds: Union[int, None] = 600) -> "TransformDocumentResponse":
         """
         Transform a document using AI extraction (sync)
         
@@ -156,10 +158,22 @@ class DocumentsResource:
             ApiError: If the request fails
         """
         path = "/documents/transform"
-        response = self._http.request("POST", path, json=body.model_dump(by_alias=True, exclude_unset=True) if body else None)
+        if isinstance(schema, type) and issubclass(schema, BaseModel):
+            _schema = schema.model_json_schema()
+        else:
+            _schema = schema
+        body = TransformDocumentRequest(
+            file=file,
+            artifact_schema=_schema,
+            model=model,
+            prompt=prompt,
+            prompt_id=prompt_id,
+            timeout_seconds=timeout_seconds,
+        )
+        response = self._http.request("POST", path, json=body.model_dump(by_alias=True, exclude_unset=True))
         return TransformDocumentResponse.model_validate(response)
 
-    def submit_transform(self, body: "TransformDocumentRequest") -> "SubmitDocumentTransformResponse":
+    def submit_transform(self, file: str, schema: Union[str, Dict[str, Any], Type[BaseModel]], model: Optional[Union[str, None]] = None, prompt: Optional[Union[str, None]] = None, prompt_id: Optional[Union[str, None]] = None, timeout_seconds: Union[int, None] = 600) -> "SubmitDocumentTransformResponse":
         """
         Submit a document transform (async)
         
@@ -175,7 +189,19 @@ class DocumentsResource:
             ApiError: If the request fails
         """
         path = "/documents/transform/submit"
-        response = self._http.request("POST", path, json=body.model_dump(by_alias=True, exclude_unset=True) if body else None)
+        if isinstance(schema, type) and issubclass(schema, BaseModel):
+            _schema = schema.model_json_schema()
+        else:
+            _schema = schema
+        body = TransformDocumentRequest(
+            file=file,
+            artifact_schema=_schema,
+            model=model,
+            prompt=prompt,
+            prompt_id=prompt_id,
+            timeout_seconds=timeout_seconds,
+        )
+        response = self._http.request("POST", path, json=body.model_dump(by_alias=True, exclude_unset=True))
         return SubmitDocumentTransformResponse.model_validate(response)
 
 
@@ -307,7 +333,7 @@ class AsyncDocumentsResource:
         path = path.replace("{job_id}", str(job_id))
         return self._http.stream("GET", path)
 
-    async def transform(self, body: "TransformDocumentRequest") -> "TransformDocumentResponse":
+    async def transform(self, file: str, schema: Union[str, Dict[str, Any], Type[BaseModel]], model: Optional[Union[str, None]] = None, prompt: Optional[Union[str, None]] = None, prompt_id: Optional[Union[str, None]] = None, timeout_seconds: Union[int, None] = 600) -> "TransformDocumentResponse":
         """
         Transform a document using AI extraction (sync)
         
@@ -323,10 +349,22 @@ class AsyncDocumentsResource:
             ApiError: If the request fails
         """
         path = "/documents/transform"
-        response = await self._http.request("POST", path, json=body.model_dump(by_alias=True, exclude_unset=True) if body else None)
+        if isinstance(schema, type) and issubclass(schema, BaseModel):
+            _schema = schema.model_json_schema()
+        else:
+            _schema = schema
+        body = TransformDocumentRequest(
+            file=file,
+            artifact_schema=_schema,
+            model=model,
+            prompt=prompt,
+            prompt_id=prompt_id,
+            timeout_seconds=timeout_seconds,
+        )
+        response = await self._http.request("POST", path, json=body.model_dump(by_alias=True, exclude_unset=True))
         return TransformDocumentResponse.model_validate(response)
 
-    async def submit_transform(self, body: "TransformDocumentRequest") -> "SubmitDocumentTransformResponse":
+    async def submit_transform(self, file: str, schema: Union[str, Dict[str, Any], Type[BaseModel]], model: Optional[Union[str, None]] = None, prompt: Optional[Union[str, None]] = None, prompt_id: Optional[Union[str, None]] = None, timeout_seconds: Union[int, None] = 600) -> "SubmitDocumentTransformResponse":
         """
         Submit a document transform (async)
         
@@ -342,5 +380,17 @@ class AsyncDocumentsResource:
             ApiError: If the request fails
         """
         path = "/documents/transform/submit"
-        response = await self._http.request("POST", path, json=body.model_dump(by_alias=True, exclude_unset=True) if body else None)
+        if isinstance(schema, type) and issubclass(schema, BaseModel):
+            _schema = schema.model_json_schema()
+        else:
+            _schema = schema
+        body = TransformDocumentRequest(
+            file=file,
+            artifact_schema=_schema,
+            model=model,
+            prompt=prompt,
+            prompt_id=prompt_id,
+            timeout_seconds=timeout_seconds,
+        )
+        response = await self._http.request("POST", path, json=body.model_dump(by_alias=True, exclude_unset=True))
         return SubmitDocumentTransformResponse.model_validate(response)

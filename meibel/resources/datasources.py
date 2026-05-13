@@ -8,6 +8,7 @@ from typing import Optional, List, Dict, Any, Union, Iterator, AsyncIterator
 from .._http import HttpClient, AsyncHttpClient
 from ..models import *
 from ..exceptions import raise_for_status
+from .._metadata import metadata_schema_from_model
 from .data_elements import DataElementsResource, AsyncDataElementsResource
 from .downloads import DownloadsResource, AsyncDownloadsResource
 from .file_uploads import FileUploadsResource, AsyncFileUploadsResource
@@ -40,7 +41,7 @@ class DatasourcesResource:
         response = self._http.request("GET", path)
         return DatasourceListResponse.model_validate(response)
 
-    def create(self, body: "CreateDatasourceRequest") -> "DatasourceResponse":
+    def create(self, name: str, connector: "ConnectorConfig", description: str = "", metadata_config: Optional[Union[Dict[str, Any], Type[BaseModel]]] = None) -> "DatasourceResponse":
         """
         Create Datasource
         
@@ -54,7 +55,17 @@ class DatasourcesResource:
             ApiError: If the request fails
         """
         path = "/datasources"
-        response = self._http.request("POST", path, json=body.model_dump(by_alias=True, exclude_unset=True) if body else None)
+        if isinstance(metadata_config, type) and issubclass(metadata_config, BaseModel):
+            _metadata_config = metadata_schema_from_model(metadata_config)
+        else:
+            _metadata_config = metadata_config
+        body = CreateDatasourceRequest(
+            name=name,
+            description=description,
+            connector=connector,
+            metadata_config=_metadata_config,
+        )
+        response = self._http.request("POST", path, json=body.model_dump(by_alias=True, exclude_unset=True))
         return DatasourceResponse.model_validate(response)
 
     def get(self, datasource_id: str, include_tables: Optional[bool] = None) -> "DatasourceResponse":
@@ -161,7 +172,7 @@ class AsyncDatasourcesResource:
         response = await self._http.request("GET", path)
         return DatasourceListResponse.model_validate(response)
 
-    async def create(self, body: "CreateDatasourceRequest") -> "DatasourceResponse":
+    async def create(self, name: str, connector: "ConnectorConfig", description: str = "", metadata_config: Optional[Union[Dict[str, Any], Type[BaseModel]]] = None) -> "DatasourceResponse":
         """
         Create Datasource
         
@@ -175,7 +186,17 @@ class AsyncDatasourcesResource:
             ApiError: If the request fails
         """
         path = "/datasources"
-        response = await self._http.request("POST", path, json=body.model_dump(by_alias=True, exclude_unset=True) if body else None)
+        if isinstance(metadata_config, type) and issubclass(metadata_config, BaseModel):
+            _metadata_config = metadata_schema_from_model(metadata_config)
+        else:
+            _metadata_config = metadata_config
+        body = CreateDatasourceRequest(
+            name=name,
+            description=description,
+            connector=connector,
+            metadata_config=_metadata_config,
+        )
+        response = await self._http.request("POST", path, json=body.model_dump(by_alias=True, exclude_unset=True))
         return DatasourceResponse.model_validate(response)
 
     async def get(self, datasource_id: str, include_tables: Optional[bool] = None) -> "DatasourceResponse":
