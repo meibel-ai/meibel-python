@@ -148,8 +148,12 @@ def _model_to_markdown_sections(
 # Schema builder
 # ---------------------------------------------------------------------------
 
-def _build_schema_def(model_cls: Optional[Type[BaseModel]], artifact_type: str) -> str:
-    """Build the schema_def JSON string based on artifact type and model."""
+def _build_schema_def(model_cls: Optional[Type[BaseModel]], artifact_type: str) -> Any:
+    """Build the schema_def object based on artifact type and model.
+
+    Returns a dict (or list for CSV) — the API expects schema_def as a JSON object,
+    not a JSON-encoded string.
+    """
     if model_cls is not None:
         if not isinstance(model_cls, type) or not issubclass(model_cls, BaseModel):
             hint = ""
@@ -165,21 +169,17 @@ def _build_schema_def(model_cls: Optional[Type[BaseModel]], artifact_type: str) 
                 f"A Pydantic model is required for artifact type '{artifact_type}'. "
                 f"Only markdown, text, html, and pdf support freeform (no model)."
             )
-        return json.dumps({"freeform": True, "sections": []})
+        return {"freeform": True, "sections": []}
 
     if artifact_type in ("json", "yaml"):
-        schema = _model_to_json_schema(model_cls)
-        return json.dumps(schema)
+        return _model_to_json_schema(model_cls)
     elif artifact_type == "csv":
-        columns = _model_to_csv_columns(model_cls)
-        return json.dumps(columns)
+        return _model_to_csv_columns(model_cls)
     elif artifact_type == "markdown":
-        sections = _model_to_markdown_sections(model_cls)
-        return json.dumps({"sections": sections})
+        return {"sections": _model_to_markdown_sections(model_cls)}
     else:
         # text, html, pdf — use JSON Schema as validation hints
-        schema = _model_to_json_schema(model_cls)
-        return json.dumps(schema)
+        return _model_to_json_schema(model_cls)
 
 
 # ---------------------------------------------------------------------------
