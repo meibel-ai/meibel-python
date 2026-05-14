@@ -15,6 +15,30 @@ from .exceptions import ApiError, AuthenticationError, RateLimitError, NotFoundE
 T = TypeVar("T", bound=BaseModel)
 
 
+def _extract_error_message(error_body: Dict[str, Any]) -> str:
+    """Extract a human-readable error message from various API error formats."""
+    if "message" in error_body:
+        return str(error_body["message"])
+    if "error" in error_body:
+        return str(error_body["error"])
+    if "detail" in error_body:
+        detail = error_body["detail"]
+        if isinstance(detail, str):
+            return detail
+        if isinstance(detail, list):
+            parts = []
+            for item in detail:
+                if isinstance(item, dict):
+                    loc = ".".join(str(x) for x in item.get("loc", []))
+                    msg = item.get("msg", "")
+                    parts.append(f"{loc}: {msg}" if loc else msg)
+                else:
+                    parts.append(str(item))
+            return "; ".join(parts)
+        return str(detail)
+    return "Unknown error"
+
+
 class HttpClient:
     """Synchronous HTTP client."""
 
@@ -60,6 +84,7 @@ class HttpClient:
         json: Optional[Any] = None,
         headers: Optional[Dict[str, str]] = None,
         response_model: Optional[Type[T]] = None,
+        timeout: Optional[float] = None,
     ) -> Union[T, Dict[str, Any], None]:
         """Make an HTTP request."""
         # Filter out None values from params
@@ -77,6 +102,7 @@ class HttpClient:
             params=params,
             json=self._serialize_body(json),
             headers=request_headers,
+            timeout=timeout if timeout is not None else self._timeout,
         )
 
         return self._handle_response(response, response_model)
@@ -193,7 +219,7 @@ class HttpClient:
         except Exception:
             error_body = {"message": response.text}
 
-        message = error_body.get("message", error_body.get("error", "Unknown error"))
+        message = _extract_error_message(error_body)
 
         if response.status_code == 401:
             raise AuthenticationError(message, response.status_code, error_body)
@@ -250,6 +276,7 @@ class AsyncHttpClient:
         json: Optional[Any] = None,
         headers: Optional[Dict[str, str]] = None,
         response_model: Optional[Type[T]] = None,
+        timeout: Optional[float] = None,
     ) -> Union[T, Dict[str, Any], None]:
         """Make an HTTP request."""
         # Filter out None values from params
@@ -267,6 +294,7 @@ class AsyncHttpClient:
             params=params,
             json=self._serialize_body(json),
             headers=request_headers,
+            timeout=timeout if timeout is not None else self._timeout,
         )
 
         return self._handle_response(response, response_model)
@@ -383,7 +411,7 @@ class AsyncHttpClient:
         except Exception:
             error_body = {"message": response.text}
 
-        message = error_body.get("message", error_body.get("error", "Unknown error"))
+        message = _extract_error_message(error_body)
 
         if response.status_code == 401:
             raise AuthenticationError(message, response.status_code, error_body)

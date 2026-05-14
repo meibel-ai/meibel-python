@@ -170,7 +170,7 @@ class DocumentsResource:
             prompt_id=prompt_id,
             timeout_seconds=timeout_seconds,
         )
-        response = self._http.request("POST", path, json=body.model_dump(by_alias=True, exclude_unset=True))
+        response = self._http.request("POST", path, json=body.model_dump(by_alias=True, exclude_unset=True), timeout=float(timeout_seconds or self._http._timeout))
         return TransformDocumentResponse.model_validate(response)
 
     def submit_transform(self, file: str, schema: Union[str, Dict[str, Any], Type[BaseModel]], model: Optional[Union[str, None]] = None, prompt: Optional[Union[str, None]] = None, prompt_id: Optional[Union[str, None]] = None, timeout_seconds: Union[int, None] = 600) -> "SubmitDocumentTransformResponse":
@@ -201,7 +201,7 @@ class DocumentsResource:
             prompt_id=prompt_id,
             timeout_seconds=timeout_seconds,
         )
-        response = self._http.request("POST", path, json=body.model_dump(by_alias=True, exclude_unset=True))
+        response = self._http.request("POST", path, json=body.model_dump(by_alias=True, exclude_unset=True), timeout=float(timeout_seconds or self._http._timeout))
         return SubmitDocumentTransformResponse.model_validate(response)
 
 
@@ -361,7 +361,7 @@ class AsyncDocumentsResource:
             prompt_id=prompt_id,
             timeout_seconds=timeout_seconds,
         )
-        response = await self._http.request("POST", path, json=body.model_dump(by_alias=True, exclude_unset=True))
+        response = await self._http.request("POST", path, json=body.model_dump(by_alias=True, exclude_unset=True), timeout=float(timeout_seconds or self._http._timeout))
         return TransformDocumentResponse.model_validate(response)
 
     async def submit_transform(self, file: str, schema: Union[str, Dict[str, Any], Type[BaseModel]], model: Optional[Union[str, None]] = None, prompt: Optional[Union[str, None]] = None, prompt_id: Optional[Union[str, None]] = None, timeout_seconds: Union[int, None] = 600) -> "SubmitDocumentTransformResponse":
@@ -392,5 +392,5 @@ class AsyncDocumentsResource:
             prompt_id=prompt_id,
             timeout_seconds=timeout_seconds,
         )
-        response = await self._http.request("POST", path, json=body.model_dump(by_alias=True, exclude_unset=True))
+        response = await self._http.request("POST", path, json=body.model_dump(by_alias=True, exclude_unset=True), timeout=float(timeout_seconds or self._http._timeout))
         return SubmitDocumentTransformResponse.model_validate(response)
