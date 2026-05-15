@@ -162,6 +162,7 @@ class HttpClient:
         form_fields: Optional[Dict[str, str]] = None,
         headers: Optional[Dict[str, str]] = None,
         response_model: Optional[Type[T]] = None,
+        timeout: Optional[float] = None,
     ) -> Union[T, Dict[str, Any], None]:
         """Upload a file with streaming multipart/form-data."""
         from ._upload import create_multipart_stream
@@ -179,6 +180,7 @@ class HttpClient:
 
         response = self._client.request(
             method=method, url=path, content=content_stream, params=params, headers=request_headers,
+            timeout=timeout if timeout is not None else self._timeout,
         )
         return self._handle_response(response, response_model)
 
@@ -354,6 +356,7 @@ class AsyncHttpClient:
         form_fields: Optional[Dict[str, str]] = None,
         headers: Optional[Dict[str, str]] = None,
         response_model: Optional[Type[T]] = None,
+        timeout: Optional[float] = None,
     ) -> Union[T, Dict[str, Any], None]:
         """Upload a file with streaming multipart/form-data."""
         from ._upload import create_async_multipart_stream
@@ -371,6 +374,7 @@ class AsyncHttpClient:
 
         response = await self._client.request(
             method=method, url=path, content=content_stream, params=params, headers=request_headers,
+            timeout=timeout if timeout is not None else self._timeout,
         )
         return self._handle_response(response, response_model)
 

@@ -142,11 +142,11 @@ class DocumentsResource:
         path = path.replace("{job_id}", str(job_id))
         return self._http.stream("GET", path)
 
-    def transform(self, file: str, schema: Union[str, Dict[str, Any], Type[BaseModel]], model: Optional[Union[str, None]] = None, prompt: Optional[Union[str, None]] = None, prompt_id: Optional[Union[str, None]] = None, timeout_seconds: Union[int, None] = 600) -> "TransformDocumentResponse":
+    def transform(self, file: str, schema: Union[str, Dict[str, Any], Type[BaseModel]], model: Optional[str] = None, prompt: Optional[str] = None, prompt_id: Optional[str] = None, timeout_seconds: int = 600) -> "TransformDocumentResponse":
         """
         Transform a document using AI extraction (sync)
         
-        Submit a document for AI-powered structured extraction and block until complete. Internally orchestrates a system agent session, polls for completion, and returns the extracted data.
+        Upload a document for AI-powered structured extraction and block until complete. The file is uploaded to cloud storage and processed by a system agent.
         
         Args:
             body: Request body
@@ -162,22 +162,33 @@ class DocumentsResource:
             _schema = schema.model_json_schema()
         else:
             _schema = schema
-        body = TransformDocumentRequest(
-            file=file,
-            artifact_schema=_schema,
-            model=model,
-            prompt=prompt,
-            prompt_id=prompt_id,
-            timeout_seconds=timeout_seconds,
-        )
-        response = self._http.request("POST", path, json=body.model_dump(by_alias=True, exclude_unset=True), timeout=float(timeout_seconds or self._http._timeout))
+        import json as _json
+        _file = open(file, "rb")
+        _file_name = file.rsplit("/", 1)[-1] if "/" in file else file
+        form_fields = {}
+        if isinstance(_schema, (dict, list)):
+            form_fields["artifact_schema"] = _json.dumps(_schema)
+        elif _schema is not None:
+            form_fields["artifact_schema"] = str(_schema)
+        if model is not None:
+            form_fields["model"] = str(model)
+        if prompt is not None:
+            form_fields["prompt"] = str(prompt)
+        if prompt_id is not None:
+            form_fields["prompt_id"] = str(prompt_id)
+        if timeout_seconds is not None:
+            form_fields["timeout_seconds"] = str(timeout_seconds)
+        try:
+            response = self._http.upload("POST", path, file=_file, file_name=_file_name, field_name="file", form_fields=form_fields, timeout=float(timeout_seconds or self._http._timeout))
+        finally:
+            _file.close()
         return TransformDocumentResponse.model_validate(response)
 
-    def submit_transform(self, file: str, schema: Union[str, Dict[str, Any], Type[BaseModel]], model: Optional[Union[str, None]] = None, prompt: Optional[Union[str, None]] = None, prompt_id: Optional[Union[str, None]] = None, timeout_seconds: Union[int, None] = 600) -> "SubmitDocumentTransformResponse":
+    def submit_transform(self, file: str, schema: Union[str, Dict[str, Any], Type[BaseModel]], model: Optional[str] = None, prompt: Optional[str] = None, prompt_id: Optional[str] = None, timeout_seconds: int = 600) -> "SubmitDocumentTransformResponse":
         """
         Submit a document transform (async)
         
-        Submit a document for AI-powered extraction and return immediately. Poll for completion via client.sessions.get(execution_id).
+        Upload a document for AI-powered extraction and return immediately. Poll for completion via client.sessions.get(execution_id).
         
         Args:
             body: Request body
@@ -193,15 +204,26 @@ class DocumentsResource:
             _schema = schema.model_json_schema()
         else:
             _schema = schema
-        body = TransformDocumentRequest(
-            file=file,
-            artifact_schema=_schema,
-            model=model,
-            prompt=prompt,
-            prompt_id=prompt_id,
-            timeout_seconds=timeout_seconds,
-        )
-        response = self._http.request("POST", path, json=body.model_dump(by_alias=True, exclude_unset=True), timeout=float(timeout_seconds or self._http._timeout))
+        import json as _json
+        _file = open(file, "rb")
+        _file_name = file.rsplit("/", 1)[-1] if "/" in file else file
+        form_fields = {}
+        if isinstance(_schema, (dict, list)):
+            form_fields["artifact_schema"] = _json.dumps(_schema)
+        elif _schema is not None:
+            form_fields["artifact_schema"] = str(_schema)
+        if model is not None:
+            form_fields["model"] = str(model)
+        if prompt is not None:
+            form_fields["prompt"] = str(prompt)
+        if prompt_id is not None:
+            form_fields["prompt_id"] = str(prompt_id)
+        if timeout_seconds is not None:
+            form_fields["timeout_seconds"] = str(timeout_seconds)
+        try:
+            response = self._http.upload("POST", path, file=_file, file_name=_file_name, field_name="file", form_fields=form_fields, timeout=float(timeout_seconds or self._http._timeout))
+        finally:
+            _file.close()
         return SubmitDocumentTransformResponse.model_validate(response)
 
 
@@ -333,11 +355,11 @@ class AsyncDocumentsResource:
         path = path.replace("{job_id}", str(job_id))
         return self._http.stream("GET", path)
 
-    async def transform(self, file: str, schema: Union[str, Dict[str, Any], Type[BaseModel]], model: Optional[Union[str, None]] = None, prompt: Optional[Union[str, None]] = None, prompt_id: Optional[Union[str, None]] = None, timeout_seconds: Union[int, None] = 600) -> "TransformDocumentResponse":
+    async def transform(self, file: str, schema: Union[str, Dict[str, Any], Type[BaseModel]], model: Optional[str] = None, prompt: Optional[str] = None, prompt_id: Optional[str] = None, timeout_seconds: int = 600) -> "TransformDocumentResponse":
         """
         Transform a document using AI extraction (sync)
         
-        Submit a document for AI-powered structured extraction and block until complete. Internally orchestrates a system agent session, polls for completion, and returns the extracted data.
+        Upload a document for AI-powered structured extraction and block until complete. The file is uploaded to cloud storage and processed by a system agent.
         
         Args:
             body: Request body
@@ -353,22 +375,33 @@ class AsyncDocumentsResource:
             _schema = schema.model_json_schema()
         else:
             _schema = schema
-        body = TransformDocumentRequest(
-            file=file,
-            artifact_schema=_schema,
-            model=model,
-            prompt=prompt,
-            prompt_id=prompt_id,
-            timeout_seconds=timeout_seconds,
-        )
-        response = await self._http.request("POST", path, json=body.model_dump(by_alias=True, exclude_unset=True), timeout=float(timeout_seconds or self._http._timeout))
+        import json as _json
+        _file = open(file, "rb")
+        _file_name = file.rsplit("/", 1)[-1] if "/" in file else file
+        form_fields = {}
+        if isinstance(_schema, (dict, list)):
+            form_fields["artifact_schema"] = _json.dumps(_schema)
+        elif _schema is not None:
+            form_fields["artifact_schema"] = str(_schema)
+        if model is not None:
+            form_fields["model"] = str(model)
+        if prompt is not None:
+            form_fields["prompt"] = str(prompt)
+        if prompt_id is not None:
+            form_fields["prompt_id"] = str(prompt_id)
+        if timeout_seconds is not None:
+            form_fields["timeout_seconds"] = str(timeout_seconds)
+        try:
+            response = await self._http.upload("POST", path, file=_file, file_name=_file_name, field_name="file", form_fields=form_fields, timeout=float(timeout_seconds or self._http._timeout))
+        finally:
+            _file.close()
         return TransformDocumentResponse.model_validate(response)
 
-    async def submit_transform(self, file: str, schema: Union[str, Dict[str, Any], Type[BaseModel]], model: Optional[Union[str, None]] = None, prompt: Optional[Union[str, None]] = None, prompt_id: Optional[Union[str, None]] = None, timeout_seconds: Union[int, None] = 600) -> "SubmitDocumentTransformResponse":
+    async def submit_transform(self, file: str, schema: Union[str, Dict[str, Any], Type[BaseModel]], model: Optional[str] = None, prompt: Optional[str] = None, prompt_id: Optional[str] = None, timeout_seconds: int = 600) -> "SubmitDocumentTransformResponse":
         """
         Submit a document transform (async)
         
-        Submit a document for AI-powered extraction and return immediately. Poll for completion via client.sessions.get(execution_id).
+        Upload a document for AI-powered extraction and return immediately. Poll for completion via client.sessions.get(execution_id).
         
         Args:
             body: Request body
@@ -384,13 +417,24 @@ class AsyncDocumentsResource:
             _schema = schema.model_json_schema()
         else:
             _schema = schema
-        body = TransformDocumentRequest(
-            file=file,
-            artifact_schema=_schema,
-            model=model,
-            prompt=prompt,
-            prompt_id=prompt_id,
-            timeout_seconds=timeout_seconds,
-        )
-        response = await self._http.request("POST", path, json=body.model_dump(by_alias=True, exclude_unset=True), timeout=float(timeout_seconds or self._http._timeout))
+        import json as _json
+        _file = open(file, "rb")
+        _file_name = file.rsplit("/", 1)[-1] if "/" in file else file
+        form_fields = {}
+        if isinstance(_schema, (dict, list)):
+            form_fields["artifact_schema"] = _json.dumps(_schema)
+        elif _schema is not None:
+            form_fields["artifact_schema"] = str(_schema)
+        if model is not None:
+            form_fields["model"] = str(model)
+        if prompt is not None:
+            form_fields["prompt"] = str(prompt)
+        if prompt_id is not None:
+            form_fields["prompt_id"] = str(prompt_id)
+        if timeout_seconds is not None:
+            form_fields["timeout_seconds"] = str(timeout_seconds)
+        try:
+            response = await self._http.upload("POST", path, file=_file, file_name=_file_name, field_name="file", form_fields=form_fields, timeout=float(timeout_seconds or self._http._timeout))
+        finally:
+            _file.close()
         return SubmitDocumentTransformResponse.model_validate(response)

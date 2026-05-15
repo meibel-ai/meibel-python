@@ -50,21 +50,6 @@ class AgentExecutionDetailsResponse(BaseModel):
     result: List["ArtifactEntry"] = ...
 
 
-class AgentIdentityContext(BaseModel):
-    """Identity context for agent execution.  Contains only immutable identity fields that answer: - WHO: customer_id, project_id (tenant identity) - WHAT: agent_name, agent_version, agent_execution_id (agent identity, optional) - WHERE: agent_workflow_name, agent_workflow_version, agent_workflow_execution_id (parent workflow, optional) - WHICH TOOL: tool_id, tool_instance_id, tool_execution_id (tool identity, optional)  This model is FLAT - no inheritance, all fields in one model. Agent, workflow, and tool fields are optional, making this suitable for all execution contexts.  This model does NOT contain: - Configuration (see AgentExecutionConfig in agent-platform) - Runtime state (see AgentExecutionState in agent-platform)  Design Pattern - Progressive Enhancement: - Callers provide only tenant/project identity - FSMWorkflow fills in agent_workflow_* fields from AgentWorkflowSpec - ReactAgent fills in agent_* fields from AgentSpec and workflow.info().workflow_id - Tool activities add tool_* fields via model_copy() - Context gains fields as it flows through the system  Examples:     # Starting FSMWorkflow (caller provides minimal context)     context = AgentIdentityContext(         customer_id="cust_123",         project_id="proj_456"     )     # FSM fills in workflow identity     context = context.model_copy(update={         "agent_workflow_name": "support_fsm",         "agent_workflow_version": "3.0.0",         "agent_workflow_execution_id": workflow.info().workflow_id     })      # Starting ReactAgent standalone (caller provides minimal context)     context = AgentIdentityContext(         customer_id="cust_123",         project_id="proj_456"     )     # ReactAgent fills in agent identity     context = context.model_copy(update={         "agent_name": "sales_assistant",         "agent_version": "2.0.0",         "agent_execution_id": workflow.info().workflow_id     })      # ReactAgent as FSM child (inherits workflow context, adds agent identity)     child_context = parent_context.model_copy(update={         "agent_name": "router",         "agent_version": "1.0.0",         "agent_execution_id": workflow.info().workflow_id         # agent_workflow_* fields inherited from parent     })      # Tool execution (adds tool identity to agent context)     tool_context = context.model_copy(update={         'tool_id': "tool_xyz",         'tool_instance_id': "tool_inst_123",         'tool_execution_id': "tool_exec_456"     })"""
-    customer_id: str = Field(description="Customer/tenant identifier")
-    project_id: str = Field(description="Project identifier")
-    agent_name: Optional[Union[str, None]] = Field(default=None)
-    agent_version: Optional[Union[str, None]] = Field(default=None)
-    agent_execution_id: Optional[Union[str, None]] = Field(default=None)
-    agent_workflow_name: Optional[Union[str, None]] = Field(default=None)
-    agent_workflow_version: Optional[Union[str, None]] = Field(default=None)
-    agent_workflow_execution_id: Optional[Union[str, None]] = Field(default=None)
-    tool_id: Optional[Union[str, None]] = Field(default=None)
-    tool_instance_id: Optional[Union[str, None]] = Field(default=None)
-    tool_execution_id: Optional[Union[str, None]] = Field(default=None)
-
-
 class AgentListResponse(BaseModel):
     data: List["AgentSummary"] = ...
     total: int = ...
@@ -296,22 +281,6 @@ class CloudStorageConnector(BaseModel):
     prefix: Optional[Union[str, None]] = Field(description="Key prefix to scope the datasource", default=None)
     role_arn: Optional[Union[str, None]] = Field(description="AWS IAM role ARN (S3 only)", default=None)
     region: Optional[Union[str, None]] = Field(description="AWS region (S3 only)", default=None)
-
-
-class ConfidenceScoringConfig(BaseModel):
-    """Simplified configuration wrapper that separates module name from config.  This model is shared between confidence-scoring-service and confidence-framework to ensure type consistency without OpenAPI Generator wrapper issues."""
-    module: str = ...
-    config: "Config" = ...
-
-
-class Config(BaseModel):
-    """Config"""
-    anyof_schema_1_validator: Optional[Union["JudgeConfig", None]] = Field(default=None)
-    anyof_schema_2_validator: Optional[Union["OcConfig", None]] = Field(default=None)
-    anyof_schema_3_validator: Optional[Union["OcrConfig", None]] = Field(default=None)
-    anyof_schema_4_validator: Optional[Union["TokenConfig", None]] = Field(default=None)
-    actual_instance: Optional[str] = Field(default=None)
-    any_of_schemas: Optional[List[str]] = Field(default=None)
 
 
 class ConnectorConfig(BaseModel):
@@ -629,13 +598,6 @@ class IngestStatusResponse(BaseModel):
     methods: Optional[List["IngestMethodSummary"]] = Field(description="Per-method progress and counts for this run", default=None)
 
 
-class JudgeConfig(BaseModel):
-    """Configuration for judge-based confidence scoring (LLM-as-judge patterns)."""
-    prompt: str = ...
-    temperature_max: Optional[Union[float, int, None]] = Field(default=None)
-    temperature_step: Optional[Union[float, int, None]] = Field(default=None)
-
-
 class LegacyBatchExecutionParams(BaseModel):
     """LegacyBatchExecutionParams"""
     concurrency: Optional[Union[int, None]] = Field(default=None)
@@ -711,33 +673,6 @@ class MetadataField(BaseModel):
     index: Optional[bool] = Field(description="Whether this field is indexed for filtering", default=None)
 
 
-class NBootstraps(BaseModel):
-    """NBootstraps"""
-    anyof_schema_1_validator: Optional[Union[int, None]] = Field(default=None)
-    anyof_schema_2_validator: Optional[Union[str, None]] = Field(default=None)
-    actual_instance: Optional[str] = Field(default=None)
-    any_of_schemas: Optional[List[str]] = Field(default=None)
-
-
-class OcConfig(BaseModel):
-    """Configuration for Observed Consistency confidence scoring."""
-    n_completions: Optional[Union[int, None]] = Field(default=None)
-    max_tokens: Optional[Union[int, None]] = Field(default=None)
-    temperature: Optional[Union[float, int, None]] = Field(default=None)
-    models: Optional[Union[List[Union[str, None]], None]] = Field(default=None)
-    nli_model_config: Dict[str, Any] = ...
-    n_bootstraps: Optional[Union["NBootstraps", None]] = Field(default=None)
-    token_limit: Optional[Union[int, None]] = Field(default=None)
-    original_completion: Optional[Union[str, None]] = Field(default=None)
-    comparison_completions: Optional[Union[List[str], None]] = Field(default=None)
-
-
-class OcrConfig(BaseModel):
-    """Configuration for OCR confidence scoring."""
-    calibration_model: Optional[Union[str, None]] = Field(default=None)
-    ocr_confidence_scores: Optional[Union[List[Union[float, int]], None]] = Field(default=None)
-
-
 class PaginationMeta(BaseModel):
     """Pagination metadata included in list responses."""
     total: int = Field(description="Total number of items matching the query")
@@ -796,36 +731,6 @@ class PublishAgentDefinitionResponse(BaseModel):
     commit_message: str = Field(description="User-provided description of what changed in this version")
     published_at: datetime = Field(description="Timestamp of the publish event")
     published_by: Optional[Union[str, None]] = Field(description="User who published", default=None)
-
-
-class ScoreSummary(BaseModel):
-    """Aggregated summary of scoring jobs matching one or two AgentIdentityContext filters.  With one level (primary only): flat aggregate of all jobs matching primary_field=primary_value. With two levels (primary + secondary): both constraints are applied; primary is the higher level and secondary is the lower level."""
-    primary_field: str = ...
-    primary_value: str = ...
-    secondary_field: Optional[Union[str, None]] = Field(default=None)
-    secondary_value: Optional[Union[str, None]] = Field(default=None)
-    status: Optional[Union["ScoringStatus", None]] = Field(default=None)
-    aggregate_score: Optional[Union[float, int, None]] = Field(default=None)
-    module_scores: Optional[Union[Dict[str, Union[float, int]], None]] = Field(default=None)
-    n_jobs_per_module: Optional[Union[Dict[str, int], None]] = Field(default=None)
-    jobs: Optional[Union[List["ScoringJobRecord"], None]] = Field(default=None)
-
-
-class ScoringJobRecord(BaseModel):
-    """ScoringJobRecord"""
-    job_id: str = ...
-    agent_identity_context: "AgentIdentityContext" = ...
-    module: str = ...
-    scoring_config: "ConfidenceScoringConfig" = ...
-    input_value: str = ...
-    output_value: str = ...
-    status: "ScoringStatus" = ...
-    score: Optional[Union[float, int, None]] = Field(default=None)
-
-
-class ScoringStatus(BaseModel):
-    """ScoringStatus"""
-    pass
 
 
 class SessionListResponse(BaseModel):
@@ -932,15 +837,6 @@ class TagTableUpdateItem(BaseModel):
     description: str = Field(description="New description for the table")
 
 
-class TokenConfig(BaseModel):
-    """Configuration for token-based confidence scoring (TF-IDF)."""
-    model: Optional[Union[str, None]] = Field(default=None)
-    remove_stop_words: Optional[Union[bool, None]] = Field(default=None)
-    lower_case: Optional[Union[bool, None]] = Field(default=None)
-    max_ngrams: Optional[Union[int, None]] = Field(default=None)
-    n_influencers: Optional[Union[int, None]] = Field(default=None)
-
-
 class ToolActivity(BaseModel):
     """Record of a tool call and its result."""
     tool_id: str = ...
@@ -971,15 +867,6 @@ class ToolResultInfo(BaseModel):
     result: Optional[Union[str, None]] = Field(default=None)
     sequence: Union[str, None] = ...
     timestamp: Union[str, None] = ...
-
-
-class TransformDocumentRequest(BaseModel):
-    file: str = Field(description="File path, URL, or GCS URI to transform")
-    artifact_schema: Union[str, Dict[str, Any]] = Field(description="Schema name/ID or inline JSON Schema")
-    model: Optional[Union[str, None]] = Field(description="LLM model override", default=None)
-    prompt: Optional[Union[str, None]] = Field(description="Extraction instructions override", default=None)
-    prompt_id: Optional[Union[str, None]] = Field(description="Prompt template reference", default=None)
-    timeout_seconds: Optional[Union[int, None]] = Field(description="Max wait time in seconds (sync only)", default=None)
 
 
 class TransformDocumentResponse(BaseModel):
@@ -1139,6 +1026,46 @@ class CompletionEvent(BaseModel):
     data: str = ...
 
 
+class AgentIdentityContext(BaseModel):
+    """Identifies the agent, workflow, and tool context that produced the scored output."""
+    customer_id: str = Field(description="Your customer identifier.")
+    project_id: str = Field(description="The project this scoring job belongs to.")
+    agent_name: Optional[Union[str, None]] = Field(description="Name of the agent that produced the scored output.", default=None)
+    agent_version: Optional[Union[str, None]] = Field(description="Version of the agent that produced the scored output.", default=None)
+    agent_session_id: Optional[Union[str, None]] = Field(description="Unique identifier for the agent session that produced the scored output.", default=None)
+    agent_workflow_name: Optional[Union[str, None]] = Field(description="Name of the workflow the agent is part of, if applicable.", default=None)
+    agent_workflow_version: Optional[Union[str, None]] = Field(description="Version of the workflow the agent is part of.", default=None)
+    agent_workflow_session_id: Optional[Union[str, None]] = Field(description="Unique identifier for the workflow session, if the agent runs within a workflow.", default=None)
+    tool_id: Optional[Union[str, None]] = Field(description="Identifier of the tool that produced the scored output, if applicable.", default=None)
+    tool_instance_id: Optional[Union[str, None]] = Field(description="Identifier of the specific tool instance.", default=None)
+    tool_execution_id: Optional[Union[str, None]] = Field(description="Unique identifier for the tool execution that produced the scored output.", default=None)
+
+
+class ScoreSummary(BaseModel):
+    """Aggregated summary of scoring jobs matching one or two identity context filters."""
+    primary_field: str = Field(description="The identity context field used as the primary filter (e.g. \"agent_name\").")
+    primary_value: str = Field(description="The value matched by the primary filter.")
+    secondary_field: Optional[Union[str, None]] = Field(description="An optional second identity context field used to further narrow results.", default=None)
+    secondary_value: Optional[Union[str, None]] = Field(description="The value matched by the secondary filter.", default=None)
+    status: Optional[Union[str, None]] = Field(description="Overall status across the matched scoring jobs. Null if no jobs matched the filters.", default=None)
+    aggregate_score: Optional[Union[float, int, None]] = Field(description="Average score across all completed jobs matching the filters.", default=None)
+    module_scores: Optional[Union[Dict[str, Union[float, int]], None]] = Field(description="Average score per scoring module, keyed by module name.", default=None)
+    n_jobs_per_module: Optional[Union[Dict[str, int], None]] = Field(description="Number of completed scoring jobs per module.", default=None)
+    jobs: Optional[Union[List["ScoringJobRecord"], None]] = Field(description="The individual scoring job records matching the filters.", default=None)
+
+
+class ScoringJobRecord(BaseModel):
+    """A single confidence scoring job and its result."""
+    job_id: str = Field(description="Unique identifier for this scoring job.")
+    agent_identity_context: "AgentIdentityContext" = Field(description="The agent, workflow, and tool context that produced the scored output.")
+    module: str = Field(description="The scoring module used to evaluate the output. Judge-based modules (e.g. correctness, coherence, faithfulness) produce scores on a 0–10 scale. Statistical modules (e.g. observed_consistency, data_grounding) produce scores on a 0.0–1.0 scale.")
+    scoring_config: Optional[str] = Field(description="Configuration parameters for the scoring module. Structure varies by module.", default=None)
+    input_value: str = Field(description="The input that was provided to the agent or tool being scored.")
+    output_value: str = Field(description="The output produced by the agent or tool that was evaluated.")
+    status: str = Field(description="Current status of the scoring job: submitted, in_progress, completed, failed, or not_run.")
+    score: Optional[Union[float, int, None]] = Field(description="The computed confidence score, or null if the job has not completed. Range depends on the module: 0–10 (integer) for judge-based modules, 0.0–1.0 for statistical modules.", default=None)
+
+
 class ContentItem(BaseModel):
     """A single file in a datasource's content store."""
     name: str = Field(description="Filename")
@@ -1234,10 +1161,27 @@ class BodyProcessDocument(BaseModel):
     file: bytes = Field(description="The document file to process")
 
 
+class BodyTransformDocument(BaseModel):
+    file: bytes = Field(description="Document file to transform")
+    artifact_schema: str = Field(description="JSON Schema dict (as JSON string) or schema name/ID")
+    model: Optional[str] = Field(description="LLM model override", default=None)
+    prompt: Optional[str] = Field(description="Extraction instructions override", default=None)
+    prompt_id: Optional[str] = Field(description="Prompt template reference", default=None)
+    timeout_seconds: Optional[int] = Field(description="Max wait time in seconds (sync only)", default=None)
+
+
+class BodySubmitDocumentTransform(BaseModel):
+    file: bytes = Field(description="Document file to transform")
+    artifact_schema: str = Field(description="JSON Schema dict (as JSON string) or schema name/ID")
+    model: Optional[str] = Field(description="LLM model override", default=None)
+    prompt: Optional[str] = Field(description="Extraction instructions override", default=None)
+    prompt_id: Optional[str] = Field(description="Prompt template reference", default=None)
+    timeout_seconds: Optional[int] = Field(description="Max wait time in seconds (sync only)", default=None)
+
+
 # Update forward references
 AgentDetailResponse.model_rebuild()
 AgentExecutionDetailsResponse.model_rebuild()
-AgentIdentityContext.model_rebuild()
 AgentListResponse.model_rebuild()
 AgentSummary.model_rebuild()
 AgentToolDefinition.model_rebuild()
@@ -1262,8 +1206,6 @@ ChatMessageResponse.model_rebuild()
 ChatResponse.model_rebuild()
 ChatWithDatasourceRequest.model_rebuild()
 CloudStorageConnector.model_rebuild()
-ConfidenceScoringConfig.model_rebuild()
-Config.model_rebuild()
 ConnectorConfig.model_rebuild()
 CreateAgentArtifactRequest.model_rebuild()
 CreateAgentDefinitionRequest.model_rebuild()
@@ -1303,7 +1245,6 @@ IngestMethodCountsResponse.model_rebuild()
 IngestMethodSummary.model_rebuild()
 IngestStatus.model_rebuild()
 IngestStatusResponse.model_rebuild()
-JudgeConfig.model_rebuild()
 LegacyBatchExecutionParams.model_rebuild()
 LegacyBatchInputConfig.model_rebuild()
 LegacyBatchInputFilters.model_rebuild()
@@ -1314,9 +1255,6 @@ MessageEntry.model_rebuild()
 MetadataConfigRequest.model_rebuild()
 MetadataConfigResponse.model_rebuild()
 MetadataField.model_rebuild()
-NBootstraps.model_rebuild()
-OcConfig.model_rebuild()
-OcrConfig.model_rebuild()
 PaginationMeta.model_rebuild()
 ParseDocumentResponse.model_rebuild()
 ProcessDocumentResponse.model_rebuild()
@@ -1325,9 +1263,6 @@ PromptResponse.model_rebuild()
 PromptSummary.model_rebuild()
 PublishAgentDefinitionRequest.model_rebuild()
 PublishAgentDefinitionResponse.model_rebuild()
-ScoreSummary.model_rebuild()
-ScoringJobRecord.model_rebuild()
-ScoringStatus.model_rebuild()
 SessionListResponse.model_rebuild()
 SessionMessageItem.model_rebuild()
 SessionMessagesResponse.model_rebuild()
@@ -1342,12 +1277,10 @@ TagColumn.model_rebuild()
 TagColumnUpdateItem.model_rebuild()
 TagTable.model_rebuild()
 TagTableUpdateItem.model_rebuild()
-TokenConfig.model_rebuild()
 ToolActivity.model_rebuild()
 ToolActivityEntry.model_rebuild()
 ToolCallInfo.model_rebuild()
 ToolResultInfo.model_rebuild()
-TransformDocumentRequest.model_rebuild()
 TransformDocumentResponse.model_rebuild()
 TriggerIngestResponse.model_rebuild()
 UpdateAgentArtifactRequest.model_rebuild()
@@ -1369,6 +1302,9 @@ ToolCallEvent.model_rebuild()
 ToolResultEvent.model_rebuild()
 PartialResponseEvent.model_rebuild()
 CompletionEvent.model_rebuild()
+AgentIdentityContext.model_rebuild()
+ScoreSummary.model_rebuild()
+ScoringJobRecord.model_rebuild()
 ContentItem.model_rebuild()
 ListContentResponse.model_rebuild()
 UploadContentResponse.model_rebuild()
@@ -1382,3 +1318,5 @@ BodyUploadContent.model_rebuild()
 BodyUploadAndListContent.model_rebuild()
 BodyParseDocument.model_rebuild()
 BodyProcessDocument.model_rebuild()
+BodyTransformDocument.model_rebuild()
+BodySubmitDocumentTransform.model_rebuild()

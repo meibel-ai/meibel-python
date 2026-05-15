@@ -16,12 +16,14 @@ class ConfidenceScoringResource:
     def __init__(self, http: HttpClient):
         self._http = http
 
-    def get_scoring_job(self, job_id: str) -> str:
+    def get_scoring_job(self, job_id: str) -> "ScoringJobRecord":
         """
-        Get Scoring Job
+        Get a scoring job
+        
+        Retrieve a single confidence scoring job by its ID, including its current status and score if completed.
         
         Args:
-            job_id: The job_id parameter
+            job_id: Unique identifier of the scoring job to retrieve.
         
         Returns:
             Successful Response
@@ -32,22 +34,24 @@ class ConfidenceScoringResource:
         path = "/confidence-scoring/job/{job_id}"
         path = path.replace("{job_id}", str(job_id))
         response = self._http.request("GET", path)
-        return response
+        return ScoringJobRecord.model_validate(response)
 
-    def list_scoring_jobs(self, agent_name: Optional[Union[str, None]] = None, agent_version: Optional[Union[str, None]] = None, agent_execution_id: Optional[Union[str, None]] = None, agent_workflow_name: Optional[Union[str, None]] = None, agent_workflow_version: Optional[Union[str, None]] = None, agent_workflow_execution_id: Optional[Union[str, None]] = None, tool_id: Optional[Union[str, None]] = None, tool_instance_id: Optional[Union[str, None]] = None, tool_execution_id: Optional[Union[str, None]] = None) -> str:
+    def list_scoring_jobs(self, agent_name: Optional[Union[str, None]] = None, agent_version: Optional[Union[str, None]] = None, agent_session_id: Optional[Union[str, None]] = None, agent_workflow_name: Optional[Union[str, None]] = None, agent_workflow_version: Optional[Union[str, None]] = None, agent_workflow_session_id: Optional[Union[str, None]] = None, tool_id: Optional[Union[str, None]] = None, tool_instance_id: Optional[Union[str, None]] = None, tool_execution_id: Optional[Union[str, None]] = None) -> List["ScoringJobRecord"]:
         """
-        List Scoring Jobs
+        List scoring jobs
+        
+        List confidence scoring jobs, optionally filtered by identity context fields. All filters are combined with AND logic.
         
         Args:
-            agent_name: The agent_name parameter
-            agent_version: The agent_version parameter
-            agent_execution_id: The agent_execution_id parameter
-            agent_workflow_name: The agent_workflow_name parameter
-            agent_workflow_version: The agent_workflow_version parameter
-            agent_workflow_execution_id: The agent_workflow_execution_id parameter
-            tool_id: The tool_id parameter
-            tool_instance_id: The tool_instance_id parameter
-            tool_execution_id: The tool_execution_id parameter
+            agent_name: Filter by agent name.
+            agent_version: Filter by agent version.
+            agent_session_id: Filter by agent session ID.
+            agent_workflow_name: Filter by workflow name.
+            agent_workflow_version: Filter by workflow version.
+            agent_workflow_session_id: Filter by workflow session ID.
+            tool_id: Filter by tool identifier.
+            tool_instance_id: Filter by tool instance identifier.
+            tool_execution_id: Filter by tool execution identifier.
         
         Returns:
             Successful Response
@@ -61,14 +65,14 @@ class ConfidenceScoringResource:
             params["agent_name"] = agent_name
         if agent_version is not None:
             params["agent_version"] = agent_version
-        if agent_execution_id is not None:
-            params["agent_execution_id"] = agent_execution_id
+        if agent_session_id is not None:
+            params["agent_session_id"] = agent_session_id
         if agent_workflow_name is not None:
             params["agent_workflow_name"] = agent_workflow_name
         if agent_workflow_version is not None:
             params["agent_workflow_version"] = agent_workflow_version
-        if agent_workflow_execution_id is not None:
-            params["agent_workflow_execution_id"] = agent_workflow_execution_id
+        if agent_workflow_session_id is not None:
+            params["agent_workflow_session_id"] = agent_workflow_session_id
         if tool_id is not None:
             params["tool_id"] = tool_id
         if tool_instance_id is not None:
@@ -76,15 +80,17 @@ class ConfidenceScoringResource:
         if tool_execution_id is not None:
             params["tool_execution_id"] = tool_execution_id
         response = self._http.request("GET", path, params=params)
-        return response
+        return [ScoringJobRecord.model_validate(item) for item in response]
 
     def get_scoring_jobs_summary(self, primary: str, secondary: Optional[Union[str, None]] = None) -> "ScoreSummary":
         """
-        Get Scoring Jobs Summary
+        Get scoring summary
+        
+        Get an aggregated summary of confidence scores. Requires a primary filter; an optional secondary filter narrows results further. Filters use the format "field:value", where field is any identity context field name.
         
         Args:
-            primary: The primary parameter
-            secondary: The secondary parameter
+            primary: Primary filter in "field:value" format, where field is an identity context field name (e.g. "agent_name:my-agent" or "agent_session_id:sess_abc123").
+            secondary: Optional secondary filter in the same "field:value" format to further narrow results (e.g. "agent_version:1.2.0").
         
         Returns:
             Successful Response
@@ -108,12 +114,14 @@ class AsyncConfidenceScoringResource:
     def __init__(self, http: AsyncHttpClient):
         self._http = http
 
-    async def get_scoring_job(self, job_id: str) -> str:
+    async def get_scoring_job(self, job_id: str) -> "ScoringJobRecord":
         """
-        Get Scoring Job
+        Get a scoring job
+        
+        Retrieve a single confidence scoring job by its ID, including its current status and score if completed.
         
         Args:
-            job_id: The job_id parameter
+            job_id: Unique identifier of the scoring job to retrieve.
         
         Returns:
             Successful Response
@@ -124,22 +132,24 @@ class AsyncConfidenceScoringResource:
         path = "/confidence-scoring/job/{job_id}"
         path = path.replace("{job_id}", str(job_id))
         response = await self._http.request("GET", path)
-        return response
+        return ScoringJobRecord.model_validate(response)
 
-    async def list_scoring_jobs(self, agent_name: Optional[Union[str, None]] = None, agent_version: Optional[Union[str, None]] = None, agent_execution_id: Optional[Union[str, None]] = None, agent_workflow_name: Optional[Union[str, None]] = None, agent_workflow_version: Optional[Union[str, None]] = None, agent_workflow_execution_id: Optional[Union[str, None]] = None, tool_id: Optional[Union[str, None]] = None, tool_instance_id: Optional[Union[str, None]] = None, tool_execution_id: Optional[Union[str, None]] = None) -> str:
+    async def list_scoring_jobs(self, agent_name: Optional[Union[str, None]] = None, agent_version: Optional[Union[str, None]] = None, agent_session_id: Optional[Union[str, None]] = None, agent_workflow_name: Optional[Union[str, None]] = None, agent_workflow_version: Optional[Union[str, None]] = None, agent_workflow_session_id: Optional[Union[str, None]] = None, tool_id: Optional[Union[str, None]] = None, tool_instance_id: Optional[Union[str, None]] = None, tool_execution_id: Optional[Union[str, None]] = None) -> List["ScoringJobRecord"]:
         """
-        List Scoring Jobs
+        List scoring jobs
+        
+        List confidence scoring jobs, optionally filtered by identity context fields. All filters are combined with AND logic.
         
         Args:
-            agent_name: The agent_name parameter
-            agent_version: The agent_version parameter
-            agent_execution_id: The agent_execution_id parameter
-            agent_workflow_name: The agent_workflow_name parameter
-            agent_workflow_version: The agent_workflow_version parameter
-            agent_workflow_execution_id: The agent_workflow_execution_id parameter
-            tool_id: The tool_id parameter
-            tool_instance_id: The tool_instance_id parameter
-            tool_execution_id: The tool_execution_id parameter
+            agent_name: Filter by agent name.
+            agent_version: Filter by agent version.
+            agent_session_id: Filter by agent session ID.
+            agent_workflow_name: Filter by workflow name.
+            agent_workflow_version: Filter by workflow version.
+            agent_workflow_session_id: Filter by workflow session ID.
+            tool_id: Filter by tool identifier.
+            tool_instance_id: Filter by tool instance identifier.
+            tool_execution_id: Filter by tool execution identifier.
         
         Returns:
             Successful Response
@@ -153,14 +163,14 @@ class AsyncConfidenceScoringResource:
             params["agent_name"] = agent_name
         if agent_version is not None:
             params["agent_version"] = agent_version
-        if agent_execution_id is not None:
-            params["agent_execution_id"] = agent_execution_id
+        if agent_session_id is not None:
+            params["agent_session_id"] = agent_session_id
         if agent_workflow_name is not None:
             params["agent_workflow_name"] = agent_workflow_name
         if agent_workflow_version is not None:
             params["agent_workflow_version"] = agent_workflow_version
-        if agent_workflow_execution_id is not None:
-            params["agent_workflow_execution_id"] = agent_workflow_execution_id
+        if agent_workflow_session_id is not None:
+            params["agent_workflow_session_id"] = agent_workflow_session_id
         if tool_id is not None:
             params["tool_id"] = tool_id
         if tool_instance_id is not None:
@@ -168,15 +178,17 @@ class AsyncConfidenceScoringResource:
         if tool_execution_id is not None:
             params["tool_execution_id"] = tool_execution_id
         response = await self._http.request("GET", path, params=params)
-        return response
+        return [ScoringJobRecord.model_validate(item) for item in response]
 
     async def get_scoring_jobs_summary(self, primary: str, secondary: Optional[Union[str, None]] = None) -> "ScoreSummary":
         """
-        Get Scoring Jobs Summary
+        Get scoring summary
+        
+        Get an aggregated summary of confidence scores. Requires a primary filter; an optional secondary filter narrows results further. Filters use the format "field:value", where field is any identity context field name.
         
         Args:
-            primary: The primary parameter
-            secondary: The secondary parameter
+            primary: Primary filter in "field:value" format, where field is an identity context field name (e.g. "agent_name:my-agent" or "agent_session_id:sess_abc123").
+            secondary: Optional secondary filter in the same "field:value" format to further narrow results (e.g. "agent_version:1.2.0").
         
         Returns:
             Successful Response
