@@ -198,7 +198,7 @@ class HttpClient:
         self,
         response: httpx.Response,
         response_model: Optional[Type[T]] = None,
-    ) -> Union[T, Dict[str, Any], None]:
+    ) -> Union[T, Dict[str, Any], str, None]:
         """Handle HTTP response, raising errors or parsing data."""
         if response.status_code == 204:
             return None
@@ -209,10 +209,15 @@ class HttpClient:
         if response_model:
             return response_model.model_validate(response.json())
 
-        try:
+        content_type = response.headers.get("content-type", "")
+        if "application/json" in content_type:
             return response.json()
-        except Exception:
-            return None
+
+        # Non-JSON responses (text/plain, text/html, etc.)
+        if response.text:
+            return response.text
+
+        return None
 
     def _raise_error(self, response: httpx.Response) -> None:
         """Raise appropriate error based on status code."""
@@ -392,7 +397,7 @@ class AsyncHttpClient:
         self,
         response: httpx.Response,
         response_model: Optional[Type[T]] = None,
-    ) -> Union[T, Dict[str, Any], None]:
+    ) -> Union[T, Dict[str, Any], str, None]:
         """Handle HTTP response, raising errors or parsing data."""
         if response.status_code == 204:
             return None
@@ -403,10 +408,15 @@ class AsyncHttpClient:
         if response_model:
             return response_model.model_validate(response.json())
 
-        try:
+        content_type = response.headers.get("content-type", "")
+        if "application/json" in content_type:
             return response.json()
-        except Exception:
-            return None
+
+        # Non-JSON responses (text/plain, text/html, etc.)
+        if response.text:
+            return response.text
+
+        return None
 
     def _raise_error(self, response: httpx.Response) -> None:
         """Raise appropriate error based on status code."""
