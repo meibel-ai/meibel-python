@@ -82,17 +82,22 @@ class ArtifactSchemasResource:
             _schema = schema.model_json_schema()
         else:
             _schema = schema
-        body = CreateAgentArtifactRequest(
-            display_name=display_name,
-            type=type,
-            description=description,
-            required=required,
-            schema_def=_schema,
-            max_size_bytes=max_size_bytes,
-            storage_strategy=storage_strategy,
-            additional_properties=additional_properties,
-        )
-        response = self._http.request("POST", path, json=body.model_dump(by_alias=True, exclude_unset=True))
+        body = {}
+        body["display_name"] = display_name
+        if type is not None:
+            body["type"] = type
+        if description is not None:
+            body["description"] = description
+        if required is not None:
+            body["required"] = required
+        body["schema_def"] = _schema
+        if max_size_bytes is not None:
+            body["max_size_bytes"] = max_size_bytes
+        if storage_strategy is not None:
+            body["storage_strategy"] = storage_strategy
+        if additional_properties is not None:
+            body["additional_properties"] = additional_properties
+        response = self._http.request("POST", path, json=body)
         return CreateArtifactSchemaResponse.model_validate(response)
 
     def get(self, artifact_id: str) -> "ArtifactSchemaResponse":
@@ -212,17 +217,22 @@ class AsyncArtifactSchemasResource:
             _schema = schema.model_json_schema()
         else:
             _schema = schema
-        body = CreateAgentArtifactRequest(
-            display_name=display_name,
-            type=type,
-            description=description,
-            required=required,
-            schema_def=_schema,
-            max_size_bytes=max_size_bytes,
-            storage_strategy=storage_strategy,
-            additional_properties=additional_properties,
-        )
-        response = await self._http.request("POST", path, json=body.model_dump(by_alias=True, exclude_unset=True))
+        body = {}
+        body["display_name"] = display_name
+        if type is not None:
+            body["type"] = type
+        if description is not None:
+            body["description"] = description
+        if required is not None:
+            body["required"] = required
+        body["schema_def"] = _schema
+        if max_size_bytes is not None:
+            body["max_size_bytes"] = max_size_bytes
+        if storage_strategy is not None:
+            body["storage_strategy"] = storage_strategy
+        if additional_properties is not None:
+            body["additional_properties"] = additional_properties
+        response = await self._http.request("POST", path, json=body)
         return CreateArtifactSchemaResponse.model_validate(response)
 
     async def get(self, artifact_id: str) -> "ArtifactSchemaResponse":

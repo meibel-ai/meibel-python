@@ -69,13 +69,14 @@ class DatasourcesResource:
             _metadata_config = metadata_schema_from_model(metadata_config)
         else:
             _metadata_config = metadata_config
-        body = CreateDatasourceRequest(
-            name=name,
-            description=description,
-            connector=connector,
-            metadata_config=_metadata_config,
-        )
-        response = self._http.request("POST", path, json=body.model_dump(by_alias=True, exclude_unset=True))
+        body = {}
+        body["name"] = name
+        if description is not None:
+            body["description"] = description
+        body["connector"] = connector
+        if _metadata_config is not None:
+            body["metadata_config"] = _metadata_config
+        response = self._http.request("POST", path, json=body)
         return DatasourceResponse.model_validate(response)
 
     def get(self, datasource_id: str, include_tables: Optional[bool] = None) -> "DatasourceResponse":
@@ -200,13 +201,14 @@ class AsyncDatasourcesResource:
             _metadata_config = metadata_schema_from_model(metadata_config)
         else:
             _metadata_config = metadata_config
-        body = CreateDatasourceRequest(
-            name=name,
-            description=description,
-            connector=connector,
-            metadata_config=_metadata_config,
-        )
-        response = await self._http.request("POST", path, json=body.model_dump(by_alias=True, exclude_unset=True))
+        body = {}
+        body["name"] = name
+        if description is not None:
+            body["description"] = description
+        body["connector"] = connector
+        if _metadata_config is not None:
+            body["metadata_config"] = _metadata_config
+        response = await self._http.request("POST", path, json=body)
         return DatasourceResponse.model_validate(response)
 
     async def get(self, datasource_id: str, include_tables: Optional[bool] = None) -> "DatasourceResponse":
