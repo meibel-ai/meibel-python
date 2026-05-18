@@ -9,6 +9,8 @@ from .._http import HttpClient, AsyncHttpClient
 from ..models import *
 from ..exceptions import raise_for_status
 from .._pagination import PaginatedIterator, AsyncPaginatedIterator
+from pydantic import BaseModel
+from typing import Type
 
 
 class ArtifactSchemasResource:
@@ -54,7 +56,7 @@ class ArtifactSchemasResource:
             model_class=ArtifactSchemaSummary,
         )
 
-    def create(self, body: "CreateAgentArtifactRequest") -> "CreateArtifactSchemaResponse":
+    def create(self, display_name: str, schema: Union[str, Dict[str, Any], Type[BaseModel]], type: "ArtifactType" = "json", description: Union[str, None] = "", required: Union[bool, None] = False, max_size_bytes: Optional[Union[int, None]] = None, storage_strategy: Optional[Union["ArtifactStorageStrategy", None]] = None, additional_properties: Dict[str, Any] = {}) -> "CreateArtifactSchemaResponse":
         """
         Create Artifact Schema
         
@@ -68,7 +70,21 @@ class ArtifactSchemasResource:
             ApiError: If the request fails
         """
         path = "/artifact-schemas/"
-        response = self._http.request("POST", path, json=body.model_dump(by_alias=True, exclude_unset=True) if body else None)
+        if isinstance(schema, type) and issubclass(schema, BaseModel):
+            _schema = schema.model_json_schema()
+        else:
+            _schema = schema
+        body = CreateAgentArtifactRequest(
+            display_name=display_name,
+            type=type,
+            description=description,
+            required=required,
+            schema_def=_schema,
+            max_size_bytes=max_size_bytes,
+            storage_strategy=storage_strategy,
+            additional_properties=additional_properties,
+        )
+        response = self._http.request("POST", path, json=body.model_dump(by_alias=True, exclude_unset=True))
         return CreateArtifactSchemaResponse.model_validate(response)
 
     def get(self, artifact_id: str) -> "ArtifactSchemaResponse":
@@ -170,7 +186,7 @@ class AsyncArtifactSchemasResource:
             model_class=ArtifactSchemaSummary,
         )
 
-    async def create(self, body: "CreateAgentArtifactRequest") -> "CreateArtifactSchemaResponse":
+    async def create(self, display_name: str, schema: Union[str, Dict[str, Any], Type[BaseModel]], type: "ArtifactType" = "json", description: Union[str, None] = "", required: Union[bool, None] = False, max_size_bytes: Optional[Union[int, None]] = None, storage_strategy: Optional[Union["ArtifactStorageStrategy", None]] = None, additional_properties: Dict[str, Any] = {}) -> "CreateArtifactSchemaResponse":
         """
         Create Artifact Schema
         
@@ -184,7 +200,21 @@ class AsyncArtifactSchemasResource:
             ApiError: If the request fails
         """
         path = "/artifact-schemas/"
-        response = await self._http.request("POST", path, json=body.model_dump(by_alias=True, exclude_unset=True) if body else None)
+        if isinstance(schema, type) and issubclass(schema, BaseModel):
+            _schema = schema.model_json_schema()
+        else:
+            _schema = schema
+        body = CreateAgentArtifactRequest(
+            display_name=display_name,
+            type=type,
+            description=description,
+            required=required,
+            schema_def=_schema,
+            max_size_bytes=max_size_bytes,
+            storage_strategy=storage_strategy,
+            additional_properties=additional_properties,
+        )
+        response = await self._http.request("POST", path, json=body.model_dump(by_alias=True, exclude_unset=True))
         return CreateArtifactSchemaResponse.model_validate(response)
 
     async def get(self, artifact_id: str) -> "ArtifactSchemaResponse":
