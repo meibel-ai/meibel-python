@@ -198,7 +198,7 @@ class HttpClient:
         self,
         response: httpx.Response,
         response_model: Optional[Type[T]] = None,
-    ) -> Union[T, Dict[str, Any], str, None]:
+    ) -> Union[T, Dict[str, Any], str, bytes, None]:
         """Handle HTTP response, raising errors or parsing data."""
         if response.status_code == 204:
             return None
@@ -213,7 +213,12 @@ class HttpClient:
         if "application/json" in content_type:
             return response.json()
 
-        # Non-JSON responses (text/plain, text/html, etc.)
+        # Binary responses (file downloads, archives, images, etc.)
+        if any(t in content_type for t in ("application/octet-stream", "application/zip",
+               "application/gzip", "application/pdf", "image/")):
+            return response.content
+
+        # Text responses (text/plain, text/html, text/csv, etc.)
         if response.text:
             return response.text
 
@@ -397,7 +402,7 @@ class AsyncHttpClient:
         self,
         response: httpx.Response,
         response_model: Optional[Type[T]] = None,
-    ) -> Union[T, Dict[str, Any], str, None]:
+    ) -> Union[T, Dict[str, Any], str, bytes, None]:
         """Handle HTTP response, raising errors or parsing data."""
         if response.status_code == 204:
             return None
@@ -412,7 +417,12 @@ class AsyncHttpClient:
         if "application/json" in content_type:
             return response.json()
 
-        # Non-JSON responses (text/plain, text/html, etc.)
+        # Binary responses (file downloads, archives, images, etc.)
+        if any(t in content_type for t in ("application/octet-stream", "application/zip",
+               "application/gzip", "application/pdf", "image/")):
+            return response.content
+
+        # Text responses (text/plain, text/html, text/csv, etc.)
         if response.text:
             return response.text
 
