@@ -51,7 +51,7 @@ class DatasourcesResource:
         response = self._http.request("GET", path)
         return DatasourceListResponse.model_validate(response)
 
-    def create(self, name: str, connector: "ConnectorConfig", description: str = "", metadata_config: Optional[Union[Dict[str, Any], Type[BaseModel]]] = None) -> "DatasourceResponse":
+    def create(self, name: str, description: str = "", connector: Union["ConnectorConfig", None] = None, metadata_config: Optional[Union[Dict[str, Any], Type[BaseModel]]] = None) -> "DatasourceResponse":
         """
         Create Datasource
         
@@ -74,7 +74,8 @@ class DatasourcesResource:
         body["name"] = _sv(name)
         if description is not None:
             body["description"] = _sv(description)
-        body["connector"] = _sv(connector)
+        if connector is not None:
+            body["connector"] = _sv(connector)
         if _metadata_config is not None:
             body["metadata_config"] = _sv(_metadata_config)
         response = self._http.request("POST", path, json=body)
@@ -184,7 +185,7 @@ class AsyncDatasourcesResource:
         response = await self._http.request("GET", path)
         return DatasourceListResponse.model_validate(response)
 
-    async def create(self, name: str, connector: "ConnectorConfig", description: str = "", metadata_config: Optional[Union[Dict[str, Any], Type[BaseModel]]] = None) -> "DatasourceResponse":
+    async def create(self, name: str, description: str = "", connector: Union["ConnectorConfig", None] = None, metadata_config: Optional[Union[Dict[str, Any], Type[BaseModel]]] = None) -> "DatasourceResponse":
         """
         Create Datasource
         
@@ -207,7 +208,8 @@ class AsyncDatasourcesResource:
         body["name"] = _sv(name)
         if description is not None:
             body["description"] = _sv(description)
-        body["connector"] = _sv(connector)
+        if connector is not None:
+            body["connector"] = _sv(connector)
         if _metadata_config is not None:
             body["metadata_config"] = _sv(_metadata_config)
         response = await self._http.request("POST", path, json=body)

@@ -382,7 +382,7 @@ class CreateDatasourceRequest(BaseModel):
     """Body for creating a new datasource."""
     name: str = Field(description="Human-readable datasource name")
     description: Optional[str] = Field(description="What this datasource contains", default=None)
-    connector: "ConnectorConfig" = Field(description="Connection configuration")
+    connector: Optional[Union["ConnectorConfig", None]] = Field(description="Connection configuration — omit for file-upload datasources", default=None)
     metadata_config: Optional[Union["MetadataConfigRequest", None]] = Field(description="Optional metadata extraction config to apply after creation", default=None)
 
 
