@@ -8,6 +8,7 @@ from __future__ import annotations
 from datetime import datetime, date
 from typing import Optional, List, Dict, Any, Union, Literal
 from uuid import UUID
+from enum import Enum
 from pydantic import BaseModel, Field
 
 
@@ -145,14 +146,22 @@ class ArtifactSchemaSummary(BaseModel):
     fields_summary: List["FieldSummary"] = ...
 
 
-class ArtifactStorageStrategy(BaseModel):
+class ArtifactStorageStrategy(str, Enum):
     """Supported storage strategies."""
-    pass
+    INLINE = "inline"
+    GCS = "gcs"
+    AUTO = "auto"
 
 
-class ArtifactType(BaseModel):
+class ArtifactType(str, Enum):
     """Supported artifact types."""
-    pass
+    JSON = "json"
+    MARKDOWN = "markdown"
+    CSV = "csv"
+    YAML = "yaml"
+    TEXT = "text"
+    HTML = "html"
+    PDF = "pdf"
 
 
 class BatchDefinitionFilters(BaseModel):
@@ -584,9 +593,16 @@ class IngestMethodSummary(BaseModel):
     warnings: Optional[int] = Field(description="Files that produced warnings during processing", default=None)
 
 
-class IngestStatus(BaseModel):
+class IngestStatus(str, Enum):
     """Lifecycle state of an ingest run."""
-    pass
+    NOT_STARTED = "not_started"
+    RUNNING = "running"
+    COMPLETED = "completed"
+    FAILED = "failed"
+    CANCELED = "canceled"
+    TERMINATED = "terminated"
+    TIMED_OUT = "timed_out"
+    UNKNOWN = "unknown"
 
 
 class IngestStatusResponse(BaseModel):
@@ -1192,8 +1208,6 @@ ArtifactEntry.model_rebuild()
 ArtifactSchemaListResponse.model_rebuild()
 ArtifactSchemaResponse.model_rebuild()
 ArtifactSchemaSummary.model_rebuild()
-ArtifactStorageStrategy.model_rebuild()
-ArtifactType.model_rebuild()
 BatchDefinitionFilters.model_rebuild()
 BatchDefinitionResponse.model_rebuild()
 BatchExecutionResponse.model_rebuild()
@@ -1243,7 +1257,6 @@ HttpValidationError.model_rebuild()
 IngestCountsResponse.model_rebuild()
 IngestMethodCountsResponse.model_rebuild()
 IngestMethodSummary.model_rebuild()
-IngestStatus.model_rebuild()
 IngestStatusResponse.model_rebuild()
 LegacyBatchExecutionParams.model_rebuild()
 LegacyBatchInputConfig.model_rebuild()
