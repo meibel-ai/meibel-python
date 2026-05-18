@@ -10,6 +10,14 @@ from ..models import *
 from ..exceptions import raise_for_status
 from pydantic import BaseModel
 from typing import Type
+
+
+def _is_pydantic_model(obj) -> bool:
+    """Check if obj is a Pydantic BaseModel subclass (not an instance)."""
+    try:
+        return issubclass(obj, BaseModel)
+    except TypeError:
+        return False
 from .._metadata import metadata_schema_from_model
 from .data_elements import DataElementsResource, AsyncDataElementsResource
 from .downloads import DownloadsResource, AsyncDownloadsResource
@@ -57,7 +65,7 @@ class DatasourcesResource:
             ApiError: If the request fails
         """
         path = "/datasources"
-        if isinstance(metadata_config, type) and issubclass(metadata_config, BaseModel):
+        if _is_pydantic_model(metadata_config):
             _metadata_config = metadata_schema_from_model(metadata_config)
         else:
             _metadata_config = metadata_config
@@ -188,7 +196,7 @@ class AsyncDatasourcesResource:
             ApiError: If the request fails
         """
         path = "/datasources"
-        if isinstance(metadata_config, type) and issubclass(metadata_config, BaseModel):
+        if _is_pydantic_model(metadata_config):
             _metadata_config = metadata_schema_from_model(metadata_config)
         else:
             _metadata_config = metadata_config

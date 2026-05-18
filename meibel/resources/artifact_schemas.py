@@ -13,6 +13,14 @@ from pydantic import BaseModel
 from typing import Type
 
 
+def _is_pydantic_model(obj) -> bool:
+    """Check if obj is a Pydantic BaseModel subclass (not an instance)."""
+    try:
+        return issubclass(obj, BaseModel)
+    except TypeError:
+        return False
+
+
 class ArtifactSchemasResource:
     """Define structured output schemas for agent artifacts"""
 
@@ -70,7 +78,7 @@ class ArtifactSchemasResource:
             ApiError: If the request fails
         """
         path = "/artifact-schemas/"
-        if isinstance(schema, type) and issubclass(schema, BaseModel):
+        if _is_pydantic_model(schema):
             _schema = schema.model_json_schema()
         else:
             _schema = schema
@@ -200,7 +208,7 @@ class AsyncArtifactSchemasResource:
             ApiError: If the request fails
         """
         path = "/artifact-schemas/"
-        if isinstance(schema, type) and issubclass(schema, BaseModel):
+        if _is_pydantic_model(schema):
             _schema = schema.model_json_schema()
         else:
             _schema = schema
