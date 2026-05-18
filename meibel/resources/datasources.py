@@ -69,13 +69,14 @@ class DatasourcesResource:
             _metadata_config = metadata_schema_from_model(metadata_config)
         else:
             _metadata_config = metadata_config
+        _sv = lambda v: v.model_dump(mode="json", exclude_none=True) if hasattr(v, "model_dump") else v
         body = {}
-        body["name"] = name
+        body["name"] = _sv(name)
         if description is not None:
-            body["description"] = description
-        body["connector"] = connector
+            body["description"] = _sv(description)
+        body["connector"] = _sv(connector)
         if _metadata_config is not None:
-            body["metadata_config"] = _metadata_config
+            body["metadata_config"] = _sv(_metadata_config)
         response = self._http.request("POST", path, json=body)
         return DatasourceResponse.model_validate(response)
 
@@ -201,13 +202,14 @@ class AsyncDatasourcesResource:
             _metadata_config = metadata_schema_from_model(metadata_config)
         else:
             _metadata_config = metadata_config
+        _sv = lambda v: v.model_dump(mode="json", exclude_none=True) if hasattr(v, "model_dump") else v
         body = {}
-        body["name"] = name
+        body["name"] = _sv(name)
         if description is not None:
-            body["description"] = description
-        body["connector"] = connector
+            body["description"] = _sv(description)
+        body["connector"] = _sv(connector)
         if _metadata_config is not None:
-            body["metadata_config"] = _metadata_config
+            body["metadata_config"] = _sv(_metadata_config)
         response = await self._http.request("POST", path, json=body)
         return DatasourceResponse.model_validate(response)
 

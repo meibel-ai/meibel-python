@@ -82,21 +82,22 @@ class ArtifactSchemasResource:
             _schema = schema.model_json_schema()
         else:
             _schema = schema
+        _sv = lambda v: v.model_dump(mode="json", exclude_none=True) if hasattr(v, "model_dump") else v
         body = {}
-        body["display_name"] = display_name
+        body["display_name"] = _sv(display_name)
         if type is not None:
-            body["type"] = type
+            body["type"] = _sv(type)
         if description is not None:
-            body["description"] = description
+            body["description"] = _sv(description)
         if required is not None:
-            body["required"] = required
-        body["schema_def"] = _schema
+            body["required"] = _sv(required)
+        body["schema_def"] = _sv(_schema)
         if max_size_bytes is not None:
-            body["max_size_bytes"] = max_size_bytes
+            body["max_size_bytes"] = _sv(max_size_bytes)
         if storage_strategy is not None:
-            body["storage_strategy"] = storage_strategy
+            body["storage_strategy"] = _sv(storage_strategy)
         if additional_properties is not None:
-            body["additional_properties"] = additional_properties
+            body["additional_properties"] = _sv(additional_properties)
         response = self._http.request("POST", path, json=body)
         return CreateArtifactSchemaResponse.model_validate(response)
 
@@ -217,21 +218,22 @@ class AsyncArtifactSchemasResource:
             _schema = schema.model_json_schema()
         else:
             _schema = schema
+        _sv = lambda v: v.model_dump(mode="json", exclude_none=True) if hasattr(v, "model_dump") else v
         body = {}
-        body["display_name"] = display_name
+        body["display_name"] = _sv(display_name)
         if type is not None:
-            body["type"] = type
+            body["type"] = _sv(type)
         if description is not None:
-            body["description"] = description
+            body["description"] = _sv(description)
         if required is not None:
-            body["required"] = required
-        body["schema_def"] = _schema
+            body["required"] = _sv(required)
+        body["schema_def"] = _sv(_schema)
         if max_size_bytes is not None:
-            body["max_size_bytes"] = max_size_bytes
+            body["max_size_bytes"] = _sv(max_size_bytes)
         if storage_strategy is not None:
-            body["storage_strategy"] = storage_strategy
+            body["storage_strategy"] = _sv(storage_strategy)
         if additional_properties is not None:
-            body["additional_properties"] = additional_properties
+            body["additional_properties"] = _sv(additional_properties)
         response = await self._http.request("POST", path, json=body)
         return CreateArtifactSchemaResponse.model_validate(response)
 
