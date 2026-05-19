@@ -15,6 +15,19 @@ from .exceptions import ApiError, AuthenticationError, RateLimitError, NotFoundE
 T = TypeVar("T", bound=BaseModel)
 
 
+def _build_user_agent() -> str:
+    """Build User-Agent string from package metadata."""
+    _pkg = __name__.split(".")[0]
+    try:
+        from . import __version__
+        return f"{_pkg}-python/{__version__}"
+    except Exception:
+        return f"{_pkg}-python/unknown"
+
+
+_USER_AGENT = _build_user_agent()
+
+
 def _extract_error_message(error_body: Dict[str, Any]) -> str:
     """Extract a human-readable error message from various API error formats."""
     if "message" in error_body:
@@ -52,7 +65,9 @@ class HttpClient:
     ):
         self.base_url = base_url.rstrip("/")
         self._timeout = timeout
-        self._headers = headers or {}
+        self._headers = {"User-Agent": _USER_AGENT}
+        if headers:
+            self._headers.update(headers)
 
         if api_key:
             self._headers["Meibel-API-Key"] = api_key
@@ -256,7 +271,9 @@ class AsyncHttpClient:
     ):
         self.base_url = base_url.rstrip("/")
         self._timeout = timeout
-        self._headers = headers or {}
+        self._headers = {"User-Agent": _USER_AGENT}
+        if headers:
+            self._headers.update(headers)
 
         if api_key:
             self._headers["Meibel-API-Key"] = api_key
