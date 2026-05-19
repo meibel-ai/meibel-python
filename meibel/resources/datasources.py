@@ -140,25 +140,6 @@ class DatasourcesResource:
         response = self._http.request("DELETE", path)
         return DeleteDatasourceResponse.model_validate(response)
 
-    def chat_with(self, body: "ChatWithDatasourceRequest") -> None:
-        """
-        Chat with datasources via AI (streaming)
-        
-        Ask a question against one or more datasources. Returns a streaming SSE response with the AI-generated answer.
-        
-        Args:
-            body: Request body
-        
-        Returns:
-            None
-        
-        Raises:
-            ApiError: If the request fails
-        """
-        path = "/datasources/chat"
-        response = self._http.request("POST", path, json=body.model_dump(by_alias=True, exclude_unset=True) if body else None)
-        return response
-
 
 class AsyncDatasourcesResource:
     """Manage data source connections (async)"""
@@ -273,22 +254,3 @@ class AsyncDatasourcesResource:
         path = path.replace("{datasource_id}", str(datasource_id))
         response = await self._http.request("DELETE", path)
         return DeleteDatasourceResponse.model_validate(response)
-
-    async def chat_with(self, body: "ChatWithDatasourceRequest") -> None:
-        """
-        Chat with datasources via AI (streaming)
-        
-        Ask a question against one or more datasources. Returns a streaming SSE response with the AI-generated answer.
-        
-        Args:
-            body: Request body
-        
-        Returns:
-            None
-        
-        Raises:
-            ApiError: If the request fails
-        """
-        path = "/datasources/chat"
-        response = await self._http.request("POST", path, json=body.model_dump(by_alias=True, exclude_unset=True) if body else None)
-        return response
