@@ -32,8 +32,6 @@ from .documents import DocumentsResource
 from .documents import AsyncDocumentsResource
 from .metadata_model_catalog import MetadataModelCatalogResource
 from .metadata_model_catalog import AsyncMetadataModelCatalogResource
-from .prompts import PromptsResource
-from .prompts import AsyncPromptsResource
 from .sessions import SessionsResource
 from .sessions import AsyncSessionsResource
 
@@ -66,8 +64,6 @@ __all__ = [
     "AsyncDocumentsResource",
     "MetadataModelCatalogResource",
     "AsyncMetadataModelCatalogResource",
-    "PromptsResource",
-    "AsyncPromptsResource",
     "SessionsResource",
     "AsyncSessionsResource"
 ]

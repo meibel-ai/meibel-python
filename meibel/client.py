@@ -20,7 +20,6 @@ from .resources.ingest import IngestResource, AsyncIngestResource
 from .resources.tables import TablesResource, AsyncTablesResource
 from .resources.documents import DocumentsResource, AsyncDocumentsResource
 from .resources.metadata_model_catalog import MetadataModelCatalogResource, AsyncMetadataModelCatalogResource
-from .resources.prompts import PromptsResource, AsyncPromptsResource
 from .resources.sessions import SessionsResource, AsyncSessionsResource
 
 
@@ -52,7 +51,6 @@ class MeibelClient:
         self.datasources = DatasourcesResource(self._http)
         self.documents = DocumentsResource(self._http)
         self.metadata_model_catalog = MetadataModelCatalogResource(self._http)
-        self.prompts = PromptsResource(self._http)
         self.sessions = SessionsResource(self._http)
         self.agents.sessions = AgentsSessionsResource(self._http)
         self.batches.executions = ExecutionsResource(self._http)
@@ -101,7 +99,6 @@ class AsyncMeibelClient:
         self.datasources = AsyncDatasourcesResource(self._http)
         self.documents = AsyncDocumentsResource(self._http)
         self.metadata_model_catalog = AsyncMetadataModelCatalogResource(self._http)
-        self.prompts = AsyncPromptsResource(self._http)
         self.sessions = AsyncSessionsResource(self._http)
         self.agents.sessions = AsyncAgentsSessionsResource(self._http)
         self.batches.executions = AsyncExecutionsResource(self._http)
