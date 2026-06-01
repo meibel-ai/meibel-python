@@ -51,7 +51,7 @@ class DatasourcesResource:
         response = self._http.request("GET", path)
         return DatasourceListResponse.model_validate(response)
 
-    def create(self, name: str, description: str = "", connector: Union["ConnectorConfig", None] = None, metadata_config: Optional[Union[Dict[str, Any], Type[BaseModel]]] = None) -> "DatasourceResponse":
+    def create(self, name: str, description: str = "", connector: Optional[Union["ConnectorConfig", None]] = None, metadata_config: Optional[Union[Dict[str, Any], Type[BaseModel]]] = None) -> "DatasourceResponse":
         """
         Create Datasource
         
@@ -166,7 +166,7 @@ class AsyncDatasourcesResource:
         response = await self._http.request("GET", path)
         return DatasourceListResponse.model_validate(response)
 
-    async def create(self, name: str, description: str = "", connector: Union["ConnectorConfig", None] = None, metadata_config: Optional[Union[Dict[str, Any], Type[BaseModel]]] = None) -> "DatasourceResponse":
+    async def create(self, name: str, description: str = "", connector: Optional[Union["ConnectorConfig", None]] = None, metadata_config: Optional[Union[Dict[str, Any], Type[BaseModel]]] = None) -> "DatasourceResponse":
         """
         Create Datasource
         

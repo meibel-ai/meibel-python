@@ -57,13 +57,13 @@ class TablesResource:
         response = self._http.request("PUT", path, json=body.model_dump(by_alias=True, exclude_unset=True) if body else None)
         return [TagTable.model_validate(item) for item in response]
 
-    def list_columns(self, datasource_id: str, table_name: str) -> List["TagColumn"]:
+    def list_columns(self, table_name: str, datasource_id: str) -> List["TagColumn"]:
         """
         List Columns
         
         Args:
-            datasource_id: The datasource_id parameter
             table_name: The table_name parameter
+            datasource_id: The datasource_id parameter
         
         Returns:
             Successful Response
@@ -72,18 +72,18 @@ class TablesResource:
             ApiError: If the request fails
         """
         path = "/datasources/{datasource_id}/tables/{table_name}/columns"
-        path = path.replace("{datasource_id}", str(datasource_id))
         path = path.replace("{table_name}", str(table_name))
+        path = path.replace("{datasource_id}", str(datasource_id))
         response = self._http.request("GET", path)
         return [TagColumn.model_validate(item) for item in response]
 
-    def update_column_descriptions(self, datasource_id: str, table_name: str, body: "UpdateTagColumnsRequest") -> List["TagColumn"]:
+    def update_column_descriptions(self, table_name: str, datasource_id: str, body: "UpdateTagColumnsRequest") -> List["TagColumn"]:
         """
         Update Column Descriptions
         
         Args:
-            datasource_id: The datasource_id parameter
             table_name: The table_name parameter
+            datasource_id: The datasource_id parameter
             body: Request body
         
         Returns:
@@ -93,8 +93,8 @@ class TablesResource:
             ApiError: If the request fails
         """
         path = "/datasources/{datasource_id}/tables/{table_name}/columns"
-        path = path.replace("{datasource_id}", str(datasource_id))
         path = path.replace("{table_name}", str(table_name))
+        path = path.replace("{datasource_id}", str(datasource_id))
         response = self._http.request("PUT", path, json=body.model_dump(by_alias=True, exclude_unset=True) if body else None)
         return [TagColumn.model_validate(item) for item in response]
 
@@ -146,13 +146,13 @@ class AsyncTablesResource:
         response = await self._http.request("PUT", path, json=body.model_dump(by_alias=True, exclude_unset=True) if body else None)
         return [TagTable.model_validate(item) for item in response]
 
-    async def list_columns(self, datasource_id: str, table_name: str) -> List["TagColumn"]:
+    async def list_columns(self, table_name: str, datasource_id: str) -> List["TagColumn"]:
         """
         List Columns
         
         Args:
-            datasource_id: The datasource_id parameter
             table_name: The table_name parameter
+            datasource_id: The datasource_id parameter
         
         Returns:
             Successful Response
@@ -161,18 +161,18 @@ class AsyncTablesResource:
             ApiError: If the request fails
         """
         path = "/datasources/{datasource_id}/tables/{table_name}/columns"
-        path = path.replace("{datasource_id}", str(datasource_id))
         path = path.replace("{table_name}", str(table_name))
+        path = path.replace("{datasource_id}", str(datasource_id))
         response = await self._http.request("GET", path)
         return [TagColumn.model_validate(item) for item in response]
 
-    async def update_column_descriptions(self, datasource_id: str, table_name: str, body: "UpdateTagColumnsRequest") -> List["TagColumn"]:
+    async def update_column_descriptions(self, table_name: str, datasource_id: str, body: "UpdateTagColumnsRequest") -> List["TagColumn"]:
         """
         Update Column Descriptions
         
         Args:
-            datasource_id: The datasource_id parameter
             table_name: The table_name parameter
+            datasource_id: The datasource_id parameter
             body: Request body
         
         Returns:
@@ -182,7 +182,7 @@ class AsyncTablesResource:
             ApiError: If the request fails
         """
         path = "/datasources/{datasource_id}/tables/{table_name}/columns"
-        path = path.replace("{datasource_id}", str(datasource_id))
         path = path.replace("{table_name}", str(table_name))
+        path = path.replace("{datasource_id}", str(datasource_id))
         response = await self._http.request("PUT", path, json=body.model_dump(by_alias=True, exclude_unset=True) if body else None)
         return [TagColumn.model_validate(item) for item in response]

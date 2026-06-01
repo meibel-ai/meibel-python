@@ -32,7 +32,7 @@ class BatchesResource:
         Raises:
             ApiError: If the request fails
         """
-        path = "/batch-definitions/"
+        path = "/batch-definitions"
         params = {}
         if offset is not None:
             params["offset"] = offset
@@ -54,7 +54,7 @@ class BatchesResource:
         Raises:
             ApiError: If the request fails
         """
-        path = "/batch-definitions/"
+        path = "/batch-definitions"
         response = self._http.request("POST", path, json=body.model_dump(by_alias=True, exclude_unset=True) if body else None)
         return CreateBatchDefinitionResponse.model_validate(response)
 
@@ -198,7 +198,7 @@ class AsyncBatchesResource:
         Raises:
             ApiError: If the request fails
         """
-        path = "/batch-definitions/"
+        path = "/batch-definitions"
         params = {}
         if offset is not None:
             params["offset"] = offset
@@ -220,7 +220,7 @@ class AsyncBatchesResource:
         Raises:
             ApiError: If the request fails
         """
-        path = "/batch-definitions/"
+        path = "/batch-definitions"
         response = await self._http.request("POST", path, json=body.model_dump(by_alias=True, exclude_unset=True) if body else None)
         return CreateBatchDefinitionResponse.model_validate(response)
 

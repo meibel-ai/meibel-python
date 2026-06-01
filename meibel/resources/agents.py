@@ -33,7 +33,7 @@ class AgentsResource:
         Raises:
             ApiError: If the request fails
         """
-        path = "/agents/"
+        path = "/agents"
         params = {}
         if offset is not None:
             params["offset"] = offset
@@ -63,7 +63,7 @@ class AgentsResource:
         Raises:
             ApiError: If the request fails
         """
-        path = "/agents/"
+        path = "/agents"
         response = self._http.request("POST", path, json=body.model_dump(by_alias=True, exclude_unset=True) if body else None)
         return CreateAgentResponse.model_validate(response)
 
@@ -203,7 +203,7 @@ class AsyncAgentsResource:
         Raises:
             ApiError: If the request fails
         """
-        path = "/agents/"
+        path = "/agents"
         params = {}
         if offset is not None:
             params["offset"] = offset
@@ -233,7 +233,7 @@ class AsyncAgentsResource:
         Raises:
             ApiError: If the request fails
         """
-        path = "/agents/"
+        path = "/agents"
         response = await self._http.request("POST", path, json=body.model_dump(by_alias=True, exclude_unset=True) if body else None)
         return CreateAgentResponse.model_validate(response)
 

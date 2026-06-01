@@ -47,7 +47,7 @@ class DocumentsResource:
         response = self._http.upload("POST", path, file=file, file_name=file_name, field_name="file")
         return ParseDocumentResponse.model_validate(response)
 
-    def process(self, file: BinaryIO, file_name: str) -> "ProcessDocumentResponse":
+    def process(self, file: BinaryIO, file_name: str, format: Optional[str] = None) -> "ProcessDocumentResponse":
         """
         Parse a document (sync)
         
@@ -64,7 +64,10 @@ class DocumentsResource:
             ApiError: If the request fails
         """
         path = "/documents/process"
-        response = self._http.upload("POST", path, file=file, file_name=file_name, field_name="file")
+        params = {}
+        if format is not None:
+            params["format"] = format
+        response = self._http.upload("POST", path, file=file, file_name=file_name, field_name="file", params=params)
         return ProcessDocumentResponse.model_validate(response)
 
     def get_status(self, job_id: str) -> "DocumentStatus":
@@ -260,7 +263,7 @@ class AsyncDocumentsResource:
         response = await self._http.upload("POST", path, file=file, file_name=file_name, field_name="file")
         return ParseDocumentResponse.model_validate(response)
 
-    async def process(self, file: BinaryIO, file_name: str) -> "ProcessDocumentResponse":
+    async def process(self, file: BinaryIO, file_name: str, format: Optional[str] = None) -> "ProcessDocumentResponse":
         """
         Parse a document (sync)
         
@@ -277,7 +280,10 @@ class AsyncDocumentsResource:
             ApiError: If the request fails
         """
         path = "/documents/process"
-        response = await self._http.upload("POST", path, file=file, file_name=file_name, field_name="file")
+        params = {}
+        if format is not None:
+            params["format"] = format
+        response = await self._http.upload("POST", path, file=file, file_name=file_name, field_name="file", params=params)
         return ProcessDocumentResponse.model_validate(response)
 
     async def get_status(self, job_id: str) -> "DocumentStatus":

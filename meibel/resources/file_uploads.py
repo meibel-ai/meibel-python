@@ -19,77 +19,6 @@ class FileUploadsResource:
     def __init__(self, http: HttpClient):
         self._http = http
 
-    def upload_content(self, files: BinaryIO, files_name: str, datasource_id: Optional[str] = None, name: Optional[str] = None, description: Optional[str] = None, metadata_config: Optional["MetadataConfigRequest"] = None) -> "UploadContentResponse":
-        """
-        Upload Content (async)
-        
-        Args:
-            body: Request body
-        
-        Returns:
-            Successful Response
-        
-        Raises:
-            ApiError: If the request fails
-        """
-        path = "/datasources/uploads"
-        form_fields = {}
-        if datasource_id is not None:
-            form_fields["datasource_id"] = str(datasource_id)
-        if name is not None:
-            form_fields["name"] = str(name)
-        if description is not None:
-            form_fields["description"] = str(description)
-        if metadata_config is not None:
-            form_fields["metadata_config"] = str(metadata_config)
-        response = self._http.upload("POST", path, file=files, file_name=files_name, field_name="files", form_fields=form_fields)
-        return UploadContentResponse.model_validate(response)
-
-    def upload_and_list_content(self, files: BinaryIO, files_name: str, datasource_id: Optional[str] = None, name: Optional[str] = None, description: Optional[str] = None, metadata_config: Optional["MetadataConfigRequest"] = None, trigger_ingest: Optional[bool] = None) -> "FileUploadSyncResponse":
-        """
-        Upload Content (sync)
-        
-        Args:
-            body: Request body
-        
-        Returns:
-            Successful Response
-        
-        Raises:
-            ApiError: If the request fails
-        """
-        path = "/datasources/uploads/process"
-        form_fields = {}
-        if datasource_id is not None:
-            form_fields["datasource_id"] = str(datasource_id)
-        if name is not None:
-            form_fields["name"] = str(name)
-        if description is not None:
-            form_fields["description"] = str(description)
-        if metadata_config is not None:
-            form_fields["metadata_config"] = str(metadata_config)
-        if trigger_ingest is not None:
-            form_fields["trigger_ingest"] = str(trigger_ingest)
-        response = self._http.upload("POST", path, file=files, file_name=files_name, field_name="files", form_fields=form_fields)
-        return FileUploadSyncResponse.model_validate(response)
-
-    def stream_upload_progress(self, upload_id: str) -> Iterator[Union["ConnectedEvent", "ProgressEvent", "StreamCompleteEvent", "ErrorEvent"]]:
-        """
-        Stream Upload Progress
-        
-        Args:
-            upload_id: The upload_id parameter
-        
-        Returns:
-            None
-        
-        Raises:
-            ApiError: If the request fails
-        """
-        path = "/datasources/uploads/{upload_id}/progress"
-        path = path.replace("{upload_id}", str(upload_id))
-        return self._http.stream("GET", path)
-
     def list_content(self, datasource_id: str, prefix: Optional[Union[str, None]] = None, continuation_token: Optional[Union[str, None]] = None, limit: Optional[int] = None) -> PaginatedIterator["ContentItem"]:
         """
         List Content
@@ -126,18 +55,12 @@ class FileUploadsResource:
             model_class=ContentItem,
         )
 
-
-class AsyncFileUploadsResource:
-    """Upload and manage content files (async)"""
-
-    def __init__(self, http: AsyncHttpClient):
-        self._http = http
-
-    async def upload_content(self, files: BinaryIO, files_name: str, datasource_id: Optional[str] = None, name: Optional[str] = None, description: Optional[str] = None, metadata_config: Optional["MetadataConfigRequest"] = None) -> "UploadContentResponse":
+    def upload_content(self, datasource_id: str, files: BinaryIO, files_name: str) -> "UploadContentResponse":
         """
         Upload Content (async)
         
         Args:
+            datasource_id: The datasource_id parameter
             body: Request body
         
         Returns:
@@ -146,24 +69,18 @@ class AsyncFileUploadsResource:
         Raises:
             ApiError: If the request fails
         """
-        path = "/datasources/uploads"
-        form_fields = {}
-        if datasource_id is not None:
-            form_fields["datasource_id"] = str(datasource_id)
-        if name is not None:
-            form_fields["name"] = str(name)
-        if description is not None:
-            form_fields["description"] = str(description)
-        if metadata_config is not None:
-            form_fields["metadata_config"] = str(metadata_config)
-        response = await self._http.upload("POST", path, file=files, file_name=files_name, field_name="files", form_fields=form_fields)
+        path = "/datasources/{datasource_id}/content"
+        path = path.replace("{datasource_id}", str(datasource_id))
+        response = self._http.upload("POST", path, file=files, file_name=files_name, field_name="files")
         return UploadContentResponse.model_validate(response)
 
-    async def upload_and_list_content(self, files: BinaryIO, files_name: str, datasource_id: Optional[str] = None, name: Optional[str] = None, description: Optional[str] = None, metadata_config: Optional["MetadataConfigRequest"] = None, trigger_ingest: Optional[bool] = None) -> "FileUploadSyncResponse":
+    def upload_and_list_content(self, datasource_id: str, files: BinaryIO, files_name: str, trigger_ingest: Optional[bool] = None) -> "FileUploadSyncResponse":
         """
         Upload Content (sync)
         
         Args:
+            datasource_id: The datasource_id parameter
+            trigger_ingest: Start ingestion after upload completes. Returns ingest_url to poll for status.
             body: Request body
         
         Returns:
@@ -172,22 +89,15 @@ class AsyncFileUploadsResource:
         Raises:
             ApiError: If the request fails
         """
-        path = "/datasources/uploads/process"
-        form_fields = {}
-        if datasource_id is not None:
-            form_fields["datasource_id"] = str(datasource_id)
-        if name is not None:
-            form_fields["name"] = str(name)
-        if description is not None:
-            form_fields["description"] = str(description)
-        if metadata_config is not None:
-            form_fields["metadata_config"] = str(metadata_config)
+        path = "/datasources/{datasource_id}/content/process"
+        path = path.replace("{datasource_id}", str(datasource_id))
+        params = {}
         if trigger_ingest is not None:
-            form_fields["trigger_ingest"] = str(trigger_ingest)
-        response = await self._http.upload("POST", path, file=files, file_name=files_name, field_name="files", form_fields=form_fields)
+            params["trigger_ingest"] = trigger_ingest
+        response = self._http.upload("POST", path, file=files, file_name=files_name, field_name="files", params=params)
         return FileUploadSyncResponse.model_validate(response)
 
-    async def stream_upload_progress(self, upload_id: str) -> AsyncIterator[Union["ConnectedEvent", "ProgressEvent", "StreamCompleteEvent", "ErrorEvent"]]:
+    def stream_upload_progress(self, upload_id: str) -> Iterator[Union["ConnectedEvent", "ProgressEvent", "StreamCompleteEvent", "ErrorEvent"]]:
         """
         Stream Upload Progress
         
@@ -203,6 +113,13 @@ class AsyncFileUploadsResource:
         path = "/datasources/uploads/{upload_id}/progress"
         path = path.replace("{upload_id}", str(upload_id))
         return self._http.stream("GET", path)
+
+
+class AsyncFileUploadsResource:
+    """Upload and manage content files (async)"""
+
+    def __init__(self, http: AsyncHttpClient):
+        self._http = http
 
     async def list_content(self, datasource_id: str, prefix: Optional[Union[str, None]] = None, continuation_token: Optional[Union[str, None]] = None, limit: Optional[int] = None) -> AsyncPaginatedIterator["ContentItem"]:
         """
@@ -239,3 +156,62 @@ class AsyncFileUploadsResource:
             params=params,
             model_class=ContentItem,
         )
+
+    async def upload_content(self, datasource_id: str, files: BinaryIO, files_name: str) -> "UploadContentResponse":
+        """
+        Upload Content (async)
+        
+        Args:
+            datasource_id: The datasource_id parameter
+            body: Request body
+        
+        Returns:
+            Successful Response
+        
+        Raises:
+            ApiError: If the request fails
+        """
+        path = "/datasources/{datasource_id}/content"
+        path = path.replace("{datasource_id}", str(datasource_id))
+        response = await self._http.upload("POST", path, file=files, file_name=files_name, field_name="files")
+        return UploadContentResponse.model_validate(response)
+
+    async def upload_and_list_content(self, datasource_id: str, files: BinaryIO, files_name: str, trigger_ingest: Optional[bool] = None) -> "FileUploadSyncResponse":
+        """
+        Upload Content (sync)
+        
+        Args:
+            datasource_id: The datasource_id parameter
+            trigger_ingest: Start ingestion after upload completes. Returns ingest_url to poll for status.
+            body: Request body
+        
+        Returns:
+            Successful Response
+        
+        Raises:
+            ApiError: If the request fails
+        """
+        path = "/datasources/{datasource_id}/content/process"
+        path = path.replace("{datasource_id}", str(datasource_id))
+        params = {}
+        if trigger_ingest is not None:
+            params["trigger_ingest"] = trigger_ingest
+        response = await self._http.upload("POST", path, file=files, file_name=files_name, field_name="files", params=params)
+        return FileUploadSyncResponse.model_validate(response)
+
+    async def stream_upload_progress(self, upload_id: str) -> AsyncIterator[Union["ConnectedEvent", "ProgressEvent", "StreamCompleteEvent", "ErrorEvent"]]:
+        """
+        Stream Upload Progress
+        
+        Args:
+            upload_id: The upload_id parameter
+        
+        Returns:
+            None
+        
+        Raises:
+            ApiError: If the request fails
+        """
+        path = "/datasources/uploads/{upload_id}/progress"
+        path = path.replace("{upload_id}", str(upload_id))
+        return self._http.stream("GET", path)

@@ -36,13 +36,13 @@ class DownloadsResource:
         response = self._http.request("POST", path, json=body.model_dump(by_alias=True, exclude_unset=True) if body else None)
         return DownloadJobResponse.model_validate(response)
 
-    def stream_progress(self, datasource_id: str, job_id: str) -> Iterator[Union["ConnectedEvent", "ProgressEvent", "StreamCompleteEvent", "ErrorEvent"]]:
+    def stream_progress(self, job_id: str, datasource_id: str) -> Iterator[Union["ConnectedEvent", "ProgressEvent", "StreamCompleteEvent", "ErrorEvent"]]:
         """
         Stream Download Progress
         
         Args:
-            datasource_id: The datasource_id parameter
             job_id: The job_id parameter
+            datasource_id: The datasource_id parameter
         
         Returns:
             None
@@ -51,17 +51,17 @@ class DownloadsResource:
             ApiError: If the request fails
         """
         path = "/datasources/{datasource_id}/downloads/{job_id}/progress"
-        path = path.replace("{datasource_id}", str(datasource_id))
         path = path.replace("{job_id}", str(job_id))
+        path = path.replace("{datasource_id}", str(datasource_id))
         return self._http.stream("GET", path)
 
-    def download_file(self, datasource_id: str, job_id: str) -> str:
+    def download_file(self, job_id: str, datasource_id: str) -> str:
         """
         Download File
         
         Args:
-            datasource_id: The datasource_id parameter
             job_id: The job_id parameter
+            datasource_id: The datasource_id parameter
         
         Returns:
             Successful Response
@@ -70,8 +70,8 @@ class DownloadsResource:
             ApiError: If the request fails
         """
         path = "/datasources/{datasource_id}/downloads/{job_id}/file"
-        path = path.replace("{datasource_id}", str(datasource_id))
         path = path.replace("{job_id}", str(job_id))
+        path = path.replace("{datasource_id}", str(datasource_id))
         response = self._http.request("GET", path)
         return response
 
@@ -120,13 +120,13 @@ class AsyncDownloadsResource:
         response = await self._http.request("POST", path, json=body.model_dump(by_alias=True, exclude_unset=True) if body else None)
         return DownloadJobResponse.model_validate(response)
 
-    async def stream_progress(self, datasource_id: str, job_id: str) -> AsyncIterator[Union["ConnectedEvent", "ProgressEvent", "StreamCompleteEvent", "ErrorEvent"]]:
+    async def stream_progress(self, job_id: str, datasource_id: str) -> AsyncIterator[Union["ConnectedEvent", "ProgressEvent", "StreamCompleteEvent", "ErrorEvent"]]:
         """
         Stream Download Progress
         
         Args:
-            datasource_id: The datasource_id parameter
             job_id: The job_id parameter
+            datasource_id: The datasource_id parameter
         
         Returns:
             None
@@ -135,17 +135,17 @@ class AsyncDownloadsResource:
             ApiError: If the request fails
         """
         path = "/datasources/{datasource_id}/downloads/{job_id}/progress"
-        path = path.replace("{datasource_id}", str(datasource_id))
         path = path.replace("{job_id}", str(job_id))
+        path = path.replace("{datasource_id}", str(datasource_id))
         return self._http.stream("GET", path)
 
-    async def download_file(self, datasource_id: str, job_id: str) -> str:
+    async def download_file(self, job_id: str, datasource_id: str) -> str:
         """
         Download File
         
         Args:
-            datasource_id: The datasource_id parameter
             job_id: The job_id parameter
+            datasource_id: The datasource_id parameter
         
         Returns:
             Successful Response
@@ -154,8 +154,8 @@ class AsyncDownloadsResource:
             ApiError: If the request fails
         """
         path = "/datasources/{datasource_id}/downloads/{job_id}/file"
-        path = path.replace("{datasource_id}", str(datasource_id))
         path = path.replace("{job_id}", str(job_id))
+        path = path.replace("{datasource_id}", str(datasource_id))
         response = await self._http.request("GET", path)
         return response
 

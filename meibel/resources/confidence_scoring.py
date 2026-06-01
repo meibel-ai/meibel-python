@@ -16,7 +16,7 @@ class ConfidenceScoringResource:
     def __init__(self, http: HttpClient):
         self._http = http
 
-    def get_scoring_job(self, job_id: str) -> "ScoringJobRecord":
+    def get_scoring_job(self, job_id: str) -> "ScoringJobResponse":
         """
         Get a scoring job
         
@@ -34,9 +34,9 @@ class ConfidenceScoringResource:
         path = "/confidence-scoring/job/{job_id}"
         path = path.replace("{job_id}", str(job_id))
         response = self._http.request("GET", path)
-        return ScoringJobRecord.model_validate(response)
+        return ScoringJobResponse.model_validate(response)
 
-    def list_scoring_jobs(self, agent_name: Optional[Union[str, None]] = None, agent_version: Optional[Union[str, None]] = None, agent_session_id: Optional[Union[str, None]] = None, agent_workflow_name: Optional[Union[str, None]] = None, agent_workflow_version: Optional[Union[str, None]] = None, agent_workflow_session_id: Optional[Union[str, None]] = None, tool_id: Optional[Union[str, None]] = None, tool_instance_id: Optional[Union[str, None]] = None, tool_execution_id: Optional[Union[str, None]] = None) -> List["ScoringJobRecord"]:
+    def list_scoring_jobs(self, agent_name: Optional[Union[str, None]] = None, agent_version: Optional[Union[str, None]] = None, agent_session_id: Optional[Union[str, None]] = None, agent_workflow_name: Optional[Union[str, None]] = None, agent_workflow_version: Optional[Union[str, None]] = None, agent_workflow_session_id: Optional[Union[str, None]] = None, tool_id: Optional[Union[str, None]] = None, tool_instance_id: Optional[Union[str, None]] = None, tool_execution_id: Optional[Union[str, None]] = None) -> List["ScoringJobResponse"]:
         """
         List scoring jobs
         
@@ -80,32 +80,7 @@ class ConfidenceScoringResource:
         if tool_execution_id is not None:
             params["tool_execution_id"] = tool_execution_id
         response = self._http.request("GET", path, params=params)
-        return [ScoringJobRecord.model_validate(item) for item in response]
-
-    def get_scoring_jobs_summary(self, primary: str, secondary: Optional[Union[str, None]] = None) -> "ScoreSummary":
-        """
-        Get scoring summary
-        
-        Get an aggregated summary of confidence scores. Requires a primary filter; an optional secondary filter narrows results further. Filters use the format "field:value", where field is any identity context field name.
-        
-        Args:
-            primary: Primary filter in "field:value" format, where field is an identity context field name (e.g. "agent_name:my-agent" or "agent_session_id:sess_abc123").
-            secondary: Optional secondary filter in the same "field:value" format to further narrow results (e.g. "agent_version:1.2.0").
-        
-        Returns:
-            Successful Response
-        
-        Raises:
-            ApiError: If the request fails
-        """
-        path = "/confidence-scoring/summary"
-        params = {}
-        if primary is not None:
-            params["primary"] = primary
-        if secondary is not None:
-            params["secondary"] = secondary
-        response = self._http.request("GET", path, params=params)
-        return ScoreSummary.model_validate(response)
+        return [ScoringJobResponse.model_validate(item) for item in response]
 
 
 class AsyncConfidenceScoringResource:
@@ -114,7 +89,7 @@ class AsyncConfidenceScoringResource:
     def __init__(self, http: AsyncHttpClient):
         self._http = http
 
-    async def get_scoring_job(self, job_id: str) -> "ScoringJobRecord":
+    async def get_scoring_job(self, job_id: str) -> "ScoringJobResponse":
         """
         Get a scoring job
         
@@ -132,9 +107,9 @@ class AsyncConfidenceScoringResource:
         path = "/confidence-scoring/job/{job_id}"
         path = path.replace("{job_id}", str(job_id))
         response = await self._http.request("GET", path)
-        return ScoringJobRecord.model_validate(response)
+        return ScoringJobResponse.model_validate(response)
 
-    async def list_scoring_jobs(self, agent_name: Optional[Union[str, None]] = None, agent_version: Optional[Union[str, None]] = None, agent_session_id: Optional[Union[str, None]] = None, agent_workflow_name: Optional[Union[str, None]] = None, agent_workflow_version: Optional[Union[str, None]] = None, agent_workflow_session_id: Optional[Union[str, None]] = None, tool_id: Optional[Union[str, None]] = None, tool_instance_id: Optional[Union[str, None]] = None, tool_execution_id: Optional[Union[str, None]] = None) -> List["ScoringJobRecord"]:
+    async def list_scoring_jobs(self, agent_name: Optional[Union[str, None]] = None, agent_version: Optional[Union[str, None]] = None, agent_session_id: Optional[Union[str, None]] = None, agent_workflow_name: Optional[Union[str, None]] = None, agent_workflow_version: Optional[Union[str, None]] = None, agent_workflow_session_id: Optional[Union[str, None]] = None, tool_id: Optional[Union[str, None]] = None, tool_instance_id: Optional[Union[str, None]] = None, tool_execution_id: Optional[Union[str, None]] = None) -> List["ScoringJobResponse"]:
         """
         List scoring jobs
         
@@ -178,29 +153,4 @@ class AsyncConfidenceScoringResource:
         if tool_execution_id is not None:
             params["tool_execution_id"] = tool_execution_id
         response = await self._http.request("GET", path, params=params)
-        return [ScoringJobRecord.model_validate(item) for item in response]
-
-    async def get_scoring_jobs_summary(self, primary: str, secondary: Optional[Union[str, None]] = None) -> "ScoreSummary":
-        """
-        Get scoring summary
-        
-        Get an aggregated summary of confidence scores. Requires a primary filter; an optional secondary filter narrows results further. Filters use the format "field:value", where field is any identity context field name.
-        
-        Args:
-            primary: Primary filter in "field:value" format, where field is an identity context field name (e.g. "agent_name:my-agent" or "agent_session_id:sess_abc123").
-            secondary: Optional secondary filter in the same "field:value" format to further narrow results (e.g. "agent_version:1.2.0").
-        
-        Returns:
-            Successful Response
-        
-        Raises:
-            ApiError: If the request fails
-        """
-        path = "/confidence-scoring/summary"
-        params = {}
-        if primary is not None:
-            params["primary"] = primary
-        if secondary is not None:
-            params["secondary"] = secondary
-        response = await self._http.request("GET", path, params=params)
-        return ScoreSummary.model_validate(response)
+        return [ScoringJobResponse.model_validate(item) for item in response]

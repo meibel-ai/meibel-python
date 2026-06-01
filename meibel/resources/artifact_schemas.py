@@ -43,7 +43,7 @@ class ArtifactSchemasResource:
         Raises:
             ApiError: If the request fails
         """
-        path = "/artifact-schemas/"
+        path = "/artifact-schemas"
         params = {}
         if offset is not None:
             params["offset"] = offset
@@ -77,7 +77,7 @@ class ArtifactSchemasResource:
         Raises:
             ApiError: If the request fails
         """
-        path = "/artifact-schemas/"
+        path = "/artifact-schemas"
         if _is_pydantic_model(schema):
             _schema = schema.model_json_schema()
         else:
@@ -179,7 +179,7 @@ class AsyncArtifactSchemasResource:
         Raises:
             ApiError: If the request fails
         """
-        path = "/artifact-schemas/"
+        path = "/artifact-schemas"
         params = {}
         if offset is not None:
             params["offset"] = offset
@@ -213,7 +213,7 @@ class AsyncArtifactSchemasResource:
         Raises:
             ApiError: If the request fails
         """
-        path = "/artifact-schemas/"
+        path = "/artifact-schemas"
         if _is_pydantic_model(schema):
             _schema = schema.model_json_schema()
         else:

@@ -17,13 +17,13 @@ class DataElementsResource:
     def __init__(self, http: HttpClient):
         self._http = http
 
-    def get(self, datasource_id: str, data_element_id: str) -> "DataElementResponse":
+    def get(self, data_element_id: str, datasource_id: str) -> "DataElementResponse":
         """
         Get Data Element
         
         Args:
-            datasource_id: The datasource_id parameter
             data_element_id: The data_element_id parameter
+            datasource_id: The datasource_id parameter
         
         Returns:
             Successful Response
@@ -32,18 +32,18 @@ class DataElementsResource:
             ApiError: If the request fails
         """
         path = "/datasources/{datasource_id}/data-elements/{data_element_id}"
-        path = path.replace("{datasource_id}", str(datasource_id))
         path = path.replace("{data_element_id}", str(data_element_id))
+        path = path.replace("{datasource_id}", str(datasource_id))
         response = self._http.request("GET", path)
         return DataElementResponse.model_validate(response)
 
-    def update(self, datasource_id: str, data_element_id: str, body: "UpdateDataElementRequest") -> "DataElementResponse":
+    def update(self, data_element_id: str, datasource_id: str, body: "UpdateDataElementRequest") -> "DataElementResponse":
         """
         Update Data Element
         
         Args:
-            datasource_id: The datasource_id parameter
             data_element_id: The data_element_id parameter
+            datasource_id: The datasource_id parameter
             body: Request body
         
         Returns:
@@ -53,8 +53,8 @@ class DataElementsResource:
             ApiError: If the request fails
         """
         path = "/datasources/{datasource_id}/data-elements/{data_element_id}"
-        path = path.replace("{datasource_id}", str(datasource_id))
         path = path.replace("{data_element_id}", str(data_element_id))
+        path = path.replace("{datasource_id}", str(datasource_id))
         response = self._http.request("PUT", path, json=body.model_dump(by_alias=True, exclude_unset=True) if body else None)
         return DataElementResponse.model_validate(response)
 
@@ -124,13 +124,13 @@ class AsyncDataElementsResource:
     def __init__(self, http: AsyncHttpClient):
         self._http = http
 
-    async def get(self, datasource_id: str, data_element_id: str) -> "DataElementResponse":
+    async def get(self, data_element_id: str, datasource_id: str) -> "DataElementResponse":
         """
         Get Data Element
         
         Args:
-            datasource_id: The datasource_id parameter
             data_element_id: The data_element_id parameter
+            datasource_id: The datasource_id parameter
         
         Returns:
             Successful Response
@@ -139,18 +139,18 @@ class AsyncDataElementsResource:
             ApiError: If the request fails
         """
         path = "/datasources/{datasource_id}/data-elements/{data_element_id}"
-        path = path.replace("{datasource_id}", str(datasource_id))
         path = path.replace("{data_element_id}", str(data_element_id))
+        path = path.replace("{datasource_id}", str(datasource_id))
         response = await self._http.request("GET", path)
         return DataElementResponse.model_validate(response)
 
-    async def update(self, datasource_id: str, data_element_id: str, body: "UpdateDataElementRequest") -> "DataElementResponse":
+    async def update(self, data_element_id: str, datasource_id: str, body: "UpdateDataElementRequest") -> "DataElementResponse":
         """
         Update Data Element
         
         Args:
-            datasource_id: The datasource_id parameter
             data_element_id: The data_element_id parameter
+            datasource_id: The datasource_id parameter
             body: Request body
         
         Returns:
@@ -160,8 +160,8 @@ class AsyncDataElementsResource:
             ApiError: If the request fails
         """
         path = "/datasources/{datasource_id}/data-elements/{data_element_id}"
-        path = path.replace("{datasource_id}", str(datasource_id))
         path = path.replace("{data_element_id}", str(data_element_id))
+        path = path.replace("{datasource_id}", str(datasource_id))
         response = await self._http.request("PUT", path, json=body.model_dump(by_alias=True, exclude_unset=True) if body else None)
         return DataElementResponse.model_validate(response)
 

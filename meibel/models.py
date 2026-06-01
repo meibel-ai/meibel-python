@@ -51,6 +51,24 @@ class AgentExecutionDetailsResponse(BaseModel):
     result: List["ArtifactEntry"] = ...
 
 
+class AgentIdentityContext(BaseModel):
+    """Identifies the agent, workflow, and tool context that produced the scored output."""
+    customer_id: str = Field(description="Your customer identifier.")
+    project_id: str = Field(description="The project this scoring job belongs to.")
+    agent_name: Optional[Union[str, None]] = Field(description="Name of the agent that produced the scored output.", default=None)
+    agent_version: Optional[Union[str, None]] = Field(description="Version of the agent that produced the scored output.", default=None)
+    agent_session_id: Optional[Union[str, None]] = Field(description="Unique identifier for the agent session that produced the scored output.", default=None)
+    agent_turn: Optional[Union[int, None]] = Field(description="The agent turn number within the session, if applicable.", default=None)
+    agent_workflow_name: Optional[Union[str, None]] = Field(description="Name of the workflow the agent is part of, if applicable.", default=None)
+    agent_workflow_version: Optional[Union[str, None]] = Field(description="Version of the workflow the agent is part of.", default=None)
+    agent_workflow_session_id: Optional[Union[str, None]] = Field(description="Unique identifier for the workflow session, if the agent runs within a workflow.", default=None)
+    batch_definition_id: Optional[Union[str, None]] = Field(description="Identifier of the batch definition this job belongs to, if applicable.", default=None)
+    batch_execution_id: Optional[Union[str, None]] = Field(description="Identifier of the batch execution this job belongs to, if applicable.", default=None)
+    tool_id: Optional[Union[str, None]] = Field(description="Identifier of the tool that produced the scored output, if applicable.", default=None)
+    tool_instance_id: Optional[Union[str, None]] = Field(description="Identifier of the specific tool instance.", default=None)
+    tool_execution_id: Optional[Union[str, None]] = Field(description="Unique identifier for the tool execution that produced the scored output.", default=None)
+
+
 class AgentListResponse(BaseModel):
     data: List["AgentSummary"] = ...
     total: int = ...
@@ -232,7 +250,7 @@ class BodySendChatMessageStream(BaseModel):
     timeout_seconds: Optional[Union[int, None]] = Field(default=None)
     include_thinking: Optional[Union[bool, None]] = Field(default=None)
     include_tool_activity: Optional[Union[bool, None]] = Field(default=None)
-    files: Optional[Union[List[bytes], None]] = Field(default=None)
+    files: Optional[Union[List[str], None]] = Field(default=None)
 
 
 class BoundingBox(BaseModel):
@@ -277,12 +295,6 @@ class ChatResponse(BaseModel):
     artifacts: Optional[Union[List["Artifact"], None]] = Field(default=None)
 
 
-class ChatWithDatasourceRequest(BaseModel):
-    datasource_ids: List[str] = Field(description="Datasources to query")
-    message: str = Field(description="User question")
-    model: Optional[Union[str, None]] = Field(description="LLM model override", default=None)
-
-
 class CloudStorageConnector(BaseModel):
     """Connect to a cloud storage bucket."""
     provider: Literal["s3", "gcs"] = Field(description="Cloud storage provider")
@@ -292,11 +304,25 @@ class CloudStorageConnector(BaseModel):
     region: Optional[Union[str, None]] = Field(description="AWS region (S3 only)", default=None)
 
 
+class CloudStorageConnectorSummary(BaseModel):
+    """Public-facing summary of a cloud storage connector. Omits bucket/prefix/role/region."""
+    provider: Literal["s3", "gcs"] = Field(description="Cloud storage provider")
+
+
 class ConnectorConfig(BaseModel):
     """Datasource connection configuration. Exactly one connector type must be set."""
     type: Literal["database", "cloud_storage", "web_crawl"] = Field(description="Connector type — set the matching config object: 'database' → database, 'cloud_storage' → cloud_storage, 'web_crawl' → web_crawl")
     database: Optional[Union["DatabaseConnector", None]] = Field(default=None)
     cloud_storage: Optional[Union["CloudStorageConnector", None]] = Field(default=None)
+    web_crawl: Optional[Union["WebCrawlConnector", None]] = Field(default=None)
+
+
+class ConnectorSummary(BaseModel):
+    """Public-facing connector summary returned on datasource reads. Strips infra details that
+customers configured on create and don't need echoed back (bucket names, IAM ARNs, regions,
+database hosts, etc.)."""
+    type: Literal["database", "cloud_storage", "web_crawl"] = Field(description="Connector type")
+    cloud_storage: Optional[Union["CloudStorageConnectorSummary", None]] = Field(default=None)
     web_crawl: Optional[Union["WebCrawlConnector", None]] = Field(default=None)
 
 
@@ -329,12 +355,6 @@ class CreateAgentDefinitionRequest(BaseModel):
     tags: Optional[Union[List[str], None]] = Field(description="Tags for categorization", default=None)
     icon: Optional[Union[str, None]] = Field(description="UI icon identifier", default=None)
     additional_properties: Optional[Dict[str, Any]] = Field(default=None)
-
-
-class CreateAgentPromptRequest(BaseModel):
-    """Request model for creating a new agent prompt."""
-    display_name: str = Field(description="Human-readable name of the prompt (letters, numbers, and spaces only). Converted to kebab-case internally.")
-    prompt: str = Field(description="Prompt text")
 
 
 class CreateAgentResponse(BaseModel):
@@ -384,13 +404,6 @@ class CreateDatasourceRequest(BaseModel):
     description: Optional[str] = Field(description="What this datasource contains", default=None)
     connector: Optional[Union["ConnectorConfig", None]] = Field(description="Connection configuration — omit for file-upload datasources", default=None)
     metadata_config: Optional[Union["MetadataConfigRequest", None]] = Field(description="Optional metadata extraction config to apply after creation", default=None)
-
-
-class CreatePromptResponse(BaseModel):
-    id: str = ...
-    name: str = ...
-    display_name: str = ...
-    version: str = ...
 
 
 class CreateSessionRequest(BaseModel):
@@ -446,7 +459,7 @@ class DatasourceResponse(BaseModel):
     id: str = Field(description="Unique datasource ID")
     name: str = Field(description="Human-readable datasource name")
     description: str = Field(description="What this datasource contains")
-    connector: "ConnectorConfig" = Field(description="Connection configuration")
+    connector: "ConnectorSummary" = Field(description="Connection configuration (summary — infra details like buckets, roles, and hosts are not echoed back)")
     created_at: str = Field(description="ISO 8601 creation timestamp")
     updated_at: str = Field(description="ISO 8601 last-update timestamp")
     last_sync_at: Optional[Union[str, None]] = Field(description="ISO 8601 timestamp of the most recent ingest run", default=None)
@@ -709,29 +722,6 @@ class ProcessDocumentResponse(BaseModel):
     result: Union["MeibelDocumentResult", str] = Field(description="MeibelDocumentResult for meibel format, str for markdown")
 
 
-class PromptListResponse(BaseModel):
-    data: List["PromptSummary"] = ...
-
-
-class PromptResponse(BaseModel):
-    id: str = ...
-    name: str = ...
-    display_name: str = ...
-    version: str = ...
-    parent_version: Optional[Union[str, None]] = Field(default=None)
-    prompt: str = ...
-    description: Optional[Union[str, None]] = Field(default=None)
-    created_by: Optional[Union[str, None]] = Field(default=None)
-    created_at: Optional[Union[datetime, None]] = Field(default=None)
-
-
-class PromptSummary(BaseModel):
-    id: str = ...
-    display_name: str = ...
-    version: str = ...
-    preview: str = ...
-
-
 class PublishAgentDefinitionRequest(BaseModel):
     """Request model for publishing the current draft of an agent."""
     commit_message: str = Field(description="User-provided description of what changed in this version")
@@ -747,6 +737,26 @@ class PublishAgentDefinitionResponse(BaseModel):
     commit_message: str = Field(description="User-provided description of what changed in this version")
     published_at: datetime = Field(description="Timestamp of the publish event")
     published_by: Optional[Union[str, None]] = Field(description="User who published", default=None)
+
+
+class ScoreSummary(BaseModel):
+    """Aggregated summary of scoring jobs matching identity context filters."""
+    status: Optional[Union[str, None]] = Field(description="Overall status across the matched scoring jobs. Null if no jobs matched the filters.", default=None)
+    aggregate_score: Optional[Union[float, int, None]] = Field(description="Average score across all completed jobs matching the filters.", default=None)
+    module_scores: Optional[Union[Dict[str, Union[float, int]], None]] = Field(description="Average score per scoring module, keyed by module name.", default=None)
+    n_jobs_per_module: Optional[Union[Dict[str, int], None]] = Field(description="Number of completed scoring jobs per module.", default=None)
+    job_ids: Optional[Union[List[str], None]] = Field(description="Job IDs matching the filters.", default=None)
+    turns: Optional[Union[List["TurnSummary"], None]] = Field(description="Per-turn score breakdowns, ordered by turn number ascending with null-turn last.", default=None)
+
+
+class ScoringJobResponse(BaseModel):
+    """A confidence scoring job record with metadata and scores only."""
+    job_id: str = Field(description="Unique identifier for this scoring job.")
+    agent_identity_context: "AgentIdentityContext" = Field(description="The agent, workflow, and tool context that produced the scored output.")
+    module: str = Field(description="The scoring module used to evaluate the output. Judge-based modules (e.g. correctness, coherence, faithfulness) produce scores on a 0–10 scale. Statistical modules (e.g. observed_consistency, data_grounding) produce scores on a 0.0–1.0 scale.")
+    status: str = Field(description="Current status of the scoring job: submitted, in_progress, completed, failed, or not_run.")
+    score: Optional[Union[float, int, None]] = Field(description="The computed confidence score, or null if the job has not completed. Range depends on the module: 0–10 (integer) for judge-based modules, 0.0–1.0 for statistical modules.", default=None)
+    explanation: Optional[Union[str, None]] = Field(description="Human-readable explanation of the score.", default=None)
 
 
 class SessionListResponse(BaseModel):
@@ -897,6 +907,16 @@ class TriggerIngestResponse(BaseModel):
     datasource_id: str = Field(description="ID of the datasource ingest was triggered on")
 
 
+class TurnSummary(BaseModel):
+    """Per-turn score aggregation."""
+    turn: Optional[Union[int, None]] = Field(description="Agent turn number, or null for jobs without a turn assignment.", default=None)
+    status: Optional[Union[str, None]] = Field(description="Overall status for this turn's jobs.", default=None)
+    aggregate_score: Optional[Union[float, int, None]] = Field(description="Average score across this turn's completed jobs.", default=None)
+    module_scores: Optional[Union[Dict[str, Union[float, int]], None]] = Field(description="Average score per module for this turn.", default=None)
+    n_jobs_per_module: Optional[Union[Dict[str, int], None]] = Field(description="Job count per module for this turn.", default=None)
+    job_ids: Optional[Union[List[str], None]] = Field(description="Job IDs for this turn.", default=None)
+
+
 class UpdateAgentArtifactRequest(BaseModel):
     """Request model for updating an agent artifact. Name is intentionally excluded as it serves as the stable identifier for a version chain and cannot be changed."""
     display_name: Optional[Union[str, None]] = Field(description="Human-readable name of the artifact", default=None)
@@ -931,12 +951,6 @@ class UpdateAgentDefinitionResponse(BaseModel):
     id: str = Field(description="New agent definition ID")
     catalog_urn: str = Field(description="Catalog URN for the new version")
     version: str = Field(description="New version number")
-
-
-class UpdateAgentPromptRequest(BaseModel):
-    """Request model for updating an agent prompt. Name is intentionally excluded as it serves as the stable identifier for a version chain and cannot be changed."""
-    display_name: Optional[Union[str, None]] = Field(description="Human-readable name of the prompt", default=None)
-    prompt: Optional[Union[str, None]] = Field(description="Prompt text", default=None)
 
 
 class UpdateArtifactSchemaResponse(BaseModel):
@@ -978,11 +992,6 @@ class UpdateBatchExecutionRequest(BaseModel):
     additional_properties: Optional[Dict[str, Any]] = Field(default=None)
 
 
-class UpdatePromptResponse(BaseModel):
-    id: str = ...
-    version: str = ...
-
-
 class UpdateTagColumnsRequest(BaseModel):
     """Bulk update of column descriptions on a single table."""
     columns: List["TagColumnUpdateItem"] = Field(description="One entry per column to update on the target table")
@@ -997,6 +1006,8 @@ class ValidationError(BaseModel):
     loc: List[Union[str, int]] = ...
     msg: str = ...
     type: str = ...
+    input: Optional[str] = Field(default=None)
+    ctx: Optional[str] = Field(default=None)
 
 
 class WebCrawlConnector(BaseModel):
@@ -1040,46 +1051,6 @@ class CompletionEvent(BaseModel):
     """A server-sent event containing the final complete response from the agent, sent once at the end of the stream"""
     event: str = ...
     data: str = ...
-
-
-class AgentIdentityContext(BaseModel):
-    """Identifies the agent, workflow, and tool context that produced the scored output."""
-    customer_id: str = Field(description="Your customer identifier.")
-    project_id: str = Field(description="The project this scoring job belongs to.")
-    agent_name: Optional[Union[str, None]] = Field(description="Name of the agent that produced the scored output.", default=None)
-    agent_version: Optional[Union[str, None]] = Field(description="Version of the agent that produced the scored output.", default=None)
-    agent_session_id: Optional[Union[str, None]] = Field(description="Unique identifier for the agent session that produced the scored output.", default=None)
-    agent_workflow_name: Optional[Union[str, None]] = Field(description="Name of the workflow the agent is part of, if applicable.", default=None)
-    agent_workflow_version: Optional[Union[str, None]] = Field(description="Version of the workflow the agent is part of.", default=None)
-    agent_workflow_session_id: Optional[Union[str, None]] = Field(description="Unique identifier for the workflow session, if the agent runs within a workflow.", default=None)
-    tool_id: Optional[Union[str, None]] = Field(description="Identifier of the tool that produced the scored output, if applicable.", default=None)
-    tool_instance_id: Optional[Union[str, None]] = Field(description="Identifier of the specific tool instance.", default=None)
-    tool_execution_id: Optional[Union[str, None]] = Field(description="Unique identifier for the tool execution that produced the scored output.", default=None)
-
-
-class ScoreSummary(BaseModel):
-    """Aggregated summary of scoring jobs matching one or two identity context filters."""
-    primary_field: str = Field(description="The identity context field used as the primary filter (e.g. \"agent_name\").")
-    primary_value: str = Field(description="The value matched by the primary filter.")
-    secondary_field: Optional[Union[str, None]] = Field(description="An optional second identity context field used to further narrow results.", default=None)
-    secondary_value: Optional[Union[str, None]] = Field(description="The value matched by the secondary filter.", default=None)
-    status: Optional[Union[str, None]] = Field(description="Overall status across the matched scoring jobs. Null if no jobs matched the filters.", default=None)
-    aggregate_score: Optional[Union[float, int, None]] = Field(description="Average score across all completed jobs matching the filters.", default=None)
-    module_scores: Optional[Union[Dict[str, Union[float, int]], None]] = Field(description="Average score per scoring module, keyed by module name.", default=None)
-    n_jobs_per_module: Optional[Union[Dict[str, int], None]] = Field(description="Number of completed scoring jobs per module.", default=None)
-    jobs: Optional[Union[List["ScoringJobRecord"], None]] = Field(description="The individual scoring job records matching the filters.", default=None)
-
-
-class ScoringJobRecord(BaseModel):
-    """A single confidence scoring job and its result."""
-    job_id: str = Field(description="Unique identifier for this scoring job.")
-    agent_identity_context: "AgentIdentityContext" = Field(description="The agent, workflow, and tool context that produced the scored output.")
-    module: str = Field(description="The scoring module used to evaluate the output. Judge-based modules (e.g. correctness, coherence, faithfulness) produce scores on a 0–10 scale. Statistical modules (e.g. observed_consistency, data_grounding) produce scores on a 0.0–1.0 scale.")
-    scoring_config: Optional[str] = Field(description="Configuration parameters for the scoring module. Structure varies by module.", default=None)
-    input_value: str = Field(description="The input that was provided to the agent or tool being scored.")
-    output_value: str = Field(description="The output produced by the agent or tool that was evaluated.")
-    status: str = Field(description="Current status of the scoring job: submitted, in_progress, completed, failed, or not_run.")
-    score: Optional[Union[float, int, None]] = Field(description="The computed confidence score, or null if the job has not completed. Range depends on the module: 0–10 (integer) for judge-based modules, 0.0–1.0 for statistical modules.", default=None)
 
 
 class ContentItem(BaseModel):
@@ -1154,19 +1125,10 @@ class MetadataModelCatalogEntry(BaseModel):
 
 class BodyUploadContent(BaseModel):
     files: List[bytes] = Field(description="One or more files to upload")
-    datasource_id: Optional[str] = Field(description="ID of an existing datasource to upload to. Provide this or name.", default=None)
-    name: Optional[str] = Field(description="Name for a new datasource to create. Provide this or datasource_id.", default=None)
-    description: Optional[str] = Field(description="Description of the new datasource (only used when creating with name).", default=None)
-    metadata_config: Optional["MetadataConfigRequest"] = Field(default=None)
 
 
 class BodyUploadAndListContent(BaseModel):
     files: List[bytes] = Field(description="One or more files to upload")
-    datasource_id: Optional[str] = Field(description="ID of an existing datasource to upload to. Provide this or name.", default=None)
-    name: Optional[str] = Field(description="Name for a new datasource to create. Provide this or datasource_id.", default=None)
-    description: Optional[str] = Field(description="Description of the new datasource (only used when creating with name).", default=None)
-    metadata_config: Optional["MetadataConfigRequest"] = Field(default=None)
-    trigger_ingest: Optional[bool] = Field(description="Start ingestion after upload completes. Returns ingest_url to poll for status.", default=None)
 
 
 class BodyParseDocument(BaseModel):
@@ -1198,6 +1160,7 @@ class BodySubmitDocumentTransform(BaseModel):
 # Update forward references
 AgentDetailResponse.model_rebuild()
 AgentExecutionDetailsResponse.model_rebuild()
+AgentIdentityContext.model_rebuild()
 AgentListResponse.model_rebuild()
 AgentSummary.model_rebuild()
 AgentToolDefinition.model_rebuild()
@@ -1218,19 +1181,18 @@ CallToAction.model_rebuild()
 ChatMessageRequest.model_rebuild()
 ChatMessageResponse.model_rebuild()
 ChatResponse.model_rebuild()
-ChatWithDatasourceRequest.model_rebuild()
 CloudStorageConnector.model_rebuild()
+CloudStorageConnectorSummary.model_rebuild()
 ConnectorConfig.model_rebuild()
+ConnectorSummary.model_rebuild()
 CreateAgentArtifactRequest.model_rebuild()
 CreateAgentDefinitionRequest.model_rebuild()
-CreateAgentPromptRequest.model_rebuild()
 CreateAgentResponse.model_rebuild()
 CreateArtifactSchemaResponse.model_rebuild()
 CreateBatchDefinitionRequest.model_rebuild()
 CreateBatchDefinitionResponse.model_rebuild()
 CreateBatchExecutionRequest.model_rebuild()
 CreateDatasourceRequest.model_rebuild()
-CreatePromptResponse.model_rebuild()
 CreateSessionRequest.model_rebuild()
 CreateSessionResponse.model_rebuild()
 DataElementListResponse.model_rebuild()
@@ -1271,11 +1233,10 @@ MetadataField.model_rebuild()
 PaginationMeta.model_rebuild()
 ParseDocumentResponse.model_rebuild()
 ProcessDocumentResponse.model_rebuild()
-PromptListResponse.model_rebuild()
-PromptResponse.model_rebuild()
-PromptSummary.model_rebuild()
 PublishAgentDefinitionRequest.model_rebuild()
 PublishAgentDefinitionResponse.model_rebuild()
+ScoreSummary.model_rebuild()
+ScoringJobResponse.model_rebuild()
 SessionListResponse.model_rebuild()
 SessionMessageItem.model_rebuild()
 SessionMessagesResponse.model_rebuild()
@@ -1296,15 +1257,14 @@ ToolCallInfo.model_rebuild()
 ToolResultInfo.model_rebuild()
 TransformDocumentResponse.model_rebuild()
 TriggerIngestResponse.model_rebuild()
+TurnSummary.model_rebuild()
 UpdateAgentArtifactRequest.model_rebuild()
 UpdateAgentDefinitionRequest.model_rebuild()
 UpdateAgentDefinitionResponse.model_rebuild()
-UpdateAgentPromptRequest.model_rebuild()
 UpdateArtifactSchemaResponse.model_rebuild()
 UpdateBatchDefinitionRequest.model_rebuild()
 UpdateBatchDefinitionResponse.model_rebuild()
 UpdateBatchExecutionRequest.model_rebuild()
-UpdatePromptResponse.model_rebuild()
 UpdateTagColumnsRequest.model_rebuild()
 UpdateTagTablesRequest.model_rebuild()
 ValidationError.model_rebuild()
@@ -1315,9 +1275,6 @@ ToolCallEvent.model_rebuild()
 ToolResultEvent.model_rebuild()
 PartialResponseEvent.model_rebuild()
 CompletionEvent.model_rebuild()
-AgentIdentityContext.model_rebuild()
-ScoreSummary.model_rebuild()
-ScoringJobRecord.model_rebuild()
 ContentItem.model_rebuild()
 ListContentResponse.model_rebuild()
 UploadContentResponse.model_rebuild()

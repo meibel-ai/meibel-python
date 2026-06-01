@@ -33,7 +33,7 @@ class ExecutionsResource:
         Raises:
             ApiError: If the request fails
         """
-        path = "/batch-executions/"
+        path = "/batch-executions"
         params = {}
         if input_datasource_id is not None:
             params["input_datasource_id"] = input_datasource_id
@@ -61,7 +61,7 @@ class ExecutionsResource:
         Raises:
             ApiError: If the request fails
         """
-        path = "/batch-executions/"
+        path = "/batch-executions"
         response = self._http.request("POST", path, json=body.model_dump(by_alias=True, exclude_unset=True) if body else None)
         return BatchExecutionResponse.model_validate(response)
 
@@ -180,7 +180,7 @@ class AsyncExecutionsResource:
         Raises:
             ApiError: If the request fails
         """
-        path = "/batch-executions/"
+        path = "/batch-executions"
         params = {}
         if input_datasource_id is not None:
             params["input_datasource_id"] = input_datasource_id
@@ -208,7 +208,7 @@ class AsyncExecutionsResource:
         Raises:
             ApiError: If the request fails
         """
-        path = "/batch-executions/"
+        path = "/batch-executions"
         response = await self._http.request("POST", path, json=body.model_dump(by_alias=True, exclude_unset=True) if body else None)
         return BatchExecutionResponse.model_validate(response)
 
