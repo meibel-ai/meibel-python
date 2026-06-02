@@ -134,7 +134,7 @@ class DocumentsResource:
         response = self._http.request("GET", path)
         return [DocumentChild.model_validate(item) for item in response]
 
-    def stream_trace(self, job_id: str) -> Iterator[Union["LayoutDetectedEvent", "TableExtractedEvent", "OcrPageEvent", "CompletedEvent", "ErrorEvent"]]:
+    def stream_trace(self, job_id: str) -> Iterator[Dict[str, Any]]:
         """
         Stream document parsing trace
         
@@ -350,7 +350,7 @@ class AsyncDocumentsResource:
         response = await self._http.request("GET", path)
         return [DocumentChild.model_validate(item) for item in response]
 
-    async def stream_trace(self, job_id: str) -> AsyncIterator[Union["LayoutDetectedEvent", "TableExtractedEvent", "OcrPageEvent", "CompletedEvent", "ErrorEvent"]]:
+    async def stream_trace(self, job_id: str) -> AsyncIterator[Dict[str, Any]]:
         """
         Stream document parsing trace
         
@@ -367,7 +367,7 @@ class AsyncDocumentsResource:
         """
         path = "/documents/{job_id}/trace"
         path = path.replace("{job_id}", str(job_id))
-        return self._http.stream("GET", path)
+        return await self._http.stream("GET", path)
 
     async def transform(self, file: str, schema: Union[str, Dict[str, Any], Type[BaseModel]], model: Optional[str] = None, prompt: Optional[str] = None, prompt_id: Optional[str] = None, timeout_seconds: int = 600) -> "TransformDocumentResponse":
         """

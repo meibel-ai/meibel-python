@@ -97,7 +97,7 @@ class FileUploadsResource:
         response = self._http.upload("POST", path, file=files, file_name=files_name, field_name="files", params=params)
         return FileUploadSyncResponse.model_validate(response)
 
-    def stream_upload_progress(self, upload_id: str) -> Iterator[Union["ConnectedEvent", "ProgressEvent", "StreamCompleteEvent", "ErrorEvent"]]:
+    def stream_upload_progress(self, upload_id: str) -> Iterator[Union["ConnectedEvent", Dict[str, Any]]]:
         """
         Stream Upload Progress
         
@@ -199,7 +199,7 @@ class AsyncFileUploadsResource:
         response = await self._http.upload("POST", path, file=files, file_name=files_name, field_name="files", params=params)
         return FileUploadSyncResponse.model_validate(response)
 
-    async def stream_upload_progress(self, upload_id: str) -> AsyncIterator[Union["ConnectedEvent", "ProgressEvent", "StreamCompleteEvent", "ErrorEvent"]]:
+    async def stream_upload_progress(self, upload_id: str) -> AsyncIterator[Union["ConnectedEvent", Dict[str, Any]]]:
         """
         Stream Upload Progress
         
@@ -214,4 +214,4 @@ class AsyncFileUploadsResource:
         """
         path = "/datasources/uploads/{upload_id}/progress"
         path = path.replace("{upload_id}", str(upload_id))
-        return self._http.stream("GET", path)
+        return await self._http.stream("GET", path)

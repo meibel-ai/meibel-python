@@ -36,7 +36,7 @@ class DownloadsResource:
         response = self._http.request("POST", path, json=body.model_dump(by_alias=True, exclude_unset=True) if body else None)
         return DownloadJobResponse.model_validate(response)
 
-    def stream_progress(self, job_id: str, datasource_id: str) -> Iterator[Union["ConnectedEvent", "ProgressEvent", "StreamCompleteEvent", "ErrorEvent"]]:
+    def stream_progress(self, job_id: str, datasource_id: str) -> Iterator[Union["ConnectedEvent", Dict[str, Any]]]:
         """
         Stream Download Progress
         
@@ -120,7 +120,7 @@ class AsyncDownloadsResource:
         response = await self._http.request("POST", path, json=body.model_dump(by_alias=True, exclude_unset=True) if body else None)
         return DownloadJobResponse.model_validate(response)
 
-    async def stream_progress(self, job_id: str, datasource_id: str) -> AsyncIterator[Union["ConnectedEvent", "ProgressEvent", "StreamCompleteEvent", "ErrorEvent"]]:
+    async def stream_progress(self, job_id: str, datasource_id: str) -> AsyncIterator[Union["ConnectedEvent", Dict[str, Any]]]:
         """
         Stream Download Progress
         
@@ -137,7 +137,7 @@ class AsyncDownloadsResource:
         path = "/datasources/{datasource_id}/downloads/{job_id}/progress"
         path = path.replace("{job_id}", str(job_id))
         path = path.replace("{datasource_id}", str(datasource_id))
-        return self._http.stream("GET", path)
+        return await self._http.stream("GET", path)
 
     async def download_file(self, job_id: str, datasource_id: str) -> str:
         """
