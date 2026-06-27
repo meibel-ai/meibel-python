@@ -987,7 +987,7 @@ class UpdateBatchExecutionRequest(BaseModel):
     succeeded: Optional[Union[int, None]] = Field(description="Number of succeeded items", default=None)
     failed: Optional[Union[int, None]] = Field(description="Number of failed items", default=None)
     output_datasource_id: Optional[Union[str, None]] = Field(description="Output datasource ID", default=None)
-    items: Optional[Union[List[Union[Dict[str, Any], None]], None]] = Field(description="Per-item results", default=None)
+    items: Optional[Union[List[Dict[str, Any]], None]] = Field(description="Per-item results", default=None)
     error: Optional[Union[str, None]] = Field(description="Overall error message", default=None)
     additional_properties: Optional[Dict[str, Any]] = Field(default=None)
 

@@ -82,6 +82,48 @@ class ConfidenceScoringResource:
         response = self._http.request("GET", path, params=params)
         return [ScoringJobResponse.model_validate(item) for item in response]
 
+    def get_agent_scoring_summary(self, agent_name: str) -> "ScoreSummary":
+        """
+        Get agent scoring summary
+        
+        Get an aggregated summary of confidence scores for a specific agent.
+        
+        Args:
+            agent_name: Name of the agent to summarize.
+        
+        Returns:
+            Successful Response
+        
+        Raises:
+            ApiError: If the request fails
+        """
+        path = "/confidence-scoring/summary/agent/{agent_name}"
+        path = path.replace("{agent_name}", str(agent_name))
+        response = self._http.request("GET", path)
+        return ScoreSummary.model_validate(response)
+
+    def get_agent_session_scoring_summary(self, agent_name: str, session_id: str) -> "ScoreSummary":
+        """
+        Get agent session scoring summary
+        
+        Get an aggregated summary of confidence scores for a specific agent session.
+        
+        Args:
+            agent_name: Name of the agent.
+            session_id: Agent session ID.
+        
+        Returns:
+            Successful Response
+        
+        Raises:
+            ApiError: If the request fails
+        """
+        path = "/confidence-scoring/summary/agent/{agent_name}/session/{session_id}"
+        path = path.replace("{agent_name}", str(agent_name))
+        path = path.replace("{session_id}", str(session_id))
+        response = self._http.request("GET", path)
+        return ScoreSummary.model_validate(response)
+
 
 class AsyncConfidenceScoringResource:
     """Track and analyze confidence scores (async)"""
@@ -154,3 +196,45 @@ class AsyncConfidenceScoringResource:
             params["tool_execution_id"] = tool_execution_id
         response = await self._http.request("GET", path, params=params)
         return [ScoringJobResponse.model_validate(item) for item in response]
+
+    async def get_agent_scoring_summary(self, agent_name: str) -> "ScoreSummary":
+        """
+        Get agent scoring summary
+        
+        Get an aggregated summary of confidence scores for a specific agent.
+        
+        Args:
+            agent_name: Name of the agent to summarize.
+        
+        Returns:
+            Successful Response
+        
+        Raises:
+            ApiError: If the request fails
+        """
+        path = "/confidence-scoring/summary/agent/{agent_name}"
+        path = path.replace("{agent_name}", str(agent_name))
+        response = await self._http.request("GET", path)
+        return ScoreSummary.model_validate(response)
+
+    async def get_agent_session_scoring_summary(self, agent_name: str, session_id: str) -> "ScoreSummary":
+        """
+        Get agent session scoring summary
+        
+        Get an aggregated summary of confidence scores for a specific agent session.
+        
+        Args:
+            agent_name: Name of the agent.
+            session_id: Agent session ID.
+        
+        Returns:
+            Successful Response
+        
+        Raises:
+            ApiError: If the request fails
+        """
+        path = "/confidence-scoring/summary/agent/{agent_name}/session/{session_id}"
+        path = path.replace("{agent_name}", str(agent_name))
+        path = path.replace("{session_id}", str(session_id))
+        response = await self._http.request("GET", path)
+        return ScoreSummary.model_validate(response)

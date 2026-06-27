@@ -19,6 +19,31 @@ class AgentsSessionsResource:
     def __init__(self, http: HttpClient):
         self._http = http
 
+    def create_by_name(self, name: str, body: Optional[Union["CreateSessionRequest", None]] = None) -> "CreateSessionResponse":
+        """
+        Create Session By Name
+        
+        Start a session against the latest published version of an agent by name.
+        
+        Resolves the current latest published version at runtime — callers do not
+        need to track a specific agent ID or version. Returns 404 if no published
+        version exists for the given agent name.
+        
+        Args:
+            name: The name parameter
+            body: Request body
+        
+        Returns:
+            Successful Response
+        
+        Raises:
+            ApiError: If the request fails
+        """
+        path = "/agents/name/{name}/sessions"
+        path = path.replace("{name}", str(name))
+        response = self._http.request("POST", path, json=body.model_dump(by_alias=True, exclude_unset=True) if body else None)
+        return CreateSessionResponse.model_validate(response)
+
     def list(self, agent_id: str, offset: Optional[int] = None, limit: Optional[Union[int, None]] = None, sort_by: Optional[str] = None, sort_order: Optional[str] = None, status: Optional[Union[str, None]] = None) -> PaginatedIterator["SessionSummary"]:
         """
         List Sessions
@@ -134,6 +159,31 @@ class AsyncAgentsSessionsResource:
 
     def __init__(self, http: AsyncHttpClient):
         self._http = http
+
+    async def create_by_name(self, name: str, body: Optional[Union["CreateSessionRequest", None]] = None) -> "CreateSessionResponse":
+        """
+        Create Session By Name
+        
+        Start a session against the latest published version of an agent by name.
+        
+        Resolves the current latest published version at runtime — callers do not
+        need to track a specific agent ID or version. Returns 404 if no published
+        version exists for the given agent name.
+        
+        Args:
+            name: The name parameter
+            body: Request body
+        
+        Returns:
+            Successful Response
+        
+        Raises:
+            ApiError: If the request fails
+        """
+        path = "/agents/name/{name}/sessions"
+        path = path.replace("{name}", str(name))
+        response = await self._http.request("POST", path, json=body.model_dump(by_alias=True, exclude_unset=True) if body else None)
+        return CreateSessionResponse.model_validate(response)
 
     async def list(self, agent_id: str, offset: Optional[int] = None, limit: Optional[Union[int, None]] = None, sort_by: Optional[str] = None, sort_order: Optional[str] = None, status: Optional[Union[str, None]] = None) -> AsyncPaginatedIterator["SessionSummary"]:
         """
