@@ -13,42 +13,44 @@ from pydantic import BaseModel, Field
 
 
 class AgentDetailResponse(BaseModel):
-    id: str = ...
-    name: str = ...
-    display_name: str = ...
-    catalog_urn: str = ...
-    version: str = ...
+    id: str
+    name: str
+    display_name: str
+    catalog_urn: str
+    version: str
     parent_version: Optional[Union[str, None]] = Field(default=None)
-    type: str = ...
+    type: str
     description: Optional[Union[str, None]] = Field(default=None)
-    llm_model: str = ...
-    fallback_models: List[str] = ...
-    datasources: List[str] = ...
-    instructions: str = ...
-    tools: List[Dict[str, Any]] = ...
-    artifacts: List[str] = ...
-    confidence_configs: List[str] = ...
-    temperature: Union[float, int] = ...
+    llm_model: str
+    fallback_models: List[str]
+    datasources: List[str]
+    instructions: str
+    tools: List[Dict[str, Any]]
+    artifacts: List[str]
+    confidence_configs: List[str]
+    temperature: Union[float, int]
     max_tokens: Optional[Union[int, None]] = Field(default=None)
-    tags: List[str] = ...
+    tags: List[str]
     icon: Optional[Union[str, None]] = Field(default=None)
     created_by: Optional[Union[str, None]] = Field(default=None)
     created_at: Optional[Union[datetime, None]] = Field(default=None)
+    execution_policy: Optional[Union["ExecutionPolicy", None]] = Field(description="Execution policy applied to this agent's sessions.", default=None)
+    execution_policy_ids: Optional[Union[List[str], None]] = Field(default=None)
     last_execution_status: Optional[Union[str, None]] = Field(default=None)
     last_execution_time: Optional[Union[datetime, None]] = Field(default=None)
 
 
 class AgentExecutionDetailsResponse(BaseModel):
     """AgentExecutionDetailsResponse"""
-    agent_id: Union[str, None] = ...
-    agent_name: Union[str, None] = ...
-    version: Union[str, None] = ...
-    status: str = ...
-    messages: List["MessageEntry"] = ...
-    tool_activity: List["ToolActivityEntry"] = ...
-    token_usage: List[Union[Dict[str, Any], None]] = ...
-    file_parsing: List["FileParseEntry"] = ...
-    result: List["ArtifactEntry"] = ...
+    agent_id: Union[str, None]
+    agent_name: Union[str, None]
+    version: Union[str, None]
+    status: str
+    messages: List["MessageEntry"]
+    tool_activity: List["ToolActivityEntry"]
+    token_usage: List[Union[Dict[str, Any], None]]
+    file_parsing: List["FileParseEntry"]
+    result: List["ArtifactEntry"]
 
 
 class AgentIdentityContext(BaseModel):
@@ -70,17 +72,17 @@ class AgentIdentityContext(BaseModel):
 
 
 class AgentListResponse(BaseModel):
-    data: List["AgentSummary"] = ...
-    total: int = ...
+    data: List["AgentSummary"]
+    total: int
 
 
 class AgentSummary(BaseModel):
-    id: str = ...
-    display_name: str = ...
+    id: str
+    display_name: str
     description: Optional[Union[str, None]] = Field(default=None)
-    llm_model: str = ...
-    tool_count: int = ...
-    datasource_count: int = ...
+    llm_model: str
+    tool_count: int
+    datasource_count: int
     last_execution_status: Optional[Union[str, None]] = Field(default=None)
     last_execution_time: Optional[Union[datetime, None]] = Field(default=None)
 
@@ -99,29 +101,29 @@ class AgentToolDefinition(BaseModel):
 
 
 class AgentVersionListResponse(BaseModel):
-    data: List["AgentVersionSummary"] = ...
-    total: int = ...
+    data: List["AgentVersionSummary"]
+    total: int
 
 
 class AgentVersionSummary(BaseModel):
-    id: str = ...
-    display_name: str = ...
-    version: str = ...
+    id: str
+    display_name: str
+    version: str
     parent_version: Optional[Union[str, None]] = Field(default=None)
     description: Optional[Union[str, None]] = Field(default=None)
-    llm_model: str = ...
+    llm_model: str
     created_at: Optional[Union[datetime, None]] = Field(default=None)
     created_by: Optional[Union[str, None]] = Field(default=None)
-    is_published: bool = ...
+    is_published: bool
     published_at: Optional[Union[datetime, None]] = Field(default=None)
     commit_message: Optional[Union[str, None]] = Field(default=None)
 
 
 class Artifact(BaseModel):
     """A generated artifact/file from the chat agent."""
-    artifact_id: str = ...
-    filename: str = ...
-    mime_type: str = ...
+    artifact_id: str
+    filename: str
+    mime_type: str
     content: Optional[Union[str, None]] = Field(default=None)
     storage_url: Optional[Union[str, None]] = Field(default=None)
     size_bytes: Optional[Union[int, None]] = Field(default=None)
@@ -130,38 +132,38 @@ class Artifact(BaseModel):
 
 class ArtifactEntry(BaseModel):
     """ArtifactEntry"""
-    name: str = ...
+    name: str
     content: Optional[Union[str, None]] = Field(default=None)
-    file_type: Union[str, None] = ...
+    file_type: Union[str, None]
 
 
 class ArtifactSchemaListResponse(BaseModel):
-    data: List["ArtifactSchemaSummary"] = ...
-    total: int = ...
+    data: List["ArtifactSchemaSummary"]
+    total: int
 
 
 class ArtifactSchemaResponse(BaseModel):
-    id: str = ...
-    name: str = ...
-    display_name: str = ...
-    version: str = ...
+    id: str
+    name: str
+    display_name: str
+    version: str
     parent_version: Optional[Union[str, None]] = Field(default=None)
-    type: str = ...
-    description: str = ...
-    required: bool = ...
-    schema_def: Dict[str, Any] = ...
+    type: str
+    description: str
+    required: bool
+    schema_def: Dict[str, Any]
     max_size_bytes: Optional[Union[int, None]] = Field(default=None)
-    storage_strategy: str = ...
+    storage_strategy: str
     created_by: Optional[Union[str, None]] = Field(default=None)
     created_at: Optional[Union[datetime, None]] = Field(default=None)
 
 
 class ArtifactSchemaSummary(BaseModel):
-    id: str = ...
-    name: str = ...
-    description: str = ...
-    type: str = ...
-    fields_summary: List["FieldSummary"] = ...
+    id: str
+    name: str
+    description: str
+    type: str
+    fields_summary: List["FieldSummary"]
 
 
 class ArtifactStorageStrategy(str, Enum):
@@ -191,25 +193,27 @@ class BatchDefinitionFilters(BaseModel):
 
 class BatchDefinitionResponse(BaseModel):
     """Full BatchDefinition snapshot."""
-    id: str = ...
-    customer_id: str = ...
-    project_id: str = ...
-    name: str = ...
-    version: str = ...
-    parent_version: Union[str, None] = ...
-    catalog_urn: str = ...
-    agent_urn: str = ...
-    agent_spec_json: Dict[str, Any] = ...
-    input_datasource_id: str = ...
+    id: str
+    customer_id: str
+    project_id: str
+    name: str
+    version: str
+    parent_version: Union[str, None]
+    catalog_urn: str
+    agent_urn: str
+    agent_spec_json: Dict[str, Any]
+    input_datasource_id: str
     filters: Optional[Union[Dict[str, Any], None]] = Field(description="Optional override for the tool's parameters schema", default=None)
     output_datasource_id: Optional[Union[str, None]] = Field(default=None)
     user_message: Optional[Union[str, None]] = Field(default=None)
-    concurrency: int = ...
-    retry_limit: int = ...
+    concurrency: int
+    retry_limit: int
     recurrence_cron: Optional[Union[str, None]] = Field(default=None)
     description: Optional[Union[str, None]] = Field(default=None)
-    created_at: datetime = ...
-    created_by: str = ...
+    execution_policy: Optional[Union["ExecutionPolicy", None]] = Field(default=None)
+    execution_policy_ids: Optional[Union[List[str], None]] = Field(default=None)
+    created_at: datetime
+    created_by: str
     deleted_at: Optional[Union[datetime, None]] = Field(default=None)
 
 
@@ -217,8 +221,8 @@ class BatchExecutionResponse(BaseModel):
     """Response shape for a single batch execution. The legacy `batch_spec_json` / `agent_spec_json` / `agent_urn` / `input_datasource_id` fields are kept for client compatibility (DEL-1376 §5.5) — they are reconstructed from the linked BatchDefinition by the router, not stored on the execution row."""
     id: str = Field(description="Execution ID — also the Temporal workflow ID for direct queries")
     batch_definition_id: str = Field(description="FK to the BatchDefinition this execution ran against")
-    customer_id: str = ...
-    project_id: str = ...
+    customer_id: str
+    project_id: str
     agent_urn: Optional[Union[str, None]] = Field(default=None)
     batch_spec_json: Optional[Union[Dict[str, Any], None]] = Field(description="Optional override for the tool's parameters schema", default=None)
     agent_spec_json: Optional[Union[Dict[str, Any], None]] = Field(default=None)
@@ -228,18 +232,18 @@ class BatchExecutionResponse(BaseModel):
     total_items: Optional[Union[int, None]] = Field(default=None)
     succeeded: Optional[Union[int, None]] = Field(default=None)
     failed: Optional[Union[int, None]] = Field(default=None)
-    start_time: datetime = ...
+    start_time: datetime
     end_time: Optional[Union[datetime, None]] = Field(default=None)
-    status: str = ...
+    status: str
     error: Optional[Union[str, None]] = Field(description="Overall error message", default=None)
     items: Optional[Union[List["BatchItemResult"], None]] = Field(description="Per-item results (populated on completion by status callback)", default=None)
 
 
 class BatchItemResult(BaseModel):
     """Per-item result from the Temporal workflow."""
-    input_data_element_id: str = ...
-    filename: str = ...
-    status: str = ...
+    input_data_element_id: str
+    filename: str
+    status: str
     error: Optional[Union[str, None]] = Field(default=None)
     output_artifacts: Optional[Union[List[Union[Dict[str, Any], None]], None]] = Field(default=None)
     attempts: Optional[Union[int, None]] = Field(default=None)
@@ -254,17 +258,17 @@ class BodySendChatMessageStream(BaseModel):
 
 
 class BoundingBox(BaseModel):
-    x: float = ...
-    y: float = ...
-    width: float = ...
-    height: float = ...
-    page: int = ...
+    x: float
+    y: float
+    width: float
+    height: float
+    page: int
 
 
 class CallToAction(BaseModel):
     """An action the user can take."""
-    label: str = ...
-    action: str = ...
+    label: str
+    action: str
     action_data: Optional[Union[Dict[str, Any], None]] = Field(description="Optional override for the tool's parameters schema", default=None)
 
 
@@ -354,21 +358,23 @@ class CreateAgentDefinitionRequest(BaseModel):
     max_tokens: Optional[Union[int, None]] = Field(description="Maximum tokens in response", default=None)
     tags: Optional[Union[List[str], None]] = Field(description="Tags for categorization", default=None)
     icon: Optional[Union[str, None]] = Field(description="UI icon identifier", default=None)
+    execution_policy: Optional[Union["ExecutionPolicy", None]] = Field(description="Inline execution policy constraints (datasources, tools)", default=None)
+    execution_policy_ids: Optional[Union[List[str], None]] = Field(description="IDs of stored ExecutionPolicies to compose", default=None)
     additional_properties: Optional[Dict[str, Any]] = Field(default=None)
 
 
 class CreateAgentResponse(BaseModel):
-    id: str = ...
-    name: str = ...
-    display_name: str = ...
-    version: str = ...
+    id: str
+    name: str
+    display_name: str
+    version: str
 
 
 class CreateArtifactSchemaResponse(BaseModel):
-    id: str = ...
-    name: str = ...
-    display_name: str = ...
-    version: str = ...
+    id: str
+    name: str
+    display_name: str
+    version: str
 
 
 class CreateBatchDefinitionRequest(BaseModel):
@@ -383,19 +389,21 @@ class CreateBatchDefinitionRequest(BaseModel):
     retry_limit: Optional[Union[int, None]] = Field(default=None)
     recurrence_cron: Optional[Union[str, None]] = Field(description="Cron expression validated by croniter; not yet scheduled in DEL-1376.", default=None)
     description: Optional[Union[str, None]] = Field(default=None)
+    execution_policy: Optional[Union["ExecutionPolicy", None]] = Field(description="Inline execution policy constraints (datasources, tools)", default=None)
+    execution_policy_ids: Optional[Union[List[str], None]] = Field(description="IDs of stored ExecutionPolicies to compose", default=None)
 
 
 class CreateBatchDefinitionResponse(BaseModel):
     """Compact post-create payload mirroring CreateAgentDefinitionResponse."""
-    id: str = ...
-    catalog_urn: str = ...
-    name: str = ...
-    version: str = ...
+    id: str
+    catalog_urn: str
+    name: str
+    version: str
 
 
 class CreateBatchExecutionRequest(BaseModel):
     """Legacy request body for POST /batch-execution/ (pre-DEL-1376 compat shim)."""
-    batch_spec_json: "LegacyBatchSpecJson" = ...
+    batch_spec_json: "LegacyBatchSpecJson"
 
 
 class CreateDatasourceRequest(BaseModel):
@@ -406,14 +414,24 @@ class CreateDatasourceRequest(BaseModel):
     metadata_config: Optional[Union["MetadataConfigRequest", None]] = Field(description="Optional metadata extraction config to apply after creation", default=None)
 
 
+class CreateExecutionPolicyRequest(BaseModel):
+    """CreateExecutionPolicyRequest"""
+    name: str = Field(description="Policy name (unique within tenant)")
+    description: Optional[Union[str, None]] = Field(description="Human-readable description", default=None)
+    execution_policy: "ExecutionPolicy" = Field(description="ExecutionPolicy payload (datasources, tools)")
+
+
 class CreateSessionRequest(BaseModel):
     prompt: Optional[Union[str, None]] = Field(default=None)
     initial_context: Optional[Union[Dict[str, Any], None]] = Field(default=None)
-    max_iterations_per_user_message: Optional[Union[int, None]] = Field(default=None)
+    max_iterations_per_user_message: Optional[int] = Field(default=None)
+    message_wait_timeout_seconds: Optional[int] = Field(default=None)
+    execution_policy_ids: Optional[Union[List[str], None]] = Field(description="IDs of stored ExecutionPolicies to compose into this session.", default=None)
+    execution_policy: Optional[Union["ExecutionPolicy", None]] = Field(description="Inline session-level access constraints (hardrails). Controls which datasources and tools the agent can use, and what data is accessible within each. Composed with any stored policies referenced by execution_policy_ids.", default=None)
 
 
 class CreateSessionResponse(BaseModel):
-    session_id: str = ...
+    session_id: str
 
 
 class DataElementListResponse(BaseModel):
@@ -471,12 +489,50 @@ class DatasourceResponse(BaseModel):
     tables: Optional[Union[List["TableSummaryResponse"], None]] = Field(description="Tables discovered on a structured datasource — only populated when include_tables=true", default=None)
 
 
+class DatasourceView(BaseModel):
+    """Access controls for a single datasource.  Each datasource can be entirely disabled, or selectively constrained via TAG (SQL) and/or RAG (vector search) filters. Keyed by datasource_id in ``ExecutionPolicy.datasources``."""
+    disabled: Optional[Union[bool, None]] = Field(description="When true, the datasource is entirely inaccessible for this session. All queries against it will be blocked.", default=None)
+    tables: Optional[Union["TagConstraints", None]] = Field(description="TAG (SQL/database) constraints. Controls table/row access and column redaction.", default=None)
+    documents: Optional[Union["RagConstraints", None]] = Field(description="RAG (vector search) constraints. Controls which documents can be retrieved.", default=None)
+
+
+class DeepTransformJob(BaseModel):
+    job_id: str = Field(description="Deep-transform job id")
+    status: str = Field(description="queued | running | succeeded | failed")
+    artifacts: Optional[List[str]] = Field(description="Names of the artifacts available for download once the job succeeds", default=None)
+    metrics: Optional[Union["DeepTransformMetrics", None]] = Field(description="Run metrics (timing, counts)", default=None)
+    aeq: Optional[Union[Dict[str, Any], None]] = Field(description="Extraction quality (AEQ) summary", default=None)
+    error: Optional[Union[str, None]] = Field(description="Failure reason when status is failed", default=None)
+
+
+class DeepTransformJobList(BaseModel):
+    jobs: Optional[List["DeepTransformJob"]] = Field(description="The customer's deep-transform jobs, newest first", default=None)
+    limit: int = Field(description="Applied page size")
+    offset: int = Field(description="Applied offset")
+    next_offset: Optional[Union[int, None]] = Field(description="Offset for the next page, or null when this was the last page", default=None)
+
+
+class DeepTransformMetrics(BaseModel):
+    """Public run metrics. Mirrors heron's RunMetrics minus internal cost fields (`cost_*_usd`),
+which are dropped: Pydantic ignores unknown keys, so any cost field heron sends is discarded."""
+    wall_ms: Optional[Union[int, None]] = Field(description="Total wall-clock time of the run", default=None)
+    floor_ms: Optional[Union[int, None]] = Field(description="Minimum achievable time given dependencies", default=None)
+    llm_concurrency_peak: Optional[Union[int, None]] = Field(description="Peak concurrent LLM calls", default=None)
+    identity_resolution_rate: Optional[Union[float, None]] = Field(description="Fraction of entities resolved to an identity", default=None)
+    orphan_count: Optional[Union[int, None]] = Field(description="Entities with no incoming references", default=None)
+    dangling_edge_count: Optional[Union[int, None]] = Field(description="Edges pointing at a missing entity", default=None)
+    fragmented_count: Optional[Union[int, None]] = Field(description="Entities split across fragments", default=None)
+    scalar_conflicts_unresolved: Optional[Union[int, None]] = Field(description="Scalar conflicts shipped un-arbitrated (DEGRADED resolution)", default=None)
+    uncovered_entity_count: Optional[Union[int, None]] = Field(description="Entities not covered by the extraction", default=None)
+    failed_unit_count: Optional[Union[int, None]] = Field(description="Work units that failed during the run", default=None)
+
+
 class DocumentChild(BaseModel):
     """Child document from container (ZIP/TAR/EML)."""
-    job_id: str = ...
-    filename: str = ...
-    status: str = ...
-    media_type: str = ...
+    job_id: str
+    filename: str
+    status: str
+    media_type: str
 
 
 class DocumentElement(BaseModel):
@@ -492,7 +548,7 @@ class DocumentElement(BaseModel):
 
 class DocumentStatus(BaseModel):
     """Returned from GET /documents/{job_id}."""
-    job_id: str = ...
+    job_id: str
     status: str = Field(description="queued | processing | completed | failed")
     format: str = Field(description="meibel | markdown | docling")
     pages: Optional[Union[int, None]] = Field(default=None)
@@ -518,37 +574,55 @@ class DownloadJobResponse(BaseModel):
 
 class ExecuteBatchDefinitionResponse(BaseModel):
     """ExecuteBatchDefinitionResponse"""
-    execution_id: str = ...
-    workflow_id: str = ...
+    execution_id: str
+    workflow_id: str
+
+
+class ExecutionPolicy(BaseModel):
+    """Session-level access constraints (hardrails) for data and tools.  Controls what data an agent session can access and what tools it can use. Constraints are enforced by the platform at runtime — the agent cannot bypass them.  Multiple policies can be composed: stored policies (by ID) and/or an inline policy are structurally merged. Overlapping datasource or tool entries are combined with ``$and`` (intersection semantics).  All filter fields use MongoDB-style constraint operators. Plain values are automatically normalized to ``{"$eq": value}``."""
+    datasources: Optional[Union[Dict[str, "DatasourceView"], None]] = Field(description="Per-datasource access controls, keyed by datasource_id. Each entry can disable the datasource entirely or apply TAG/RAG filters to restrict which data is accessible.", default=None)
+    tools: Optional[Union[Dict[str, "ToolConfig"], None]] = Field(description="Per-tool access controls, keyed by tool instance name. Each entry can disable the tool entirely or constrain its parameters to specific values or ranges.", default=None)
+
+
+class ExecutionPolicyResponse(BaseModel):
+    """ExecutionPolicyResponse"""
+    id: str
+    customer_id: str
+    project_id: str
+    name: str
+    description: Optional[Union[str, None]] = Field(default=None)
+    execution_policy: "ExecutionPolicy"
+    created_at: datetime
+    updated_at: datetime
 
 
 class FieldSummary(BaseModel):
-    name: str = ...
-    type: str = ...
+    name: str
+    type: str
 
 
 class FileParseCompleteInfo(BaseModel):
     """FileParseCompleteInfo"""
-    status: Union[str, None] = ...
+    status: Union[str, None]
     error: Optional[Union[str, None]] = Field(default=None)
-    bbox_count: Union[int, None] = ...
-    page_count: Union[int, None] = ...
-    content_type: Union[str, None] = ...
-    timestamp: Union[str, None] = ...
+    bbox_count: Union[int, None]
+    page_count: Union[int, None]
+    content_type: Union[str, None]
+    timestamp: Union[str, None]
 
 
 class FileParseEntry(BaseModel):
     """FileParseEntry"""
-    file_id: str = ...
-    filename: Union[str, None] = ...
-    parse_start: Union["FileParseStartInfo", None] = ...
-    parse_complete: Union["FileParseCompleteInfo", None] = ...
+    file_id: str
+    filename: Union[str, None]
+    parse_start: Union["FileParseStartInfo", None]
+    parse_complete: Union["FileParseCompleteInfo", None]
 
 
 class FileParseStartInfo(BaseModel):
     """FileParseStartInfo"""
-    attempt: Union[int, None] = ...
-    timestamp: Union[str, None] = ...
+    attempt: Union[int, None]
+    timestamp: Union[str, None]
 
 
 class FileUploadSyncResponse(BaseModel):
@@ -567,14 +641,20 @@ class FilesSummaryResponse(BaseModel):
 
 class GetBatchDefinitionsResponse(BaseModel):
     """GetBatchDefinitionsResponse"""
-    data: List["BatchDefinitionResponse"] = ...
-    pagination: "PaginationMeta" = ...
+    data: List["BatchDefinitionResponse"]
+    pagination: "PaginationMeta"
 
 
 class GetBatchExecutionsResponse(BaseModel):
     """Response model for listing batch executions."""
-    data: List["BatchExecutionResponse"] = ...
-    pagination: "PaginationMeta" = ...
+    data: List["BatchExecutionResponse"]
+    pagination: "PaginationMeta"
+
+
+class GetExecutionPoliciesResponse(BaseModel):
+    """GetExecutionPoliciesResponse"""
+    data: List["ExecutionPolicyResponse"]
+    pagination: "PaginationMeta"
 
 
 class HttpValidationError(BaseModel):
@@ -635,7 +715,7 @@ class LegacyBatchExecutionParams(BaseModel):
 
 class LegacyBatchInputConfig(BaseModel):
     """LegacyBatchInputConfig"""
-    datasource_id: str = ...
+    datasource_id: str
     filters: Optional[Union["LegacyBatchInputFilters", None]] = Field(default=None)
 
 
@@ -654,11 +734,11 @@ class LegacyBatchOutputConfig(BaseModel):
 
 class LegacyBatchSpecJson(BaseModel):
     """LegacyBatchSpecJson"""
-    name: str = ...
+    name: str
     version: Optional[Union[str, None]] = Field(default=None)
     agent: str = Field(description="AgentDefinition ID")
     user_message: Optional[Union[str, None]] = Field(default=None)
-    input: "LegacyBatchInputConfig" = ...
+    input: "LegacyBatchInputConfig"
     output: Optional[Union["LegacyBatchOutputConfig", None]] = Field(default=None)
     execution: Optional[Union["LegacyBatchExecutionParams", None]] = Field(default=None)
     additional_properties: Optional[Dict[str, Any]] = Field(default=None)
@@ -666,18 +746,18 @@ class LegacyBatchSpecJson(BaseModel):
 
 class MeibelDocumentResult(BaseModel):
     """Full structured parse result (meibel format)."""
-    elements: List["DocumentElement"] = ...
-    pages: int = ...
-    tables: int = ...
+    elements: List["DocumentElement"]
+    pages: int
+    tables: int
     metadata: Optional[Union[Dict[str, Any], None]] = Field(default=None)
 
 
 class MessageEntry(BaseModel):
     """MessageEntry"""
-    role: str = ...
-    message: str = ...
-    signal_id: Union[str, None] = ...
-    timestamp: datetime = ...
+    role: str
+    message: str
+    signal_id: Union[str, None]
+    timestamp: datetime
 
 
 class MetadataConfigRequest(BaseModel):
@@ -711,13 +791,13 @@ class PaginationMeta(BaseModel):
 
 class ParseDocumentResponse(BaseModel):
     """Returned from POST /documents (async)."""
-    job_id: str = ...
+    job_id: str
     status: str = Field(description="Job status, e.g. 'queued'")
 
 
 class ProcessDocumentResponse(BaseModel):
     """Returned from POST /documents/process (sync)."""
-    job_id: str = ...
+    job_id: str
     status: str = Field(description="'completed'")
     result: Union["MeibelDocumentResult", str] = Field(description="MeibelDocumentResult for meibel format, str for markdown")
 
@@ -737,6 +817,11 @@ class PublishAgentDefinitionResponse(BaseModel):
     commit_message: str = Field(description="User-provided description of what changed in this version")
     published_at: datetime = Field(description="Timestamp of the publish event")
     published_by: Optional[Union[str, None]] = Field(description="User who published", default=None)
+
+
+class RagConstraints(BaseModel):
+    """Constraints for RAG (vector search) queries within a datasource.  Controls which documents the agent can retrieve via vector search.  Filters use MongoDB-style constraint dicts. Plain values are automatically normalized to ``{"$eq": value}`` on construction.  Built-in fields:   - ``data_element.__id__``: scope by data element ID   - ``data_element.__name__``: scope by original filename  Custom indexed metadata fields (e.g., ``author``, ``document_type``) are also supported when configured on the datasource.  Supported operators:   - Comparison: ``$eq``, ``$ne``, ``$gt``, ``$gte``, ``$lt``, ``$lte``   - Set: ``$in``, ``$nin``   - Logical: ``$and``, ``$or``, ``$not``"""
+    filter: Optional[Union[Dict[str, Any], None]] = Field(description="Optional override for the tool's parameters schema", default=None)
 
 
 class ScoreSummary(BaseModel):
@@ -760,12 +845,12 @@ class ScoringJobResponse(BaseModel):
 
 
 class SessionListResponse(BaseModel):
-    data: List["SessionSummary"] = ...
-    total: int = ...
+    data: List["SessionSummary"]
+    total: int
 
 
 class SessionMessageItem(BaseModel):
-    type: str = ...
+    type: str
     timestamp: Optional[Union[str, None]] = Field(default=None)
     message: Optional[Union[str, None]] = Field(default=None)
     signal_id: Optional[Union[str, None]] = Field(default=None)
@@ -779,13 +864,13 @@ class SessionMessagesResponse(BaseModel):
     agent_id: Optional[Union[str, None]] = Field(default=None)
     agent_name: Optional[Union[str, None]] = Field(default=None)
     version: Optional[Union[str, None]] = Field(default=None)
-    messages: List["SessionMessageItem"] = ...
+    messages: List["SessionMessageItem"]
 
 
 class SessionSummary(BaseModel):
-    session_id: str = ...
-    status: str = ...
-    start_time: datetime = ...
+    session_id: str
+    status: str
+    start_time: datetime
     end_time: Optional[Union[datetime, None]] = Field(default=None)
     agent_name: Optional[Union[str, None]] = Field(default=None)
     agent_version: Optional[Union[str, None]] = Field(default=None)
@@ -796,11 +881,15 @@ class SessionSummary(BaseModel):
 
 class Source(BaseModel):
     """A source/citation in the response."""
-    title: str = ...
+    title: str
     url: Optional[Union[str, None]] = Field(default=None)
     snippet: Optional[Union[str, None]] = Field(default=None)
     data_element_id: Optional[Union[str, None]] = Field(default=None)
     relevance_score: Optional[Union[float, int, None]] = Field(default=None)
+
+
+class SubmitDeepTransformResponse(BaseModel):
+    job_id: str = Field(description="Poll status via GET /documents/deep-transform/{job_id}")
 
 
 class SubmitDocumentTransformResponse(BaseModel):
@@ -808,16 +897,16 @@ class SubmitDocumentTransformResponse(BaseModel):
 
 
 class Table(BaseModel):
-    cells: List["TableCell"] = ...
-    rows: int = ...
-    cols: int = ...
+    cells: List["TableCell"]
+    rows: int
+    cols: int
     bbox: Optional[Union["BoundingBox", None]] = Field(default=None)
 
 
 class TableCell(BaseModel):
-    text: str = ...
-    row: int = ...
-    col: int = ...
+    text: str
+    row: int
+    col: int
     row_span: Optional[int] = Field(default=None)
     col_span: Optional[int] = Field(default=None)
     bbox: Optional[Union["BoundingBox", None]] = Field(default=None)
@@ -850,6 +939,13 @@ class TagColumnUpdateItem(BaseModel):
     description: str = Field(description="New description for the column")
 
 
+class TagConstraints(BaseModel):
+    """Constraints for TAG (SQL/database) queries within a datasource.  Controls which tables and rows the agent can access, and which columns are redacted from query output.  Filters use MongoDB-style constraint dicts. Plain values are automatically normalized to ``{"$eq": value}`` on construction.  Supported operators:   - Comparison: ``$eq``, ``$ne``, ``$gt``, ``$gte``, ``$lt``, ``$lte``   - Set: ``$in``, ``$nin``   - Logical: ``$and``, ``$or``, ``$not``"""
+    filter: Optional[Union[Dict[str, Any], None]] = Field(description="Optional override for the tool's parameters schema", default=None)
+    hidden_columns: Optional[Union[Dict[str, List[str]], None]] = Field(description="Per-table column names to redact from query output. Keyed by table name; values are lists of column names. Columns remain usable in WHERE/JOIN — only the final result values are stripped.", default=None)
+    hidden_tables: Optional[Union[List[str], None]] = Field(description="Table names whose columns are fully redacted from query output. Tables remain queryable in WHERE/JOIN — only SELECT output is stripped.", default=None)
+
+
 class TagTable(BaseModel):
     """A table on a structured datasource, with its description and optionally its columns."""
     table_name: str = Field(description="Table name as defined on the datasource")
@@ -865,34 +961,40 @@ class TagTableUpdateItem(BaseModel):
 
 class ToolActivity(BaseModel):
     """Record of a tool call and its result."""
-    tool_id: str = ...
-    tool_name: str = ...
-    arguments: Dict[str, Any] = ...
+    tool_id: str
+    tool_name: str
+    arguments: Dict[str, Any]
     result: Optional[Union[Dict[str, Any], None]] = Field(description="Optional override for the tool's parameters schema", default=None)
-    timestamp: str = ...
+    timestamp: str
 
 
 class ToolActivityEntry(BaseModel):
     """ToolActivityEntry"""
-    tool_id: str = ...
-    tool_call: Union["ToolCallInfo", None] = ...
-    tool_result: Union["ToolResultInfo", None] = ...
+    tool_id: str
+    tool_call: Union["ToolCallInfo", None]
+    tool_result: Union["ToolResultInfo", None]
 
 
 class ToolCallInfo(BaseModel):
     """ToolCallInfo"""
-    tool_name: Union[str, None] = ...
+    tool_name: Union[str, None]
     arguments: Union[Dict[str, Any], None] = Field(description="Optional override for the tool's parameters schema")
-    sequence: Union[str, None] = ...
-    timestamp: Union[str, None] = ...
+    sequence: Union[str, None]
+    timestamp: Union[str, None]
+
+
+class ToolConfig(BaseModel):
+    """Access controls for a single tool instance.  Tools can be entirely disabled, or have their parameters constrained to specific values or ranges. Keyed by tool instance name in ``ExecutionPolicy.tools``.  Variable constraints use the same MongoDB-style operators as datasource filters. Plain values are automatically normalized to ``{"$eq": value}`` on construction. All constraints are:   1. Annotated in the tool's parameter schema (visible to the LLM)   2. Validated at execution time (enforced by the platform)  Supported operators:   - Comparison: ``$eq``, ``$ne``, ``$gt``, ``$gte``, ``$lt``, ``$lte``   - Set: ``$in``, ``$nin``   - Logical: ``$and``, ``$or``, ``$not``"""
+    disabled: Optional[Union[bool, None]] = Field(description="When true, the tool is removed from the agent's toolkit for this session. The agent will not be able to invoke it.", default=None)
+    variables: Optional[Union[Dict[str, Any], None]] = Field(description="Optional override for the tool's parameters schema", default=None)
 
 
 class ToolResultInfo(BaseModel):
     """ToolResultInfo"""
-    tool_name: Union[str, None] = ...
+    tool_name: Union[str, None]
     result: Optional[Union[str, None]] = Field(default=None)
-    sequence: Union[str, None] = ...
-    timestamp: Union[str, None] = ...
+    sequence: Union[str, None]
+    timestamp: Union[str, None]
 
 
 class TransformDocumentResponse(BaseModel):
@@ -944,6 +1046,8 @@ class UpdateAgentDefinitionRequest(BaseModel):
     max_tokens: Optional[Union[int, None]] = Field(description="Maximum tokens in response", default=None)
     tags: Optional[Union[List[str], None]] = Field(description="Tags for categorization", default=None)
     icon: Optional[Union[str, None]] = Field(description="UI icon identifier", default=None)
+    execution_policy: Optional[Union["ExecutionPolicy", None]] = Field(description="Inline execution policy constraints (datasources, tools)", default=None)
+    execution_policy_ids: Optional[Union[List[str], None]] = Field(description="IDs of stored ExecutionPolicies to compose", default=None)
 
 
 class UpdateAgentDefinitionResponse(BaseModel):
@@ -954,8 +1058,8 @@ class UpdateAgentDefinitionResponse(BaseModel):
 
 
 class UpdateArtifactSchemaResponse(BaseModel):
-    id: str = ...
-    version: str = ...
+    id: str
+    version: str
 
 
 class UpdateBatchDefinitionRequest(BaseModel):
@@ -970,13 +1074,15 @@ class UpdateBatchDefinitionRequest(BaseModel):
     retry_limit: Optional[Union[int, None]] = Field(default=None)
     recurrence_cron: Optional[Union[str, None]] = Field(default=None)
     description: Optional[Union[str, None]] = Field(default=None)
+    execution_policy: Optional[Union["ExecutionPolicy", None]] = Field(description="Inline execution policy constraints (datasources, tools)", default=None)
+    execution_policy_ids: Optional[Union[List[str], None]] = Field(description="IDs of stored ExecutionPolicies to compose", default=None)
 
 
 class UpdateBatchDefinitionResponse(BaseModel):
     """New version metadata returned after a successful update fork."""
-    id: str = ...
-    catalog_urn: str = ...
-    version: str = ...
+    id: str
+    catalog_urn: str
+    version: str
 
 
 class UpdateBatchExecutionRequest(BaseModel):
@@ -992,6 +1098,13 @@ class UpdateBatchExecutionRequest(BaseModel):
     additional_properties: Optional[Dict[str, Any]] = Field(default=None)
 
 
+class UpdateExecutionPolicyRequest(BaseModel):
+    """UpdateExecutionPolicyRequest"""
+    name: Optional[Union[str, None]] = Field(description="Updated policy name", default=None)
+    description: Optional[Union[str, None]] = Field(description="Updated description", default=None)
+    execution_policy: Optional[Union["ExecutionPolicy", None]] = Field(description="Updated ExecutionPolicy payload", default=None)
+
+
 class UpdateTagColumnsRequest(BaseModel):
     """Bulk update of column descriptions on a single table."""
     columns: List["TagColumnUpdateItem"] = Field(description="One entry per column to update on the target table")
@@ -1003,9 +1116,9 @@ class UpdateTagTablesRequest(BaseModel):
 
 
 class ValidationError(BaseModel):
-    loc: List[Union[str, int]] = ...
-    msg: str = ...
-    type: str = ...
+    loc: List[Union[str, int]]
+    msg: str
+    type: str
     input: Optional[str] = Field(default=None)
     ctx: Optional[str] = Field(default=None)
 
@@ -1019,38 +1132,38 @@ class WebCrawlConnector(BaseModel):
 
 class ConnectedEvent(BaseModel):
     """A server-sent event indicating the stream connection has been established"""
-    event: str = ...
-    data: str = ...
+    event: str
+    data: str
 
 
 class StatusEvent(BaseModel):
     """A server-sent event containing an agent status update"""
-    event: str = ...
-    data: str = ...
+    event: str
+    data: str
 
 
 class ToolCallEvent(BaseModel):
     """A server-sent event indicating the agent is calling a tool"""
-    event: str = ...
-    data: str = ...
+    event: str
+    data: str
 
 
 class ToolResultEvent(BaseModel):
     """A server-sent event containing the result of a tool call"""
-    event: str = ...
-    data: str = ...
+    event: str
+    data: str
 
 
 class PartialResponseEvent(BaseModel):
     """A server-sent event containing an incremental response from the agent"""
-    event: str = ...
-    data: str = ...
+    event: str
+    data: str
 
 
 class CompletionEvent(BaseModel):
     """A server-sent event containing the final complete response from the agent, sent once at the end of the stream"""
-    event: str = ...
-    data: str = ...
+    event: str
+    data: str
 
 
 class ContentItem(BaseModel):
@@ -1123,6 +1236,15 @@ class MetadataModelCatalogEntry(BaseModel):
     fields: List["MetadataField"] = Field(description="Field definitions this model extracts")
 
 
+class SubmitDeepTransformFromDocument(BaseModel):
+    """Reuse an already-parsed document instead of re-parsing an upload."""
+    document_job_id: str = Field(description="A document job id returned by POST /documents. Reuses that parse so the document is not parsed again. The document must belong to the calling customer.")
+    schema: Dict[str, Any] = Field(description="JSON Schema of the entities to extract")
+    root_name: Optional[Union[str, None]] = Field(description="Name of the root entity in the schema. Optional: when omitted it is resolved from the schema's `title` or inferred during extraction.", default=None)
+    guidance: Optional[Union[str, None]] = Field(description="Optional domain guidance for the extraction", default=None)
+    max_pages: Optional[Union[int, None]] = Field(description="Optional cap on the number of pages to process", default=None)
+
+
 class BodyUploadContent(BaseModel):
     files: List[bytes] = Field(description="One or more files to upload")
 
@@ -1155,6 +1277,14 @@ class BodySubmitDocumentTransform(BaseModel):
     prompt: Optional[str] = Field(description="Extraction instructions override", default=None)
     prompt_id: Optional[str] = Field(description="Prompt template reference", default=None)
     timeout_seconds: Optional[int] = Field(description="Max wait time in seconds (sync only)", default=None)
+
+
+class BodySubmitDeepTransform(BaseModel):
+    file: bytes = Field(description="Document file to extract from")
+    schema: str = Field(description="JSON Schema (as a JSON string) of the entities to extract")
+    root_name: Optional[str] = Field(description="Name of the root entity in the schema. Optional: resolved from the schema's title or inferred when omitted.", default=None)
+    guidance: Optional[str] = Field(description="Optional domain guidance for the extraction", default=None)
+    max_pages: Optional[int] = Field(description="Optional cap on the number of pages to process", default=None)
 
 
 # Update forward references
@@ -1193,6 +1323,7 @@ CreateBatchDefinitionRequest.model_rebuild()
 CreateBatchDefinitionResponse.model_rebuild()
 CreateBatchExecutionRequest.model_rebuild()
 CreateDatasourceRequest.model_rebuild()
+CreateExecutionPolicyRequest.model_rebuild()
 CreateSessionRequest.model_rebuild()
 CreateSessionResponse.model_rebuild()
 DataElementListResponse.model_rebuild()
@@ -1201,12 +1332,18 @@ DataElementSearchRequest.model_rebuild()
 DatabaseConnector.model_rebuild()
 DatasourceListResponse.model_rebuild()
 DatasourceResponse.model_rebuild()
+DatasourceView.model_rebuild()
+DeepTransformJob.model_rebuild()
+DeepTransformJobList.model_rebuild()
+DeepTransformMetrics.model_rebuild()
 DocumentChild.model_rebuild()
 DocumentElement.model_rebuild()
 DocumentStatus.model_rebuild()
 DownloadJobRequest.model_rebuild()
 DownloadJobResponse.model_rebuild()
 ExecuteBatchDefinitionResponse.model_rebuild()
+ExecutionPolicy.model_rebuild()
+ExecutionPolicyResponse.model_rebuild()
 FieldSummary.model_rebuild()
 FileParseCompleteInfo.model_rebuild()
 FileParseEntry.model_rebuild()
@@ -1215,6 +1352,7 @@ FileUploadSyncResponse.model_rebuild()
 FilesSummaryResponse.model_rebuild()
 GetBatchDefinitionsResponse.model_rebuild()
 GetBatchExecutionsResponse.model_rebuild()
+GetExecutionPoliciesResponse.model_rebuild()
 HttpValidationError.model_rebuild()
 IngestCountsResponse.model_rebuild()
 IngestMethodCountsResponse.model_rebuild()
@@ -1235,6 +1373,7 @@ ParseDocumentResponse.model_rebuild()
 ProcessDocumentResponse.model_rebuild()
 PublishAgentDefinitionRequest.model_rebuild()
 PublishAgentDefinitionResponse.model_rebuild()
+RagConstraints.model_rebuild()
 ScoreSummary.model_rebuild()
 ScoringJobResponse.model_rebuild()
 SessionListResponse.model_rebuild()
@@ -1242,6 +1381,7 @@ SessionMessageItem.model_rebuild()
 SessionMessagesResponse.model_rebuild()
 SessionSummary.model_rebuild()
 Source.model_rebuild()
+SubmitDeepTransformResponse.model_rebuild()
 SubmitDocumentTransformResponse.model_rebuild()
 Table.model_rebuild()
 TableCell.model_rebuild()
@@ -1249,11 +1389,13 @@ TableDescriptionUpdate.model_rebuild()
 TableSummaryResponse.model_rebuild()
 TagColumn.model_rebuild()
 TagColumnUpdateItem.model_rebuild()
+TagConstraints.model_rebuild()
 TagTable.model_rebuild()
 TagTableUpdateItem.model_rebuild()
 ToolActivity.model_rebuild()
 ToolActivityEntry.model_rebuild()
 ToolCallInfo.model_rebuild()
+ToolConfig.model_rebuild()
 ToolResultInfo.model_rebuild()
 TransformDocumentResponse.model_rebuild()
 TriggerIngestResponse.model_rebuild()
@@ -1265,6 +1407,7 @@ UpdateArtifactSchemaResponse.model_rebuild()
 UpdateBatchDefinitionRequest.model_rebuild()
 UpdateBatchDefinitionResponse.model_rebuild()
 UpdateBatchExecutionRequest.model_rebuild()
+UpdateExecutionPolicyRequest.model_rebuild()
 UpdateTagColumnsRequest.model_rebuild()
 UpdateTagTablesRequest.model_rebuild()
 ValidationError.model_rebuild()
@@ -1284,9 +1427,11 @@ UpdateDatasourceRequest.model_rebuild()
 WebDomain.model_rebuild()
 ListMetadataModelCatalogResponse.model_rebuild()
 MetadataModelCatalogEntry.model_rebuild()
+SubmitDeepTransformFromDocument.model_rebuild()
 BodyUploadContent.model_rebuild()
 BodyUploadAndListContent.model_rebuild()
 BodyParseDocument.model_rebuild()
 BodyProcessDocument.model_rebuild()
 BodyTransformDocument.model_rebuild()
 BodySubmitDocumentTransform.model_rebuild()
+BodySubmitDeepTransform.model_rebuild()

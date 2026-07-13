@@ -18,7 +18,10 @@ from typing import (
     Optional,
     Type,
     TypeVar,
+    cast,
 )
+
+from pydantic import BaseModel
 
 if TYPE_CHECKING:
     from ._http import AsyncHttpClient, HttpClient
@@ -58,9 +61,10 @@ class PaginatedIterator(Generic[T]):
         self._exhausted = False
 
     def _parse_item(self, item: Any) -> T:
-        if self._model_class is not None and isinstance(item, dict):
-            return self._model_class.model_validate(item)
-        return item
+        model_class = self._model_class
+        if model_class is not None and isinstance(item, dict):
+            return cast(T, cast("Type[BaseModel]", model_class).model_validate(item))
+        return cast(T, item)
 
     def __iter__(self) -> Iterator[T]:
         return self
@@ -73,8 +77,9 @@ class PaginatedIterator(Generic[T]):
             raise StopIteration
 
         response = self._http.request(self._method, self._path, params=self._params)
-        items = response.get(self._items_field, [])
-        next_cursor = response.get(self._next_field)
+        data = response if isinstance(response, dict) else {}
+        items = data.get(self._items_field, [])
+        next_cursor = data.get(self._next_field)
 
         if next_cursor:
             self._params[self._cursor_param] = next_cursor
@@ -138,9 +143,10 @@ class AsyncPaginatedIterator(Generic[T]):
         self._exhausted = False
 
     def _parse_item(self, item: Any) -> T:
-        if self._model_class is not None and isinstance(item, dict):
-            return self._model_class.model_validate(item)
-        return item
+        model_class = self._model_class
+        if model_class is not None and isinstance(item, dict):
+            return cast(T, cast("Type[BaseModel]", model_class).model_validate(item))
+        return cast(T, item)
 
     def __aiter__(self) -> AsyncIterator[T]:
         return self
@@ -153,8 +159,9 @@ class AsyncPaginatedIterator(Generic[T]):
             raise StopAsyncIteration
 
         response = await self._http.request(self._method, self._path, params=self._params)
-        items = response.get(self._items_field, [])
-        next_cursor = response.get(self._next_field)
+        data = response if isinstance(response, dict) else {}
+        items = data.get(self._items_field, [])
+        next_cursor = data.get(self._next_field)
 
         if next_cursor:
             self._params[self._cursor_param] = next_cursor

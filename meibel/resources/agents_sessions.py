@@ -64,7 +64,7 @@ class AgentsSessionsResource:
         """
         path = "/agents/{agent_id}/sessions"
         path = path.replace("{agent_id}", str(agent_id))
-        params = {}
+        params: Dict[str, Any] = {}
         if offset is not None:
             params["offset"] = offset
         if limit is not None:
@@ -205,7 +205,7 @@ class AsyncAgentsSessionsResource:
         """
         path = "/agents/{agent_id}/sessions"
         path = path.replace("{agent_id}", str(agent_id))
-        params = {}
+        params: Dict[str, Any] = {}
         if offset is not None:
             params["offset"] = offset
         if limit is not None:

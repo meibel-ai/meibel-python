@@ -44,7 +44,7 @@ class ArtifactSchemasResource:
             ApiError: If the request fails
         """
         path = "/artifact-schemas"
-        params = {}
+        params: Dict[str, Any] = {}
         if offset is not None:
             params["offset"] = offset
         if limit is not None:
@@ -180,7 +180,7 @@ class AsyncArtifactSchemasResource:
             ApiError: If the request fails
         """
         path = "/artifact-schemas"
-        params = {}
+        params: Dict[str, Any] = {}
         if offset is not None:
             params["offset"] = offset
         if limit is not None:

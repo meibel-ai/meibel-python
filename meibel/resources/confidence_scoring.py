@@ -60,7 +60,7 @@ class ConfidenceScoringResource:
             ApiError: If the request fails
         """
         path = "/confidence-scoring/jobs"
-        params = {}
+        params: Dict[str, Any] = {}
         if agent_name is not None:
             params["agent_name"] = agent_name
         if agent_version is not None:
@@ -175,7 +175,7 @@ class AsyncConfidenceScoringResource:
             ApiError: If the request fails
         """
         path = "/confidence-scoring/jobs"
-        params = {}
+        params: Dict[str, Any] = {}
         if agent_name is not None:
             params["agent_name"] = agent_name
         if agent_version is not None:

@@ -12,7 +12,7 @@ from __future__ import annotations
 import datetime
 import typing
 import uuid
-from typing import Any, Dict, List, Optional, Type, get_type_hints
+from typing import Any, Dict, List, Optional, Type, cast, get_type_hints
 
 from pydantic import BaseModel, Field
 
@@ -60,7 +60,7 @@ def _get_field_index(model_cls: Type[BaseModel], field_name: str) -> bool:
     """Check if a field has index=False in its json_schema_extra or metadata, default True."""
     field_info = model_cls.model_fields.get(field_name)
     if field_info and field_info.json_schema_extra and isinstance(field_info.json_schema_extra, dict):
-        return field_info.json_schema_extra.get("index", True)
+        return cast(bool, field_info.json_schema_extra.get("index", True))
     return True
 
 

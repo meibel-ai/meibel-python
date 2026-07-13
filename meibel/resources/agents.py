@@ -34,7 +34,7 @@ class AgentsResource:
             ApiError: If the request fails
         """
         path = "/agents"
-        params = {}
+        params: Dict[str, Any] = {}
         if offset is not None:
             params["offset"] = offset
         if limit is not None:
@@ -139,7 +139,7 @@ class AgentsResource:
         """
         path = "/agents/{agent_id}/publish"
         path = path.replace("{agent_id}", str(agent_id))
-        params = {}
+        params: Dict[str, Any] = {}
         if override_draft is not None:
             params["override_draft"] = override_draft
         response = self._http.request("POST", path, params=params, json=body.model_dump(by_alias=True, exclude_unset=True) if body else None)
@@ -163,7 +163,7 @@ class AgentsResource:
         """
         path = "/agents/{agent_id}/versions"
         path = path.replace("{agent_id}", str(agent_id))
-        params = {}
+        params: Dict[str, Any] = {}
         if published is not None:
             params["published"] = published
         if offset is not None:
@@ -204,7 +204,7 @@ class AsyncAgentsResource:
             ApiError: If the request fails
         """
         path = "/agents"
-        params = {}
+        params: Dict[str, Any] = {}
         if offset is not None:
             params["offset"] = offset
         if limit is not None:
@@ -309,7 +309,7 @@ class AsyncAgentsResource:
         """
         path = "/agents/{agent_id}/publish"
         path = path.replace("{agent_id}", str(agent_id))
-        params = {}
+        params: Dict[str, Any] = {}
         if override_draft is not None:
             params["override_draft"] = override_draft
         response = await self._http.request("POST", path, params=params, json=body.model_dump(by_alias=True, exclude_unset=True) if body else None)
@@ -333,7 +333,7 @@ class AsyncAgentsResource:
         """
         path = "/agents/{agent_id}/versions"
         path = path.replace("{agent_id}", str(agent_id))
-        params = {}
+        params: Dict[str, Any] = {}
         if published is not None:
             params["published"] = published
         if offset is not None:

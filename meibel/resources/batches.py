@@ -33,7 +33,7 @@ class BatchesResource:
             ApiError: If the request fails
         """
         path = "/batch-definitions"
-        params = {}
+        params: Dict[str, Any] = {}
         if offset is not None:
             params["offset"] = offset
         if limit is not None:
@@ -72,7 +72,7 @@ class BatchesResource:
             ApiError: If the request fails
         """
         path = "/batch-definitions/catalog-urn"
-        params = {}
+        params: Dict[str, Any] = {}
         if catalog_urn is not None:
             params["catalog_urn"] = catalog_urn
         response = self._http.request("GET", path, params=params)
@@ -150,7 +150,7 @@ class BatchesResource:
         """
         path = "/batch-definitions/id/{definition_id}/versions"
         path = path.replace("{definition_id}", str(definition_id))
-        params = {}
+        params: Dict[str, Any] = {}
         if offset is not None:
             params["offset"] = offset
         if limit is not None:
@@ -199,7 +199,7 @@ class AsyncBatchesResource:
             ApiError: If the request fails
         """
         path = "/batch-definitions"
-        params = {}
+        params: Dict[str, Any] = {}
         if offset is not None:
             params["offset"] = offset
         if limit is not None:
@@ -238,7 +238,7 @@ class AsyncBatchesResource:
             ApiError: If the request fails
         """
         path = "/batch-definitions/catalog-urn"
-        params = {}
+        params: Dict[str, Any] = {}
         if catalog_urn is not None:
             params["catalog_urn"] = catalog_urn
         response = await self._http.request("GET", path, params=params)
@@ -316,7 +316,7 @@ class AsyncBatchesResource:
         """
         path = "/batch-definitions/id/{definition_id}/versions"
         path = path.replace("{definition_id}", str(definition_id))
-        params = {}
+        params: Dict[str, Any] = {}
         if offset is not None:
             params["offset"] = offset
         if limit is not None:

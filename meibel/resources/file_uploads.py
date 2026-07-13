@@ -37,7 +37,7 @@ class FileUploadsResource:
         """
         path = "/datasources/{datasource_id}/content"
         path = path.replace("{datasource_id}", str(datasource_id))
-        params = {}
+        params: Dict[str, Any] = {}
         if prefix is not None:
             params["prefix"] = prefix
         if continuation_token is not None:
@@ -91,7 +91,7 @@ class FileUploadsResource:
         """
         path = "/datasources/{datasource_id}/content/process"
         path = path.replace("{datasource_id}", str(datasource_id))
-        params = {}
+        params: Dict[str, Any] = {}
         if trigger_ingest is not None:
             params["trigger_ingest"] = trigger_ingest
         response = self._http.upload("POST", path, file=files, file_name=files_name, field_name="files", params=params)
@@ -139,7 +139,7 @@ class AsyncFileUploadsResource:
         """
         path = "/datasources/{datasource_id}/content"
         path = path.replace("{datasource_id}", str(datasource_id))
-        params = {}
+        params: Dict[str, Any] = {}
         if prefix is not None:
             params["prefix"] = prefix
         if continuation_token is not None:
@@ -193,7 +193,7 @@ class AsyncFileUploadsResource:
         """
         path = "/datasources/{datasource_id}/content/process"
         path = path.replace("{datasource_id}", str(datasource_id))
-        params = {}
+        params: Dict[str, Any] = {}
         if trigger_ingest is not None:
             params["trigger_ingest"] = trigger_ingest
         response = await self._http.upload("POST", path, file=files, file_name=files_name, field_name="files", params=params)

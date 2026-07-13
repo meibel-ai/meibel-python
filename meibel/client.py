@@ -19,6 +19,7 @@ from .resources.file_uploads import FileUploadsResource, AsyncFileUploadsResourc
 from .resources.ingest import IngestResource, AsyncIngestResource
 from .resources.tables import TablesResource, AsyncTablesResource
 from .resources.documents import DocumentsResource, AsyncDocumentsResource
+from .resources.execution_policies import ExecutionPoliciesResource, AsyncExecutionPoliciesResource
 from .resources.metadata_model_catalog import MetadataModelCatalogResource, AsyncMetadataModelCatalogResource
 from .resources.sessions import SessionsResource, AsyncSessionsResource
 
@@ -50,6 +51,7 @@ class MeibelClient:
         self.confidence_scoring = ConfidenceScoringResource(self._http)
         self.datasources = DatasourcesResource(self._http)
         self.documents = DocumentsResource(self._http)
+        self.execution_policies = ExecutionPoliciesResource(self._http)
         self.metadata_model_catalog = MetadataModelCatalogResource(self._http)
         self.sessions = SessionsResource(self._http)
         self.agents.sessions = AgentsSessionsResource(self._http)
@@ -67,7 +69,7 @@ class MeibelClient:
     def __enter__(self) -> "MeibelClient":
         return self
 
-    def __exit__(self, *args) -> None:
+    def __exit__(self, *args: object) -> None:
         self.close()
 
 
@@ -98,6 +100,7 @@ class AsyncMeibelClient:
         self.confidence_scoring = AsyncConfidenceScoringResource(self._http)
         self.datasources = AsyncDatasourcesResource(self._http)
         self.documents = AsyncDocumentsResource(self._http)
+        self.execution_policies = AsyncExecutionPoliciesResource(self._http)
         self.metadata_model_catalog = AsyncMetadataModelCatalogResource(self._http)
         self.sessions = AsyncSessionsResource(self._http)
         self.agents.sessions = AsyncAgentsSessionsResource(self._http)
@@ -115,5 +118,5 @@ class AsyncMeibelClient:
     async def __aenter__(self) -> "AsyncMeibelClient":
         return self
 
-    async def __aexit__(self, *args) -> None:
+    async def __aexit__(self, *args: object) -> None:
         await self.close()

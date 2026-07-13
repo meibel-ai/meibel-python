@@ -7,10 +7,13 @@ Provides sync and async HTTP clients using httpx.
 from __future__ import annotations
 
 import httpx
-from typing import Any, Dict, Optional, TypeVar, Type, Union
+from typing import Any, Dict, Optional, TypeVar, Type, Union, cast, TYPE_CHECKING
 from pydantic import BaseModel
 
 from .exceptions import ApiError, AuthenticationError, RateLimitError, NotFoundError
+
+if TYPE_CHECKING:
+    from ._streaming import SSEIterator, AsyncSSEIterator
 
 T = TypeVar("T", bound=BaseModel)
 
@@ -100,7 +103,7 @@ class HttpClient:
         headers: Optional[Dict[str, str]] = None,
         response_model: Optional[Type[T]] = None,
         timeout: Optional[float] = None,
-    ) -> Union[T, Dict[str, Any], None]:
+    ) -> Union[T, Dict[str, Any], str, bytes, None]:
         """Make an HTTP request."""
         # Filter out None values from params
         if params:
@@ -131,7 +134,7 @@ class HttpClient:
         json: Optional[Any] = None,
         data: Optional[Dict[str, str]] = None,
         headers: Optional[Dict[str, str]] = None,
-    ) -> "SSEIterator":
+    ) -> "SSEIterator[Any]":
         """Make an HTTP request and return a streaming SSE iterator.
 
         Args:
@@ -178,7 +181,7 @@ class HttpClient:
         headers: Optional[Dict[str, str]] = None,
         response_model: Optional[Type[T]] = None,
         timeout: Optional[float] = None,
-    ) -> Union[T, Dict[str, Any], None]:
+    ) -> Union[T, Dict[str, Any], str, bytes, None]:
         """Upload a file with streaming multipart/form-data."""
         from ._upload import create_multipart_stream
 
@@ -198,6 +201,51 @@ class HttpClient:
             timeout=timeout if timeout is not None else self._timeout,
         )
         return self._handle_response(response, response_model)
+
+    def upload_stream(
+        self,
+        method: str,
+        path: str,
+        *,
+        file: Any,
+        file_name: str,
+        field_name: str = "file",
+        params: Optional[Dict[str, Any]] = None,
+        form_fields: Optional[Dict[str, str]] = None,
+        headers: Optional[Dict[str, str]] = None,
+    ) -> "SSEIterator[Any]":
+        """Upload a file via streaming multipart/form-data and consume an SSE response."""
+        from ._streaming import SSEIterator
+        from ._upload import create_multipart_stream
+
+        content_stream, content_type = create_multipart_stream(
+            file, field_name=field_name, file_name=file_name, form_fields=form_fields,
+        )
+
+        request_headers = {k: v for k, v in self._headers.items() if k.lower() != "content-type"}
+        request_headers["Content-Type"] = content_type
+        request_headers["Accept"] = "text/event-stream"
+        if headers:
+            request_headers.update(headers)
+        if params:
+            params = {k: v for k, v in params.items() if v is not None}
+
+        response = self._client.send(
+            self._client.build_request(
+                method=method,
+                url=path,
+                content=content_stream,
+                params=params,
+                headers=request_headers,
+            ),
+            stream=True,
+        )
+
+        if response.status_code >= 400:
+            response.read()
+            self._raise_error(response)
+
+        return SSEIterator(response)
 
     def _serialize_body(self, body: Any) -> Any:
         """Serialize request body, converting Pydantic models to dicts."""
@@ -226,7 +274,7 @@ class HttpClient:
 
         content_type = response.headers.get("content-type", "")
         if "application/json" in content_type:
-            return response.json()
+            return cast(Dict[str, Any], response.json())
 
         # Binary responses (file downloads, archives, images, etc.)
         if any(t in content_type for t in ("application/octet-stream", "application/zip",
@@ -253,7 +301,7 @@ class HttpClient:
         elif response.status_code == 404:
             raise NotFoundError(message, response.status_code, error_body)
         elif response.status_code == 429:
-            raise RateLimitError(message, response.status_code, error_body)
+            raise RateLimitError(message, status_code=response.status_code, response_body=error_body)
         else:
             raise ApiError(message, response.status_code, error_body)
 
@@ -306,7 +354,7 @@ class AsyncHttpClient:
         headers: Optional[Dict[str, str]] = None,
         response_model: Optional[Type[T]] = None,
         timeout: Optional[float] = None,
-    ) -> Union[T, Dict[str, Any], None]:
+    ) -> Union[T, Dict[str, Any], str, bytes, None]:
         """Make an HTTP request."""
         # Filter out None values from params
         if params:
@@ -337,7 +385,7 @@ class AsyncHttpClient:
         json: Optional[Any] = None,
         data: Optional[Dict[str, str]] = None,
         headers: Optional[Dict[str, str]] = None,
-    ) -> "AsyncSSEIterator":
+    ) -> "AsyncSSEIterator[Any]":
         """Make an HTTP request and return a streaming SSE iterator.
 
         Args:
@@ -384,7 +432,7 @@ class AsyncHttpClient:
         headers: Optional[Dict[str, str]] = None,
         response_model: Optional[Type[T]] = None,
         timeout: Optional[float] = None,
-    ) -> Union[T, Dict[str, Any], None]:
+    ) -> Union[T, Dict[str, Any], str, bytes, None]:
         """Upload a file with streaming multipart/form-data."""
         from ._upload import create_async_multipart_stream
 
@@ -404,6 +452,51 @@ class AsyncHttpClient:
             timeout=timeout if timeout is not None else self._timeout,
         )
         return self._handle_response(response, response_model)
+
+    async def upload_stream(
+        self,
+        method: str,
+        path: str,
+        *,
+        file: Any,
+        file_name: str,
+        field_name: str = "file",
+        params: Optional[Dict[str, Any]] = None,
+        form_fields: Optional[Dict[str, str]] = None,
+        headers: Optional[Dict[str, str]] = None,
+    ) -> "AsyncSSEIterator[Any]":
+        """Upload a file via streaming multipart/form-data and consume an SSE response."""
+        from ._streaming import AsyncSSEIterator
+        from ._upload import create_async_multipart_stream
+
+        content_stream, content_type = await create_async_multipart_stream(
+            file, field_name=field_name, file_name=file_name, form_fields=form_fields,
+        )
+
+        request_headers = {k: v for k, v in self._headers.items() if k.lower() != "content-type"}
+        request_headers["Content-Type"] = content_type
+        request_headers["Accept"] = "text/event-stream"
+        if headers:
+            request_headers.update(headers)
+        if params:
+            params = {k: v for k, v in params.items() if v is not None}
+
+        response = await self._client.send(
+            self._client.build_request(
+                method=method,
+                url=path,
+                content=content_stream,
+                params=params,
+                headers=request_headers,
+            ),
+            stream=True,
+        )
+
+        if response.status_code >= 400:
+            await response.aread()
+            self._raise_error(response)
+
+        return AsyncSSEIterator(response)
 
     def _serialize_body(self, body: Any) -> Any:
         """Serialize request body, converting Pydantic models to dicts."""
@@ -432,7 +525,7 @@ class AsyncHttpClient:
 
         content_type = response.headers.get("content-type", "")
         if "application/json" in content_type:
-            return response.json()
+            return cast(Dict[str, Any], response.json())
 
         # Binary responses (file downloads, archives, images, etc.)
         if any(t in content_type for t in ("application/octet-stream", "application/zip",
@@ -459,6 +552,6 @@ class AsyncHttpClient:
         elif response.status_code == 404:
             raise NotFoundError(message, response.status_code, error_body)
         elif response.status_code == 429:
-            raise RateLimitError(message, response.status_code, error_body)
+            raise RateLimitError(message, status_code=response.status_code, response_body=error_body)
         else:
             raise ApiError(message, response.status_code, error_body)

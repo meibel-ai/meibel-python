@@ -30,7 +30,7 @@ class MetadataModelCatalogResource:
             ApiError: If the request fails
         """
         path = "/metadata-model-catalog"
-        params = {}
+        params: Dict[str, Any] = {}
         if scope is not None:
             params["scope"] = scope
         response = self._http.request("GET", path, params=params)
@@ -75,7 +75,7 @@ class AsyncMetadataModelCatalogResource:
             ApiError: If the request fails
         """
         path = "/metadata-model-catalog"
-        params = {}
+        params: Dict[str, Any] = {}
         if scope is not None:
             params["scope"] = scope
         response = await self._http.request("GET", path, params=params)

@@ -75,7 +75,7 @@ class DataElementsResource:
         """
         path = "/datasources/{datasource_id}/data-elements"
         path = path.replace("{datasource_id}", str(datasource_id))
-        params = {}
+        params: Dict[str, Any] = {}
         if cursor is not None:
             params["cursor"] = cursor
         if limit is not None:
@@ -109,7 +109,7 @@ class DataElementsResource:
         """
         path = "/datasources/{datasource_id}/data-elements/search"
         path = path.replace("{datasource_id}", str(datasource_id))
-        params = {}
+        params: Dict[str, Any] = {}
         if cursor is not None:
             params["cursor"] = cursor
         if limit is not None:
@@ -182,7 +182,7 @@ class AsyncDataElementsResource:
         """
         path = "/datasources/{datasource_id}/data-elements"
         path = path.replace("{datasource_id}", str(datasource_id))
-        params = {}
+        params: Dict[str, Any] = {}
         if cursor is not None:
             params["cursor"] = cursor
         if limit is not None:
@@ -216,7 +216,7 @@ class AsyncDataElementsResource:
         """
         path = "/datasources/{datasource_id}/data-elements/search"
         path = path.replace("{datasource_id}", str(datasource_id))
-        params = {}
+        params: Dict[str, Any] = {}
         if cursor is not None:
             params["cursor"] = cursor
         if limit is not None:

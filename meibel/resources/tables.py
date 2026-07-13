@@ -32,7 +32,7 @@ class TablesResource:
         """
         path = "/datasources/{datasource_id}/tables"
         path = path.replace("{datasource_id}", str(datasource_id))
-        params = {}
+        params: Dict[str, Any] = {}
         if include_columns is not None:
             params["include_columns"] = include_columns
         response = self._http.request("GET", path, params=params)
@@ -121,7 +121,7 @@ class AsyncTablesResource:
         """
         path = "/datasources/{datasource_id}/tables"
         path = path.replace("{datasource_id}", str(datasource_id))
-        params = {}
+        params: Dict[str, Any] = {}
         if include_columns is not None:
             params["include_columns"] = include_columns
         response = await self._http.request("GET", path, params=params)

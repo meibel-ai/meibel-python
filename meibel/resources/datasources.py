@@ -97,7 +97,7 @@ class DatasourcesResource:
         """
         path = "/datasources/{datasource_id}"
         path = path.replace("{datasource_id}", str(datasource_id))
-        params = {}
+        params: Dict[str, Any] = {}
         if include_tables is not None:
             params["include_tables"] = include_tables
         response = self._http.request("GET", path, params=params)
@@ -212,7 +212,7 @@ class AsyncDatasourcesResource:
         """
         path = "/datasources/{datasource_id}"
         path = path.replace("{datasource_id}", str(datasource_id))
-        params = {}
+        params: Dict[str, Any] = {}
         if include_tables is not None:
             params["include_tables"] = include_tables
         response = await self._http.request("GET", path, params=params)

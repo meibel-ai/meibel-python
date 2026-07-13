@@ -7,7 +7,7 @@ Provides iterators for Server-Sent Events (SSE) streams.
 from __future__ import annotations
 
 import json
-from typing import Any, AsyncIterator, Dict, Iterator, Optional, Type, TypeVar, Union
+from typing import Any, AsyncIterator, Dict, Generic, Iterator, Optional, Type, TypeVar, Union, cast
 
 import httpx
 from pydantic import BaseModel
@@ -33,14 +33,14 @@ class SSEEvent:
     def json(self) -> Dict[str, Any]:
         """Parse data as JSON."""
         if self.data:
-            return json.loads(self.data)
+            return cast(Dict[str, Any], json.loads(self.data))
         return {}
 
     def __repr__(self) -> str:
         return f"SSEEvent(event={self.event!r}, data={self.data!r}, id={self.id!r})"
 
 
-class SSEIterator:
+class SSEIterator(Generic[T]):
     """
     Synchronous iterator for Server-Sent Events streams.
     """
@@ -126,14 +126,14 @@ class SSEIterator:
         """Close the underlying response."""
         self._response.close()
 
-    def __enter__(self) -> "SSEIterator":
+    def __enter__(self) -> "SSEIterator[T]":
         return self
 
     def __exit__(self, *args: Any) -> None:
         self.close()
 
 
-class AsyncSSEIterator:
+class AsyncSSEIterator(Generic[T]):
     """
     Asynchronous iterator for Server-Sent Events streams.
     """
@@ -219,7 +219,7 @@ class AsyncSSEIterator:
         """Close the underlying response."""
         await self._response.aclose()
 
-    async def __aenter__(self) -> "AsyncSSEIterator":
+    async def __aenter__(self) -> "AsyncSSEIterator[T]":
         return self
 
     async def __aexit__(self, *args: Any) -> None:

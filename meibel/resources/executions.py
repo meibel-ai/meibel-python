@@ -34,7 +34,7 @@ class ExecutionsResource:
             ApiError: If the request fails
         """
         path = "/batch-executions"
-        params = {}
+        params: Dict[str, Any] = {}
         if input_datasource_id is not None:
             params["input_datasource_id"] = input_datasource_id
         if offset is not None:
@@ -181,7 +181,7 @@ class AsyncExecutionsResource:
             ApiError: If the request fails
         """
         path = "/batch-executions"
-        params = {}
+        params: Dict[str, Any] = {}
         if input_datasource_id is not None:
             params["input_datasource_id"] = input_datasource_id
         if offset is not None:

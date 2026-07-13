@@ -30,6 +30,8 @@ from .tables import TablesResource
 from .tables import AsyncTablesResource
 from .documents import DocumentsResource
 from .documents import AsyncDocumentsResource
+from .execution_policies import ExecutionPoliciesResource
+from .execution_policies import AsyncExecutionPoliciesResource
 from .metadata_model_catalog import MetadataModelCatalogResource
 from .metadata_model_catalog import AsyncMetadataModelCatalogResource
 from .sessions import SessionsResource
@@ -62,6 +64,8 @@ __all__ = [
     "AsyncTablesResource",
     "DocumentsResource",
     "AsyncDocumentsResource",
+    "ExecutionPoliciesResource",
+    "AsyncExecutionPoliciesResource",
     "MetadataModelCatalogResource",
     "AsyncMetadataModelCatalogResource",
     "SessionsResource",
