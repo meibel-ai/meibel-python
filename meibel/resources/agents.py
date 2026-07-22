@@ -19,13 +19,18 @@ class AgentsResource:
         self._http = http
         self.sessions = AgentsSessionsResource(http)
 
-    def list(self, offset: Optional[int] = None, limit: Optional[Union[int, None]] = None) -> PaginatedIterator["AgentSummary"]:
+    def list(self, offset: Optional[int] = None, limit: Optional[int] = None, sort_by: Optional[str] = None, sort_order: Optional[str] = None, published_only: Optional[bool] = None, datasource_id: Optional[Union[str, None]] = None, artifact_schema_id: Optional[Union[str, None]] = None) -> PaginatedIterator["AgentSummary"]:
         """
         List Agents
         
         Args:
             offset: Number of items to skip
             limit: Maximum number of items to return
+            sort_by: Field to sort by: created_at, name, display_name
+            sort_order: Sort order: asc or desc
+            published_only: If true, return only published agents (latest published version per name)
+            datasource_id: Return only agents whose latest version uses this datasource ID
+            artifact_schema_id: Return only agents whose latest version produces this artifact (catalog URN)
         
         Returns:
             Successful Response
@@ -39,6 +44,16 @@ class AgentsResource:
             params["offset"] = offset
         if limit is not None:
             params["limit"] = limit
+        if sort_by is not None:
+            params["sort_by"] = sort_by
+        if sort_order is not None:
+            params["sort_order"] = sort_order
+        if published_only is not None:
+            params["published_only"] = published_only
+        if datasource_id is not None:
+            params["datasource_id"] = datasource_id
+        if artifact_schema_id is not None:
+            params["artifact_schema_id"] = artifact_schema_id
         return PaginatedIterator(
             self._http,
             "GET",
@@ -189,13 +204,18 @@ class AsyncAgentsResource:
         self._http = http
         self.sessions = AsyncAgentsSessionsResource(http)
 
-    async def list(self, offset: Optional[int] = None, limit: Optional[Union[int, None]] = None) -> AsyncPaginatedIterator["AgentSummary"]:
+    async def list(self, offset: Optional[int] = None, limit: Optional[int] = None, sort_by: Optional[str] = None, sort_order: Optional[str] = None, published_only: Optional[bool] = None, datasource_id: Optional[Union[str, None]] = None, artifact_schema_id: Optional[Union[str, None]] = None) -> AsyncPaginatedIterator["AgentSummary"]:
         """
         List Agents
         
         Args:
             offset: Number of items to skip
             limit: Maximum number of items to return
+            sort_by: Field to sort by: created_at, name, display_name
+            sort_order: Sort order: asc or desc
+            published_only: If true, return only published agents (latest published version per name)
+            datasource_id: Return only agents whose latest version uses this datasource ID
+            artifact_schema_id: Return only agents whose latest version produces this artifact (catalog URN)
         
         Returns:
             Successful Response
@@ -209,6 +229,16 @@ class AsyncAgentsResource:
             params["offset"] = offset
         if limit is not None:
             params["limit"] = limit
+        if sort_by is not None:
+            params["sort_by"] = sort_by
+        if sort_order is not None:
+            params["sort_order"] = sort_order
+        if published_only is not None:
+            params["published_only"] = published_only
+        if datasource_id is not None:
+            params["datasource_id"] = datasource_id
+        if artifact_schema_id is not None:
+            params["artifact_schema_id"] = artifact_schema_id
         return AsyncPaginatedIterator(
             self._http,
             "GET",

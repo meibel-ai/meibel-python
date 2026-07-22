@@ -74,12 +74,17 @@ class AgentIdentityContext(BaseModel):
 class AgentListResponse(BaseModel):
     data: List["AgentSummary"]
     total: int
+    offset: int
+    limit: Optional[Union[int, None]] = Field(default=None)
 
 
 class AgentSummary(BaseModel):
     id: str
+    name: str
     display_name: str
     description: Optional[Union[str, None]] = Field(default=None)
+    version: str
+    type: str = Field(description="Lifecycle state of the returned version: \"draft\" or \"published\".")
     llm_model: str
     tool_count: int
     datasource_count: int
@@ -103,6 +108,8 @@ class AgentToolDefinition(BaseModel):
 class AgentVersionListResponse(BaseModel):
     data: List["AgentVersionSummary"]
     total: int
+    offset: int
+    limit: Optional[Union[int, None]] = Field(default=None)
 
 
 class AgentVersionSummary(BaseModel):
@@ -782,6 +789,29 @@ class MetadataField(BaseModel):
     index: Optional[bool] = Field(description="Whether this field is indexed for filtering", default=None)
 
 
+class MoveDocumentsRequest(BaseModel):
+    """Move documents into a datasource.
+
+The documents are referenced by the job IDs returned when they were parsed
+(e.g. the job_id from `parseDocument` / `client.documents.parse(...)`),
+not by object-storage paths.
+
+Either target an existing datasource with datasource_id, or create a new
+one by supplying new_datasource_name. Customer and project context are
+injected from request headers, not the body."""
+    documents: List[str] = Field(description="Job IDs of the documents to move (e.g. the job_id returned by parseDocument)")
+    datasource_id: Optional[Union[str, None]] = Field(description="Existing datasource to move documents into. Mutually exclusive with new_datasource_name.", default=None)
+    new_datasource_name: Optional[Union[str, None]] = Field(description="Name for a new datasource created to hold the documents. Mutually exclusive with datasource_id.", default=None)
+    metadata_config: Optional[Union["MetadataConfigRequest", None]] = Field(description="Optional metadata extraction config applied to a newly created datasource. Ignored when datasource_id is set.", default=None)
+
+
+class MoveDocumentsResponse(BaseModel):
+    """Result of starting an asynchronous document move workflow."""
+    datasource_id: str = Field(description="ID of the datasource the documents are being moved into")
+    workflow_id: str = Field(description="ID of the move workflow - poll for completion")
+    documents_count: int = Field(description="Number of documents submitted for move")
+
+
 class PaginationMeta(BaseModel):
     """Pagination metadata included in list responses."""
     total: int = Field(description="Total number of items matching the query")
@@ -847,6 +877,8 @@ class ScoringJobResponse(BaseModel):
 class SessionListResponse(BaseModel):
     data: List["SessionSummary"]
     total: int
+    offset: int
+    limit: Optional[Union[int, None]] = Field(default=None)
 
 
 class SessionMessageItem(BaseModel):
@@ -886,6 +918,15 @@ class Source(BaseModel):
     snippet: Optional[Union[str, None]] = Field(default=None)
     data_element_id: Optional[Union[str, None]] = Field(default=None)
     relevance_score: Optional[Union[float, int, None]] = Field(default=None)
+
+
+class SubmitDeepTransformFromDocument(BaseModel):
+    """Reuse an already-parsed document instead of re-parsing an upload."""
+    document_job_id: str = Field(description="A document job id returned by POST /documents. Reuses that parse so the document is not parsed again. The document must belong to the calling customer.")
+    schema: Dict[str, Any] = Field(description="JSON Schema of the entities to extract")
+    root_name: Optional[Union[str, None]] = Field(description="Name of the root entity in the schema. Optional: when omitted it is resolved from the schema's `title` or inferred during extraction.", default=None)
+    guidance: Optional[Union[str, None]] = Field(description="Optional domain guidance for the extraction", default=None)
+    max_pages: Optional[Union[int, None]] = Field(description="Optional cap on the number of pages to process", default=None)
 
 
 class SubmitDeepTransformResponse(BaseModel):
@@ -1166,6 +1207,237 @@ class CompletionEvent(BaseModel):
     data: str
 
 
+class ParseStructuredDocument(BaseModel):
+    """The final output of the pipeline: a fully structured document."""
+    confidence: "ParseConfidenceScores" = Field(description="Aggregate confidence scores across all pages.")
+    format: Optional[str] = Field(description="Detected input format (e.g. \"pdf\", \"docx\", \"markdown\"). `None` for documents processed before this field was added.", default=None)
+    gpu_ms: Optional[int] = Field(description="Total GPU inference time in milliseconds across all stages (layout detection + table encoder + table decoder + OCR). Zero for non-PDF formats that don't use the ML pipeline.", default=None)
+    num_pages: int = Field(description="Number of pages in the source document.")
+    ocr_pages: Optional[int] = Field(description="Number of pages that required OCR (had no extractable text).", default=None)
+    orientation_pages: Optional[int] = Field(description="Number of pages where orientation detection applied a non-zero rotation.", default=None)
+    pages: List["ParseStructuredPage"] = Field(description="Per-page structured content.")
+    remote_regions: Optional[int] = Field(description="Number of regions dispatched to remote endpoints (charts, formulas, seals).", default=None)
+
+
+class ParseAffineFit(BaseModel):
+    """Linear fit `value = slope * pixel_pos + intercept` (on log10(value) for Log10, on unix-timestamp for DateTime). `r_squared` retained to warn on weak fits."""
+    intercept: float
+    r_squared: float
+    slope: float
+
+
+class ParseAxisCalibration(BaseModel):
+    data_range: List[float]
+    pixel_to_data: "ParseAffineFit"
+    scale: "ParseAxisScale"
+    ticks: List["ParseTickMark"]
+    title: Optional[str] = Field(default=None)
+    unit: Optional[str] = Field(default=None)
+
+
+class ParseAxisScale(str, Enum):
+    LINEAR = "Linear"
+    LOG10 = "Log10"
+    CATEGORICAL = "Categorical"
+    DATETIME = "DateTime"
+
+
+class ParseBBox(BaseModel):
+    """Axis-aligned bounding box."""
+    x0: float
+    x1: float
+    y0: float
+    y1: float
+
+
+class ParseChartData(BaseModel):
+    categories: List[str]
+    chart_type: "ParseChartType"
+    modality: "ParseModality"
+    overall_confidence: float
+    plot_area: "ParseDualBBox"
+    series: List["ParseSeries"]
+    title: Optional[str] = Field(default=None)
+    warnings: List[str]
+    x_axis: "ParseAxisCalibration"
+    y_axis_left: Optional[Union["ParseAxisCalibration", None]] = Field(default=None)
+    y_axis_right: Optional[Union["ParseAxisCalibration", None]] = Field(default=None)
+
+
+class ParseChartText(BaseModel):
+    """One recognized text run on a chart, with dual-space position and provenance."""
+    bbox: "ParseDualBBox"
+    confidence: float
+    source: "ParseChartTextSource"
+    text: str
+
+
+class ParseChartTextSource(str, Enum):
+    """Where a `ChartText` came from."""
+    PDFTEXT = "PdfText"
+    OCR = "Ocr"
+
+
+class ParseChartType(str, Enum):
+    LINE = "Line"
+    SCATTER = "Scatter"
+    BAR = "Bar"
+    AREA = "Area"
+    PIE = "Pie"
+    MIXED = "Mixed"
+    UNKNOWN = "Unknown"
+
+
+class ParseConfidenceScores(BaseModel):
+    """Aggregate confidence scores for the document."""
+    mean_layout_confidence: float = Field(description="Mean layout detection confidence across all elements.")
+    min_layout_confidence: float = Field(description="Minimum layout detection confidence across all elements.")
+    num_elements: int = Field(description="Total number of layout elements detected.")
+    num_tables: int = Field(description="Number of tables recognized.")
+
+
+class ParseDataPoint(BaseModel):
+    """One digitized data value. `x` is in data units after inversion; when `x_is_category` it is the float index into `ChartData::categories`; for a DateTime axis it is a unix timestamp (seconds)."""
+    bbox: "ParseDualBBox"
+    confidence: float
+    source: "ParseValueSource"
+    x: float
+    x_is_category: bool
+    y: float
+
+
+class ParseDocumentElement(BaseModel):
+    """A single document element (text block, table, figure, etc.) in reading order."""
+    bbox: "ParseBBox" = Field(description="Bounding box in pixel coordinates (top-left origin). Normalized to [0,1] for annotated export.")
+    chart_data: Optional[Union["ParseChartData", None]] = Field(description="If this is a Chart element, the digitized plot data.", default=None)
+    confidence: float = Field(description="Confidence score from the layout model.")
+    heading_level: Optional[int] = Field(description="Heading level (1-6) for Title/SectionHeader elements. Determined by font-size clustering: largest font → H1, decreasing → H2-H6. `None` for non-heading elements.", default=None)
+    label: "ParseLayoutLabel" = Field(description="Layout label from the detection model.")
+    ocr_text: Optional[List["ParseChartText"]] = Field(description="Recognized text on a Chart region, with positions and provenance. Sibling to `chart_data` so it survives when chart_data is None.", default=None)
+    reading_order: int = Field(description="Position in reading order (0-indexed within page).")
+    table: Optional[Union["ParseTable", None]] = Field(description="If this is a Table element, the recognized table structure.", default=None)
+    text: str = Field(description="Text content (assembled from cells within this region).")
+
+
+class ParseDualBBox(BaseModel):
+    """A bbox in both coordinate spaces. `pixel` = rendered-image space (top-left origin); `pdf` = page points (bottom-left origin, BOTTOMLEFT)."""
+    pdf: "ParseBBox"
+    pixel: "ParseBBox"
+
+
+class ParseLayoutLabel(str, Enum):
+    """Layout element types for document layout detection.
+
+PP-DocLayoutV3 produces 25 classes (indices 0-24) which are mapped to these labels. Legacy heron labels (Checkbox*, Form, KeyValueRegion, ListItem) are retained for backward compatibility but no longer emitted by the model."""
+    CAPTION = "Caption"
+    CHART = "Chart"
+    FOOTNOTE = "Footnote"
+    FORMULA = "Formula"
+    LISTITEM = "ListItem"
+    PAGEFOOTER = "PageFooter"
+    PAGEHEADER = "PageHeader"
+    PICTURE = "Picture"
+    SEAL = "Seal"
+    SECTIONHEADER = "SectionHeader"
+    TABLE = "Table"
+    TEXT = "Text"
+    TITLE = "Title"
+    DOCUMENTINDEX = "DocumentIndex"
+    CODE = "Code"
+    CHECKBOXSELECTED = "CheckboxSelected"
+    CHECKBOXUNSELECTED = "CheckboxUnselected"
+    FORM = "Form"
+    KEYVALUEREGION = "KeyValueRegion"
+
+
+class ParseModality(str, Enum):
+    VECTOR = "Vector"
+    RASTER = "Raster"
+
+
+class ParseSeries(BaseModel):
+    color: Optional[List[int]] = Field(default=None)
+    dash_pattern: Optional[List[float]] = Field(description="PDF dash array identifying the series alongside color. `Some(vec![])` = solid. Distinguishes monochrome series (Apple 10-K case). `None` = unknown (raster).", default=None)
+    name: Optional[str] = Field(default=None)
+    points: List["ParseDataPoint"]
+    style: "ParseSeriesStyle"
+    y_axis: "ParseYAxisRef"
+
+
+class ParseSeriesStyle(str, Enum):
+    LINE = "Line"
+    SCATTER = "Scatter"
+    BAR = "Bar"
+    AREA = "Area"
+    PIESLICE = "PieSlice"
+
+
+class ParseStructuredPage(BaseModel):
+    """Structured content for a single page."""
+    elements: List["ParseDocumentElement"] = Field(description="Document elements in reading order.")
+    extracted_page_no: Optional[int] = Field(description="The page number printed on the mini-page itself (\"Page 62\"): read off the page by the grid detector when legible, inferred from the confirmed reading order when obscured.", default=None)
+    image_size: Optional[List[int]] = Field(description="Image dimensions in pixels (if a page image was provided).", default=None)
+    ocr_applied: Optional[bool] = Field(description="Whether OCR was applied to this page.", default=None)
+    ocr_dpi: Optional[int] = Field(description="Adaptive OCR rendering DPI used for this page (150-600, computed from page size). Only present when OCR was applied.", default=None)
+    ocr_reason: Optional[str] = Field(description="OCR detection signal breakdown (e.g. \"enc=0.85(majority_bad), font=0.15(rich_fonts), ...\").", default=None)
+    ocr_score: Optional[float] = Field(description="OCR detection composite score (0.0 = definitely has text, 1.0 = definitely needs OCR). Present even when OCR was not applied.", default=None)
+    orientation_degrees: Optional[int] = Field(description="Orientation correction applied to this page in degrees (0, 90, 180, 270). 0 means no correction was needed or orientation detection was disabled.", default=None)
+    page_bbox: "ParseBBox" = Field(description="Page dimensions in PDF points (bottom-left origin).")
+    page_number: int = Field(description="Page number (0-indexed).")
+    physical_page: Optional[int] = Field(description="0-based index of the physical PDF page this output page came from.", default=None)
+    quadrant: Optional[int] = Field(description="Which grid cell of the physical page this output page is, numbered in reading order.", default=None)
+    sheet_rect: Optional[Union["ParseBBox", None]] = Field(description="Rectangle this output page occupies on the physical page, in the physical page's coordinate space. The viewer uses this to reassemble split pages onto the source PDF.", default=None)
+    transcript_lines: Optional[List["ParseTranscriptLine"]] = Field(description="Present when the page was detected as a line-numbered legal transcript. The gutter numbers are stripped from body text and kept here so page:line citations remain resolvable.", default=None)
+
+
+class ParseTable(BaseModel):
+    """A recognized table structure on a page. Produced by the table structure recognition model (TableFormer via ONNX)."""
+    bbox: "ParseBBox" = Field(description="Bounding box of the entire table.")
+    cells: List["ParseTableCell"] = Field(description="Table cells (not to be confused with TextCell — these are table grid cells).")
+    num_cols: int = Field(description="Number of columns.")
+    num_rows: int = Field(description="Number of rows.")
+    page_number: int = Field(description="Page number this table belongs to (0-indexed).")
+
+
+class ParseTableCell(BaseModel):
+    """A single cell in a recognized table."""
+    bbox: "ParseBBox" = Field(description="Bounding box of this table cell.")
+    col: int = Field(description="Column index (0-indexed).")
+    col_span: int = Field(description="Number of columns this cell spans (1 = no spanning).")
+    is_header: bool = Field(description="Whether this is a header cell.")
+    row: int = Field(description="Row index (0-indexed).")
+    row_span: int = Field(description="Number of rows this cell spans (1 = no spanning).")
+    text: str = Field(description="Text content of this cell (assembled from text cells within the bbox).")
+
+
+class ParseTickMark(BaseModel):
+    label_bbox: "ParseDualBBox"
+    pixel_pos: float
+    source: "ParseValueSource"
+    value: float
+
+
+class ParseTranscriptLine(BaseModel):
+    """A transcript gutter line number stripped from the text flow."""
+    bbox: "ParseBBox" = Field(description="Bounding box of the number in pixel coordinates (top-left origin).")
+    number: int = Field(description="The printed line number (1-25/26).")
+
+
+class ParseValueSource(str, Enum):
+    """Provenance for a digitized value — drives confidence and auditability."""
+    VECTORPATH = "VectorPath"
+    RASTERMASK = "RasterMask"
+    RASTERMARKER = "RasterMarker"
+    VLMADJUDICATED = "VlmAdjudicated"
+
+
+class ParseYAxisRef(str, Enum):
+    """Which Y axis a series reads against. `Ambiguous` is the fallback defined canonically in the spec §7f (dual-Y detected ∧ color match inconclusive ∧ no VLM) — emitted with a warning rather than a wrong guess."""
+    LEFT = "Left"
+    RIGHT = "Right"
+    AMBIGUOUS = "Ambiguous"
+
+
 class ContentItem(BaseModel):
     """A single file in a datasource's content store."""
     name: str = Field(description="Filename")
@@ -1236,21 +1508,20 @@ class MetadataModelCatalogEntry(BaseModel):
     fields: List["MetadataField"] = Field(description="Field definitions this model extracts")
 
 
-class SubmitDeepTransformFromDocument(BaseModel):
-    """Reuse an already-parsed document instead of re-parsing an upload."""
-    document_job_id: str = Field(description="A document job id returned by POST /documents. Reuses that parse so the document is not parsed again. The document must belong to the calling customer.")
-    schema: Dict[str, Any] = Field(description="JSON Schema of the entities to extract")
-    root_name: Optional[Union[str, None]] = Field(description="Name of the root entity in the schema. Optional: when omitted it is resolved from the schema's `title` or inferred during extraction.", default=None)
-    guidance: Optional[Union[str, None]] = Field(description="Optional domain guidance for the extraction", default=None)
-    max_pages: Optional[Union[int, None]] = Field(description="Optional cap on the number of pages to process", default=None)
-
-
 class BodyUploadContent(BaseModel):
     files: List[bytes] = Field(description="One or more files to upload")
 
 
 class BodyUploadAndListContent(BaseModel):
     files: List[bytes] = Field(description="One or more files to upload")
+
+
+class BodySubmitDeepTransform(BaseModel):
+    file: bytes = Field(description="Document file to extract from")
+    schema: str = Field(description="JSON Schema (as a JSON string) of the entities to extract")
+    root_name: Optional[str] = Field(description="Name of the root entity in the schema. Optional: resolved from the schema's title or inferred when omitted.", default=None)
+    guidance: Optional[str] = Field(description="Optional domain guidance for the extraction", default=None)
+    max_pages: Optional[int] = Field(description="Optional cap on the number of pages to process", default=None)
 
 
 class BodyParseDocument(BaseModel):
@@ -1277,14 +1548,6 @@ class BodySubmitDocumentTransform(BaseModel):
     prompt: Optional[str] = Field(description="Extraction instructions override", default=None)
     prompt_id: Optional[str] = Field(description="Prompt template reference", default=None)
     timeout_seconds: Optional[int] = Field(description="Max wait time in seconds (sync only)", default=None)
-
-
-class BodySubmitDeepTransform(BaseModel):
-    file: bytes = Field(description="Document file to extract from")
-    schema: str = Field(description="JSON Schema (as a JSON string) of the entities to extract")
-    root_name: Optional[str] = Field(description="Name of the root entity in the schema. Optional: resolved from the schema's title or inferred when omitted.", default=None)
-    guidance: Optional[str] = Field(description="Optional domain guidance for the extraction", default=None)
-    max_pages: Optional[int] = Field(description="Optional cap on the number of pages to process", default=None)
 
 
 # Update forward references
@@ -1368,6 +1631,8 @@ MessageEntry.model_rebuild()
 MetadataConfigRequest.model_rebuild()
 MetadataConfigResponse.model_rebuild()
 MetadataField.model_rebuild()
+MoveDocumentsRequest.model_rebuild()
+MoveDocumentsResponse.model_rebuild()
 PaginationMeta.model_rebuild()
 ParseDocumentResponse.model_rebuild()
 ProcessDocumentResponse.model_rebuild()
@@ -1381,6 +1646,7 @@ SessionMessageItem.model_rebuild()
 SessionMessagesResponse.model_rebuild()
 SessionSummary.model_rebuild()
 Source.model_rebuild()
+SubmitDeepTransformFromDocument.model_rebuild()
 SubmitDeepTransformResponse.model_rebuild()
 SubmitDocumentTransformResponse.model_rebuild()
 Table.model_rebuild()
@@ -1418,6 +1684,22 @@ ToolCallEvent.model_rebuild()
 ToolResultEvent.model_rebuild()
 PartialResponseEvent.model_rebuild()
 CompletionEvent.model_rebuild()
+ParseStructuredDocument.model_rebuild()
+ParseAffineFit.model_rebuild()
+ParseAxisCalibration.model_rebuild()
+ParseBBox.model_rebuild()
+ParseChartData.model_rebuild()
+ParseChartText.model_rebuild()
+ParseConfidenceScores.model_rebuild()
+ParseDataPoint.model_rebuild()
+ParseDocumentElement.model_rebuild()
+ParseDualBBox.model_rebuild()
+ParseSeries.model_rebuild()
+ParseStructuredPage.model_rebuild()
+ParseTable.model_rebuild()
+ParseTableCell.model_rebuild()
+ParseTickMark.model_rebuild()
+ParseTranscriptLine.model_rebuild()
 ContentItem.model_rebuild()
 ListContentResponse.model_rebuild()
 UploadContentResponse.model_rebuild()
@@ -1427,11 +1709,10 @@ UpdateDatasourceRequest.model_rebuild()
 WebDomain.model_rebuild()
 ListMetadataModelCatalogResponse.model_rebuild()
 MetadataModelCatalogEntry.model_rebuild()
-SubmitDeepTransformFromDocument.model_rebuild()
 BodyUploadContent.model_rebuild()
 BodyUploadAndListContent.model_rebuild()
+BodySubmitDeepTransform.model_rebuild()
 BodyParseDocument.model_rebuild()
 BodyProcessDocument.model_rebuild()
 BodyTransformDocument.model_rebuild()
 BodySubmitDocumentTransform.model_rebuild()
-BodySubmitDeepTransform.model_rebuild()

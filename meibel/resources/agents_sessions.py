@@ -44,7 +44,7 @@ class AgentsSessionsResource:
         response = self._http.request("POST", path, json=body.model_dump(by_alias=True, exclude_unset=True) if body else None)
         return CreateSessionResponse.model_validate(response)
 
-    def list(self, agent_id: str, offset: Optional[int] = None, limit: Optional[Union[int, None]] = None, sort_by: Optional[str] = None, sort_order: Optional[str] = None, status: Optional[Union[str, None]] = None) -> PaginatedIterator["SessionSummary"]:
+    def list(self, agent_id: str, offset: Optional[int] = None, limit: Optional[int] = None, sort_by: Optional[str] = None, sort_order: Optional[str] = None, status: Optional[Union[str, None]] = None) -> PaginatedIterator["SessionSummary"]:
         """
         List Sessions
         
@@ -124,7 +124,7 @@ class AgentsSessionsResource:
         response = self._http.request("POST", path, json=body.model_dump(by_alias=True, exclude_unset=True) if body else None)
         return ChatMessageResponse.model_validate(response)
 
-    def send_chat_message_stream(self, session_id: str, file: BinaryIO, file_name: str, user_message: Optional[Union[str, None]] = None, timeout_seconds: Optional[Union[int, None]] = None, include_thinking: Optional[Union[bool, None]] = None, include_tool_activity: Optional[Union[bool, None]] = None, files: Optional[Union[List[str], None]] = None) -> SSEIterator:
+    def send_chat_message_stream(self, session_id: str, file: Optional[BinaryIO] = None, file_name: Optional[str] = None, user_message: Optional[Union[str, None]] = None, timeout_seconds: Optional[Union[int, None]] = None, include_thinking: Optional[Union[bool, None]] = None, include_tool_activity: Optional[Union[bool, None]] = None, files: Optional[Union[List[str], None]] = None) -> SSEIterator:
         """
         Send a chat message with file attachments and stream the response via SSE
         
@@ -151,7 +151,10 @@ class AgentsSessionsResource:
             form_fields["include_tool_activity"] = str(include_tool_activity)
         if files is not None:
             form_fields["files"] = str(files)
-        return self._http.upload_stream("POST", path, file=file, file_name=file_name, field_name="file", form_fields=form_fields)
+        if file is not None:
+            return self._http.upload_stream("POST", path, file=file, file_name=file_name or "file", field_name="file", form_fields=form_fields)
+        else:
+            return self._http.stream("POST", path, data=form_fields)
 
 
 class AsyncAgentsSessionsResource:
@@ -185,7 +188,7 @@ class AsyncAgentsSessionsResource:
         response = await self._http.request("POST", path, json=body.model_dump(by_alias=True, exclude_unset=True) if body else None)
         return CreateSessionResponse.model_validate(response)
 
-    async def list(self, agent_id: str, offset: Optional[int] = None, limit: Optional[Union[int, None]] = None, sort_by: Optional[str] = None, sort_order: Optional[str] = None, status: Optional[Union[str, None]] = None) -> AsyncPaginatedIterator["SessionSummary"]:
+    async def list(self, agent_id: str, offset: Optional[int] = None, limit: Optional[int] = None, sort_by: Optional[str] = None, sort_order: Optional[str] = None, status: Optional[Union[str, None]] = None) -> AsyncPaginatedIterator["SessionSummary"]:
         """
         List Sessions
         
@@ -265,7 +268,7 @@ class AsyncAgentsSessionsResource:
         response = await self._http.request("POST", path, json=body.model_dump(by_alias=True, exclude_unset=True) if body else None)
         return ChatMessageResponse.model_validate(response)
 
-    async def send_chat_message_stream(self, session_id: str, file: BinaryIO, file_name: str, user_message: Optional[Union[str, None]] = None, timeout_seconds: Optional[Union[int, None]] = None, include_thinking: Optional[Union[bool, None]] = None, include_tool_activity: Optional[Union[bool, None]] = None, files: Optional[Union[List[str], None]] = None) -> AsyncSSEIterator:
+    async def send_chat_message_stream(self, session_id: str, file: Optional[BinaryIO] = None, file_name: Optional[str] = None, user_message: Optional[Union[str, None]] = None, timeout_seconds: Optional[Union[int, None]] = None, include_thinking: Optional[Union[bool, None]] = None, include_tool_activity: Optional[Union[bool, None]] = None, files: Optional[Union[List[str], None]] = None) -> AsyncSSEIterator:
         """
         Send a chat message with file attachments and stream the response via SSE
         
@@ -292,4 +295,7 @@ class AsyncAgentsSessionsResource:
             form_fields["include_tool_activity"] = str(include_tool_activity)
         if files is not None:
             form_fields["files"] = str(files)
-        return await self._http.upload_stream("POST", path, file=file, file_name=file_name, field_name="file", form_fields=form_fields)
+        if file is not None:
+            return await self._http.upload_stream("POST", path, file=file, file_name=file_name or "file", field_name="file", form_fields=form_fields)
+        else:
+            return await self._http.stream("POST", path, data=form_fields)

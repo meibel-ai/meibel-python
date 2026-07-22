@@ -29,6 +29,140 @@ class DocumentsResource:
     def __init__(self, http: HttpClient):
         self._http = http
 
+    def list_deep_transforms(self, offset: Optional[int] = None, limit: Optional[int] = None) -> PaginatedIterator["DeepTransformJob"]:
+        """
+        List deep-transform jobs
+        
+        List the calling customer's deep-transform jobs, newest first. Scoped to the customer (and project, when a project header is set). Paginated via `offset`/`limit`.
+        
+        Args:
+            offset: Number of jobs to skip
+            limit: Maximum number of jobs to return
+        
+        Returns:
+            Successful Response
+        
+        Raises:
+            ApiError: If the request fails
+        """
+        path = "/documents/deep-transform"
+        params: Dict[str, Any] = {}
+        if offset is not None:
+            params["offset"] = offset
+        if limit is not None:
+            params["limit"] = limit
+        return PaginatedIterator(
+            self._http,
+            "GET",
+            path,
+            items_field="jobs",
+            cursor_param="offset",
+            next_field="next_cursor",
+            params=params,
+            model_class=DeepTransformJob,
+        )
+
+    def submit_deep_transform(self, file: str, schema: Union[str, Dict[str, Any], Type[BaseModel]], root_name: Optional[str] = None, guidance: Optional[str] = None, max_pages: Optional[int] = None) -> "SubmitDeepTransformResponse":
+        """
+        Submit a deep-transform extraction from a file upload (async)
+        
+        Upload a document and submit an extraction against a JSON schema, returning immediately with a job id. To reuse an already-parsed document instead of uploading, use POST /documents/deep-transform/from-document. Poll status via GET /documents/deep-transform/{job_id} and download artifacts once it succeeds. Submission is idempotent on the (document, schema) pair.
+        
+        Args:
+            body: Request body
+        
+        Returns:
+            Successful Response
+        
+        Raises:
+            ApiError: If the request fails
+        """
+        path = "/documents/deep-transform"
+        if _is_pydantic_model(schema):
+            _schema = schema.model_json_schema()
+        else:
+            _schema = schema
+        import json as _json
+        _file = open(file, "rb")
+        _file_name = file.rsplit("/", 1)[-1] if "/" in file else file
+        form_fields = {}
+        if isinstance(_schema, (dict, list)):
+            form_fields["schema"] = _json.dumps(_schema)
+        elif _schema is not None:
+            form_fields["schema"] = str(_schema)
+        if root_name is not None:
+            form_fields["root_name"] = str(root_name)
+        if guidance is not None:
+            form_fields["guidance"] = str(guidance)
+        if max_pages is not None:
+            form_fields["max_pages"] = str(max_pages)
+        try:
+            response = self._http.upload("POST", path, file=_file, file_name=_file_name, field_name="file", form_fields=form_fields)
+        finally:
+            _file.close()
+        return SubmitDeepTransformResponse.model_validate(response)
+
+    def submit_deep_transform_from(self, body: "SubmitDeepTransformFromDocument") -> "SubmitDeepTransformResponse":
+        """
+        Submit a deep-transform extraction reusing a parsed document (async)
+        
+        Submit an extraction that reuses an already-parsed document (by `document_job_id` from POST /documents) instead of re-parsing an upload. Returns immediately with a job id. Poll status via GET /documents/deep-transform/{job_id} and download artifacts once it succeeds. Submission is idempotent on the (document, schema) pair.
+        
+        Args:
+            body: Request body
+        
+        Returns:
+            Successful Response
+        
+        Raises:
+            ApiError: If the request fails
+        """
+        path = "/documents/deep-transform/from-document"
+        response = self._http.request("POST", path, json=body.model_dump(by_alias=True, exclude_unset=True) if body else None)
+        return SubmitDeepTransformResponse.model_validate(response)
+
+    def get_deep_transform_status(self, job_id: str) -> "DeepTransformJob":
+        """
+        Get deep-transform job status
+        
+        Check status and, once succeeded, the list of downloadable artifacts.
+        
+        Args:
+            job_id: The job_id parameter
+        
+        Returns:
+            Successful Response
+        
+        Raises:
+            ApiError: If the request fails
+        """
+        path = "/documents/deep-transform/{job_id}"
+        path = path.replace("{job_id}", str(job_id))
+        response = self._http.request("GET", path)
+        return DeepTransformJob.model_validate(response)
+
+    def download_deep_transform_artifact(self, job_id: str, name: str) -> str:
+        """
+        Download a deep-transform artifact
+        
+        Download a named artifact (e.g. output.json) produced by a succeeded job. Ownership is verified against the customer header before any bytes are returned.
+        
+        Args:
+            job_id: The job_id parameter
+            name: The name parameter
+        
+        Returns:
+            Successful Response
+        
+        Raises:
+            ApiError: If the request fails
+        """
+        path = "/documents/deep-transform/{job_id}/artifact/{name}"
+        path = path.replace("{job_id}", str(job_id))
+        path = path.replace("{name}", str(name))
+        response = self._http.request("GET", path)
+        return response
+
     def parse(self, file: BinaryIO, file_name: str) -> "ParseDocumentResponse":
         """
         Parse a document (async)
@@ -114,6 +248,26 @@ class DocumentsResource:
             params["format"] = format
         response = self._http.request("GET", path, params=params)
         return response
+
+    def get_structured_result(self, job_id: str) -> "ParseStructuredDocument":
+        """
+        Get structured parse result
+        
+        Download the fully structured parse result (the json format): pages, typed elements, tables, chart data, chart OCR text, and bounding boxes. The response schema (StructuredDocument) is defined by the parsing engine and hoisted into this spec by the OpenAPI generator.
+        
+        Args:
+            job_id: The job_id parameter
+        
+        Returns:
+            Successful Response
+        
+        Raises:
+            ApiError: If the request fails
+        """
+        path = "/documents/{job_id}/structured"
+        path = path.replace("{job_id}", str(job_id))
+        response = self._http.request("GET", path)
+        return ParseStructuredDocument.model_validate(response)
 
     def list_children(self, job_id: str) -> List["DocumentChild"]:
         """
@@ -238,7 +392,33 @@ class DocumentsResource:
             _file.close()
         return SubmitDocumentTransformResponse.model_validate(response)
 
-    def list_deep_transforms(self, offset: Optional[int] = None, limit: Optional[int] = None) -> PaginatedIterator["DeepTransformJob"]:
+    def move(self, body: "MoveDocumentsRequest") -> "MoveDocumentsResponse":
+        """
+        Move documents into a datasource (async)
+        
+        Move documents (identified by their parse job IDs, e.g. the job_id returned by parseDocument) into an existing datasource or a newly created one. Returns a workflow_id to poll for completion.
+        
+        Args:
+            body: Request body
+        
+        Returns:
+            Successful Response
+        
+        Raises:
+            ApiError: If the request fails
+        """
+        path = "/documents/move"
+        response = self._http.request("POST", path, json=body.model_dump(by_alias=True, exclude_unset=True) if body else None)
+        return MoveDocumentsResponse.model_validate(response)
+
+
+class AsyncDocumentsResource:
+    """Parse and transform documents into structured data (async)"""
+
+    def __init__(self, http: AsyncHttpClient):
+        self._http = http
+
+    async def list_deep_transforms(self, offset: Optional[int] = None, limit: Optional[int] = None) -> AsyncPaginatedIterator["DeepTransformJob"]:
         """
         List deep-transform jobs
         
@@ -260,7 +440,7 @@ class DocumentsResource:
             params["offset"] = offset
         if limit is not None:
             params["limit"] = limit
-        return PaginatedIterator(
+        return AsyncPaginatedIterator(
             self._http,
             "GET",
             path,
@@ -271,7 +451,7 @@ class DocumentsResource:
             model_class=DeepTransformJob,
         )
 
-    def submit_deep_transform(self, file: str, schema: Union[str, Dict[str, Any], Type[BaseModel]], root_name: Optional[str] = None, guidance: Optional[str] = None, max_pages: Optional[int] = None) -> "SubmitDeepTransformResponse":
+    async def submit_deep_transform(self, file: str, schema: Union[str, Dict[str, Any], Type[BaseModel]], root_name: Optional[str] = None, guidance: Optional[str] = None, max_pages: Optional[int] = None) -> "SubmitDeepTransformResponse":
         """
         Submit a deep-transform extraction from a file upload (async)
         
@@ -306,12 +486,31 @@ class DocumentsResource:
         if max_pages is not None:
             form_fields["max_pages"] = str(max_pages)
         try:
-            response = self._http.upload("POST", path, file=_file, file_name=_file_name, field_name="file", form_fields=form_fields)
+            response = await self._http.upload("POST", path, file=_file, file_name=_file_name, field_name="file", form_fields=form_fields)
         finally:
             _file.close()
         return SubmitDeepTransformResponse.model_validate(response)
 
-    def get_deep_transform_status(self, job_id: str) -> "DeepTransformJob":
+    async def submit_deep_transform_from(self, body: "SubmitDeepTransformFromDocument") -> "SubmitDeepTransformResponse":
+        """
+        Submit a deep-transform extraction reusing a parsed document (async)
+        
+        Submit an extraction that reuses an already-parsed document (by `document_job_id` from POST /documents) instead of re-parsing an upload. Returns immediately with a job id. Poll status via GET /documents/deep-transform/{job_id} and download artifacts once it succeeds. Submission is idempotent on the (document, schema) pair.
+        
+        Args:
+            body: Request body
+        
+        Returns:
+            Successful Response
+        
+        Raises:
+            ApiError: If the request fails
+        """
+        path = "/documents/deep-transform/from-document"
+        response = await self._http.request("POST", path, json=body.model_dump(by_alias=True, exclude_unset=True) if body else None)
+        return SubmitDeepTransformResponse.model_validate(response)
+
+    async def get_deep_transform_status(self, job_id: str) -> "DeepTransformJob":
         """
         Get deep-transform job status
         
@@ -328,10 +527,10 @@ class DocumentsResource:
         """
         path = "/documents/deep-transform/{job_id}"
         path = path.replace("{job_id}", str(job_id))
-        response = self._http.request("GET", path)
+        response = await self._http.request("GET", path)
         return DeepTransformJob.model_validate(response)
 
-    def download_deep_transform_artifact(self, job_id: str, name: str) -> str:
+    async def download_deep_transform_artifact(self, job_id: str, name: str) -> str:
         """
         Download a deep-transform artifact
         
@@ -350,34 +549,8 @@ class DocumentsResource:
         path = "/documents/deep-transform/{job_id}/artifact/{name}"
         path = path.replace("{job_id}", str(job_id))
         path = path.replace("{name}", str(name))
-        response = self._http.request("GET", path)
+        response = await self._http.request("GET", path)
         return response
-
-    def submit_deep_transform_from(self, body: "SubmitDeepTransformFromDocument") -> "SubmitDeepTransformResponse":
-        """
-        Submit a deep-transform extraction reusing a parsed document (async)
-        
-        Submit an extraction that reuses an already-parsed document (by `document_job_id` from POST /documents) instead of re-parsing an upload. Returns immediately with a job id. Poll status via GET /documents/deep-transform/{job_id} and download artifacts once it succeeds. Submission is idempotent on the (document, schema) pair.
-        
-        Args:
-            body: Request body
-        
-        Returns:
-            Successful Response
-        
-        Raises:
-            ApiError: If the request fails
-        """
-        path = "/documents/deep-transform/from-document"
-        response = self._http.request("POST", path, json=body.model_dump(by_alias=True, exclude_unset=True) if body else None)
-        return SubmitDeepTransformResponse.model_validate(response)
-
-
-class AsyncDocumentsResource:
-    """Parse and transform documents into structured data (async)"""
-
-    def __init__(self, http: AsyncHttpClient):
-        self._http = http
 
     async def parse(self, file: BinaryIO, file_name: str) -> "ParseDocumentResponse":
         """
@@ -464,6 +637,26 @@ class AsyncDocumentsResource:
             params["format"] = format
         response = await self._http.request("GET", path, params=params)
         return response
+
+    async def get_structured_result(self, job_id: str) -> "ParseStructuredDocument":
+        """
+        Get structured parse result
+        
+        Download the fully structured parse result (the json format): pages, typed elements, tables, chart data, chart OCR text, and bounding boxes. The response schema (StructuredDocument) is defined by the parsing engine and hoisted into this spec by the OpenAPI generator.
+        
+        Args:
+            job_id: The job_id parameter
+        
+        Returns:
+            Successful Response
+        
+        Raises:
+            ApiError: If the request fails
+        """
+        path = "/documents/{job_id}/structured"
+        path = path.replace("{job_id}", str(job_id))
+        response = await self._http.request("GET", path)
+        return ParseStructuredDocument.model_validate(response)
 
     async def list_children(self, job_id: str) -> List["DocumentChild"]:
         """
@@ -588,44 +781,11 @@ class AsyncDocumentsResource:
             _file.close()
         return SubmitDocumentTransformResponse.model_validate(response)
 
-    async def list_deep_transforms(self, offset: Optional[int] = None, limit: Optional[int] = None) -> AsyncPaginatedIterator["DeepTransformJob"]:
+    async def move(self, body: "MoveDocumentsRequest") -> "MoveDocumentsResponse":
         """
-        List deep-transform jobs
+        Move documents into a datasource (async)
         
-        List the calling customer's deep-transform jobs, newest first. Scoped to the customer (and project, when a project header is set). Paginated via `offset`/`limit`.
-        
-        Args:
-            offset: Number of jobs to skip
-            limit: Maximum number of jobs to return
-        
-        Returns:
-            Successful Response
-        
-        Raises:
-            ApiError: If the request fails
-        """
-        path = "/documents/deep-transform"
-        params: Dict[str, Any] = {}
-        if offset is not None:
-            params["offset"] = offset
-        if limit is not None:
-            params["limit"] = limit
-        return AsyncPaginatedIterator(
-            self._http,
-            "GET",
-            path,
-            items_field="jobs",
-            cursor_param="offset",
-            next_field="next_cursor",
-            params=params,
-            model_class=DeepTransformJob,
-        )
-
-    async def submit_deep_transform(self, file: str, schema: Union[str, Dict[str, Any], Type[BaseModel]], root_name: Optional[str] = None, guidance: Optional[str] = None, max_pages: Optional[int] = None) -> "SubmitDeepTransformResponse":
-        """
-        Submit a deep-transform extraction from a file upload (async)
-        
-        Upload a document and submit an extraction against a JSON schema, returning immediately with a job id. To reuse an already-parsed document instead of uploading, use POST /documents/deep-transform/from-document. Poll status via GET /documents/deep-transform/{job_id} and download artifacts once it succeeds. Submission is idempotent on the (document, schema) pair.
+        Move documents (identified by their parse job IDs, e.g. the job_id returned by parseDocument) into an existing datasource or a newly created one. Returns a workflow_id to poll for completion.
         
         Args:
             body: Request body
@@ -636,88 +796,6 @@ class AsyncDocumentsResource:
         Raises:
             ApiError: If the request fails
         """
-        path = "/documents/deep-transform"
-        if _is_pydantic_model(schema):
-            _schema = schema.model_json_schema()
-        else:
-            _schema = schema
-        import json as _json
-        _file = open(file, "rb")
-        _file_name = file.rsplit("/", 1)[-1] if "/" in file else file
-        form_fields = {}
-        if isinstance(_schema, (dict, list)):
-            form_fields["schema"] = _json.dumps(_schema)
-        elif _schema is not None:
-            form_fields["schema"] = str(_schema)
-        if root_name is not None:
-            form_fields["root_name"] = str(root_name)
-        if guidance is not None:
-            form_fields["guidance"] = str(guidance)
-        if max_pages is not None:
-            form_fields["max_pages"] = str(max_pages)
-        try:
-            response = await self._http.upload("POST", path, file=_file, file_name=_file_name, field_name="file", form_fields=form_fields)
-        finally:
-            _file.close()
-        return SubmitDeepTransformResponse.model_validate(response)
-
-    async def get_deep_transform_status(self, job_id: str) -> "DeepTransformJob":
-        """
-        Get deep-transform job status
-        
-        Check status and, once succeeded, the list of downloadable artifacts.
-        
-        Args:
-            job_id: The job_id parameter
-        
-        Returns:
-            Successful Response
-        
-        Raises:
-            ApiError: If the request fails
-        """
-        path = "/documents/deep-transform/{job_id}"
-        path = path.replace("{job_id}", str(job_id))
-        response = await self._http.request("GET", path)
-        return DeepTransformJob.model_validate(response)
-
-    async def download_deep_transform_artifact(self, job_id: str, name: str) -> str:
-        """
-        Download a deep-transform artifact
-        
-        Download a named artifact (e.g. output.json) produced by a succeeded job. Ownership is verified against the customer header before any bytes are returned.
-        
-        Args:
-            job_id: The job_id parameter
-            name: The name parameter
-        
-        Returns:
-            Successful Response
-        
-        Raises:
-            ApiError: If the request fails
-        """
-        path = "/documents/deep-transform/{job_id}/artifact/{name}"
-        path = path.replace("{job_id}", str(job_id))
-        path = path.replace("{name}", str(name))
-        response = await self._http.request("GET", path)
-        return response
-
-    async def submit_deep_transform_from(self, body: "SubmitDeepTransformFromDocument") -> "SubmitDeepTransformResponse":
-        """
-        Submit a deep-transform extraction reusing a parsed document (async)
-        
-        Submit an extraction that reuses an already-parsed document (by `document_job_id` from POST /documents) instead of re-parsing an upload. Returns immediately with a job id. Poll status via GET /documents/deep-transform/{job_id} and download artifacts once it succeeds. Submission is idempotent on the (document, schema) pair.
-        
-        Args:
-            body: Request body
-        
-        Returns:
-            Successful Response
-        
-        Raises:
-            ApiError: If the request fails
-        """
-        path = "/documents/deep-transform/from-document"
+        path = "/documents/move"
         response = await self._http.request("POST", path, json=body.model_dump(by_alias=True, exclude_unset=True) if body else None)
-        return SubmitDeepTransformResponse.model_validate(response)
+        return MoveDocumentsResponse.model_validate(response)
