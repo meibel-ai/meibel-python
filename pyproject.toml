@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "meibel"
-version = "2.0.6"
+version = "2.0.7"
 description = "The Meibel API provides document parsing, datasource management, and AI agent orchestration. Read the docs at https://docs.meibel.ai to learn more."
 readme = "README.md"
 requires-python = ">=3.8"
