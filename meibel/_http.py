@@ -252,7 +252,7 @@ class HttpClient:
         if body is None:
             return None
         if isinstance(body, BaseModel):
-            return body.model_dump(mode="json", exclude_none=True)
+            return body.model_dump(mode="json", by_alias=True, exclude_none=True)
         if isinstance(body, list):
             return [self._serialize_body(item) for item in body]
         return body
@@ -503,7 +503,7 @@ class AsyncHttpClient:
         if body is None:
             return None
         if isinstance(body, BaseModel):
-            return body.model_dump(mode="json", exclude_none=True)
+            return body.model_dump(mode="json", by_alias=True, exclude_none=True)
         if isinstance(body, list):
             return [self._serialize_body(item) for item in body]
         return body

@@ -771,14 +771,18 @@ class MetadataConfigRequest(BaseModel):
     """Configure automatic metadata extraction from documents on ingest."""
     type: Literal["catalog", "custom"] = Field(description="Use 'catalog' to select a pre-built extraction model (set model_id); use 'custom' to define your own fields (set fields)")
     model_id: Optional[Union[str, None]] = Field(description="Pre-built model ID from the metadata model catalog — required when type is 'catalog'", default=None)
-    fields: Optional[Union[List["MetadataField"], None]] = Field(description="Custom field definitions to extract — required when type is 'custom'", default=None)
+    fields_: Optional[Union[List["MetadataField"], None]] = Field(alias="fields", description="Custom field definitions to extract — required when type is 'custom'", default=None)
+
+    model_config = {"populate_by_name": True}
 
 
 class MetadataConfigResponse(BaseModel):
     """Current metadata extraction configuration on a datasource."""
     type: Literal["catalog", "custom", "default"] = Field(description="'catalog' = using a pre-built model, 'custom' = user-defined fields, 'default' = no extraction configured")
     model_id: Optional[Union[str, None]] = Field(description="Catalog model ID — only set when type is 'catalog'", default=None)
-    fields: List["MetadataField"] = Field(description="Resolved field definitions in effect. Empty when type is 'default'")
+    fields_: List["MetadataField"] = Field(alias="fields", description="Resolved field definitions in effect. Empty when type is 'default'")
+
+    model_config = {"populate_by_name": True}
 
 
 class MetadataField(BaseModel):
@@ -923,10 +927,12 @@ class Source(BaseModel):
 class SubmitDeepTransformFromDocument(BaseModel):
     """Reuse an already-parsed document instead of re-parsing an upload."""
     document_job_id: str = Field(description="A document job id returned by POST /documents. Reuses that parse so the document is not parsed again. The document must belong to the calling customer.")
-    schema: Dict[str, Any] = Field(description="JSON Schema of the entities to extract")
+    schema_: Dict[str, Any] = Field(alias="schema", description="JSON Schema of the entities to extract")
     root_name: Optional[Union[str, None]] = Field(description="Name of the root entity in the schema. Optional: when omitted it is resolved from the schema's `title` or inferred during extraction.", default=None)
     guidance: Optional[Union[str, None]] = Field(description="Optional domain guidance for the extraction", default=None)
     max_pages: Optional[Union[int, None]] = Field(description="Optional cap on the number of pages to process", default=None)
+
+    model_config = {"populate_by_name": True}
 
 
 class SubmitDeepTransformResponse(BaseModel):
@@ -1505,7 +1511,9 @@ class MetadataModelCatalogEntry(BaseModel):
     name: str = Field(description="Human-readable model name")
     description: Optional[Union[str, None]] = Field(description="What this model is designed to extract", default=None)
     scope: str = Field(description="Visibility of the model (e.g. 'global', 'customer', 'project')")
-    fields: List["MetadataField"] = Field(description="Field definitions this model extracts")
+    fields_: List["MetadataField"] = Field(alias="fields", description="Field definitions this model extracts")
+
+    model_config = {"populate_by_name": True}
 
 
 class BodyUploadContent(BaseModel):
@@ -1518,10 +1526,12 @@ class BodyUploadAndListContent(BaseModel):
 
 class BodySubmitDeepTransform(BaseModel):
     file: bytes = Field(description="Document file to extract from")
-    schema: str = Field(description="JSON Schema (as a JSON string) of the entities to extract")
+    schema_: str = Field(alias="schema", description="JSON Schema (as a JSON string) of the entities to extract")
     root_name: Optional[str] = Field(description="Name of the root entity in the schema. Optional: resolved from the schema's title or inferred when omitted.", default=None)
     guidance: Optional[str] = Field(description="Optional domain guidance for the extraction", default=None)
     max_pages: Optional[int] = Field(description="Optional cap on the number of pages to process", default=None)
+
+    model_config = {"populate_by_name": True}
 
 
 class BodyParseDocument(BaseModel):
